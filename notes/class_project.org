@@ -1,0 +1,94 @@
+#+title: Project Journal
+
+* Project Requirements
+Web service:
+Design a social media site similar to instragram, facebook, reddit, etc...
+Users can create an account, and you can subscribe to other people's feeds.
+
+Clients usually have big ideas, and it is our reponsibility to find out what we need to do.
+Think of questions that we can ask to make concrete decisions about what we need to implement.
+Get the professor to agree and limit the scope of the project to something practical to implement.
+
+** What can users do?
+People can make posts:
+- Multimedia
+- Text
+- Images
+- Videos
+
+Users can send messages to each other.
+
+Panel for seeing everyone you're following, and to be able to see who is online and send a message through this.
+
+You can comment on posts, and like them / vote about them (like / dislike).
+
+* SRS
+Description of company, list of members with their skills
+Description of the client
+Description of the project (high level)
+List of requirements (need to be specific):
+- Functional requirements : requirement that talks about a specific action that the product must perform / must have
+  - Ex: there should be a form where a user presses a button and a form appears where they can write and post a post
+- Non-functional requirements : properties that the product has to fulfill that have nothing to do with function
+  - Ex: aesthetics, positioning of elements (this is how i want the view to look like)
+
+** TODO: SRS should be done
+DEADLINE: <2024-09-11 Wed>
+[[*SRS][What is needed]]
+
+* TODO: What technology are we planning to use?
+DEADLINE: <2024-08-30 Fri>
+We need this list by the end of the week.
+
+* Web Service Notes
+An application can be broken into 3 parts:
+1. The =User=
+   - The person that will end up using the application.
+2. =Front-end= (data display)
+   - The purpose of the Frontend is to create views for the user, and take information from the user to propogate it deeper into the stack.
+3. =Middleware= (process heavy)
+   - Holds all the logic: the processing of the data happens here.
+   - This is so we can have a "lean client" - a light frontend.
+   - Goals: handle logic, and translate information going between the frontend and the backend, and vice versa.
+     - Convert / transform data coming from the frontend to a format that can be stored in the backend.
+4. =Back-end= (data heavy)
+   - Like a bucket: this is where we store our data.
+
+These are layered on top of each other, so they are typically referred to the web development stack.
+In each of these sections, we use a different technology in order to build out this whole structure.
+
+Generally we break it into 2 parts:
+- *Client end* : User and Front-end
+- *Server end* : Middleware and Back-end
+
+** Oddities of Middleware
+Middleware is just an abstraction - it doesn't really exist. Middleware exists on the server side, but it is separate from the stored data.
+Some of the stuff for front end will live in middleware as well.
+
+** Cloud Servers: Server End
+Generally people use cloud servers now for their backend, where the middleware and the backend (database)
+
+*** Particular middleware like particular databases
+- *Django* - web middleware api for python.
+  - Likes to talk to databases like MySQL and SQL
+- *Express* - javascript middleware
+  - Gotta use a non-SQL database.
+- *Ruby on rails* - ruby middleware (?)
+  - Likes SQL databases.
+
+*** TODO: Choose what cloud provider to use for the backend
+Answer the question: where are we storing our application?
+- [ ] AWS
+- [ ] Azure
+- [ ] Google Cloud
+- [ ] Digital Ocean
+
+**** TODO: Set up a database and learn how to use it.
+
+** Front-end packages
+There are front-end packages that we can use to do all sorts of neat things like animations and whatnot.
+All of these things will be javascript based: it is the /language of browsers/.
+
+Javascript will be used by the browser for the rendering of views.
+
+*** TODO: Look into what front-end packages we should use
