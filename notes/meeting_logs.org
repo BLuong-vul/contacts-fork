@@ -1,1 +1,11 @@
+8/28 (All members present):
+During this meeting, we discussed what software and applications we would be using to construct our social media platform. Since most of the group have more experience and better understanding of Java, we decided to use that as the main language for most of the code consisting of the backend of the application. Upon discussing what services and frameworks we should use for constructing the web application, we chose React for the frontend, Spring Boot for the framework that allows for interaction between data and the backend, and AWS for the database.
+
+Going forward:
+1. Verify if the use of the above technologies is actually compatible and reasonable
+2. Finalize design and create System Requirements Specification (SRS)
+3. Set up basic skeleton for technologies
+4. Begin development
+
+
 
