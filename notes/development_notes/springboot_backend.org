@@ -1,0 +1,598 @@
+#+title: Backend Development: Spring Boot
+#+author:kyuho
+#+startup: num
+
+Content Used:
+https://www.youtube.com/watch?v=-LUA-LHXobE
+
+* Software to have installed
+NodeJS
+Java (for springboot)
+PostgreSQL ( or other database things ) (you can use mysql as well)
+- Try using a *docker container* for creating an instance of a database!!!
+
+PostgreSQL is accessed through pgAdmin, but this is probably different for Amazon RDS
+- Changing backend should not be that complex.
+
+IDE: VS Code for frontend
+Intellij for backend / java code (could probably just use vs code)
+
+* Getting Started
+** Spring Initializr
+https://start.spring.io/
+
+We are using Java and Maven for project management.
+Fill out forums with appropriate information.
+Package as JAR but decide on what version of java to use at this point. Probably just pick the latest version...
+
+*** Adding Dependencies
+The dependencies added in the tutorial were as follows:
+- Spring Web
+- Spring Data JPA
+- Lombock
+- PostgreSQL Driver (probably look for Amazon RDS stuff)
+
+After doing this, click generate and open application in IDE.
+
+*** TODO: figure out how to add more dependencies to the project.
+We might want to add more dependencies to our project during the course of development.
+It might be good to know how this works, but this could probably be researched when we need it.
+
+** In IDE:
+Rename application to whatever seems appropriate - refactor.
+
+Application should be located in =src/main/java/io.yourorg.yourapi/Application.java=
+This is where most of the programming will happen as well (?).
+
+* High Level View: Creating A System to Store Persistent Data - Backend
+The organization of the components needed for this are as follows:
+
+[[*Defining the shape of some information: Classes]] : domain package - define the structure of our data
+[[*Create a repository for JPA to manage this class]] : repo package - define an interface to access data
+[[*Create a service to use in the controller of the application]] : service package - create a class that can interact with our data repository
+
+[[*Controller: Exposing functionality over HTTP]] : resource package - define a controller using the REST API that utilizes a service class to make transactions with the database
+
+* Defining the shape of some information: Classes
+:PROPERTIES:
+:ID:       20fc9617-9486-4418-b46e-f26918fb7b4f
+:END:
+Define what information you need to create a class.
+
+Create a new package called domain, and create a class here.
+In the example, the class was called ~Contact~:
+
+#+begin_src java
+@Entity
+@Table(name = "contacts")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+public class Contact {
+    @Id
+    @UuidGenerator
+    @Column(name = "id", unique = true, updatable = true)
+    private String id;
+    private String name;
+    private String email;
+    private String title;
+    private String phone;
+    private String address;
+    private String photoUrl;
+}
+#+end_src
+
+Takeaways:
+- ID was defined as String, but there was a [[*@Id and @UuidGenerator][reason why]].
+- For some of these data types, it is more appropriate to use an enum or a distinct class. This is just an example.
+
+** Java Persistence : JPA : Annotations
+Annotations for JPA.
+
+*** ~@Entity~ and ~@Table~ Annotation
+Annotation that Contact is a table (?), so this structure will be used as a schema for building the database.
+
+*** ~@Id~ and ~@UuidGenerator~
+Marks the annotated field as an Id, as well as constraining it so that it is in the format of a UUID.
+
+The purpose of ~@UuidGenerator~ is to automatically generate a UUID for a user when we make [[*Types of Queries][POST queries]] to our database.
+
+*** ~@Column~
+Specifies name and constraint of the column of the table for this field in the database.
+Here, it is set up as a primary key with ~unique = true~. ~updatable = true~ means that we can change it.
+
+*** TODO: Look into JPA more, see how we can use this with Amazon RDS
+Is there something just like this for Amazon RDS? As long as we know what this is doing, there is probably an equivalent thing for working with RDS. Both should be using SQL anyways.
+
+*** ~@JsonInclude(JsonInclude.Include.NON_DEFAULT)~
+Only maps to JSON what is a /non-default value/.
+
+Example: if ~id~ is a String, if ~id~ is set to its default value (null), then it will not be passed to the frontend as json because it is it's default value.
+
+Sometimes you would want this behavior, or sometimes you don't want this behavior.
+For instance, maybe you want to be returned nulls in the font end so that we can make a decision based on that.
+
+** ~@Getter~, ~@Setter~, ~@NoArgsConstructor~, ~@AllArgsConstructor~ : Lombock
+Generate getters and setters so we don't have to write these ourselves.
+Generates constructors for no arguments and all arguments.
+You could do this manually if you wish though, this just saves us some time.
+
+** Create a repository for JPA to manage this class
+Create another class called ~repo~. Create an interface here that will be used for JPA to manage this class. We call this ~ContactRepo~.
+
+#+begin_src java
+@Repository
+public interface ContactRepo extends JpaRepository<Contact, String> {
+    Optional<Contact> findById(String id);
+}
+#+end_src
+This is an interface that extends ~JpaRepository~, and it takes in the class that it will be storing (~Contact~) and the type of the primary key. As shown in the [[*Defining the shape of some information: Classes][definition of the class]], the primary key is a ~String~.
+        - Since this is an extension of the ~JpaRepository~ class, we have access to methods defined by the parent class.
+        - Here we are just creating a more specialized version of the ~JpaRepository~, one which can hold our defined class.
+
+The ~findById~ function takes in an id, and will return a type of ~Option~. This is because we might not have a user with the ID in the database.
+
+        This is the function that will be used by us to get a user from our database!
+        If you want more functionality (like find by email), we can add a function like this.
+        : If we do this though, what constraints would we need in the schema for our database?
+        - email must be unique, should it be a primary key too?
+
+* Create a service to use in the controller of the application
+Once again, create a new package called ~service~, where this code will live. The tutorial calls this class ~ContactService~.
+
+A service class will *contain the interface for our repository*, which it will use to retrieve data from our database.
+
+#+begin_src java
+@Service
+@SLfF4j
+@Transactional(rollbackOn = Exception.class)
+@RequiredArgsConstructor
+public class ContactService {
+    private final ContactRepo contactRepo;
+
+    public Page<Contact> getAllContacts(int page, int size) {
+        return contactRepo.findAll(PageRequest.of(page, size, Sort.by("name")));
+    }
+
+    public Contact getContact(String id) {
+        return contactRepo.findById(id).orElseThrow(() -> new RuntimeException("contact not found"))
+    }
+
+    public Contact createContact(Contact contact) {
+        return contactRepo.save(contact);
+    }
+
+    public void deleteContact(Contact contact) {
+        contactRepo.delete(contact);
+    }
+
+    public String uploadPhoto(String id, MultipartFile file) {
+        log.info("Saving picture for user Id: {}", id)
+        Contact contact = getContact(id);
+        String photoUrl = photoFunction.apply(id, file);
+        contact.setPhotoURL(photoUrl);
+        contactRepo.save(contact);
+        return photoUrl;
+    }
+
+    private final Function<String, String> fileExtension = filename -> Optional.of(filename).filter(name -> name.contains(".")
+        .map(name -> "." + name.substring(filename.lastIndexOf(".") + 1)).orElse(".png");
+    )
+
+    private final BiFunction<String, MultipartFile, String> photoFunction = (id, image) -> {
+        String filename = id + fileExtension.apply(image.getOriginalFilename()); // uuid + .ext
+
+        try {
+            Path fileStorageLocation = Paths.get(PHOTO_DIRECTORY).toAbsolutePath().normalize();
+            if(!Files.exists(fileStorageLocation)) { Files.createDirectories(fileStorageLocation); }
+            Files.copy(image.getInputStream(), fileStorageLocation.resolve(filename), REPLACE_EXISTING);
+            return ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path("/contacts/image/" + filename).toUriString();
+        } catch (Exception exception) {
+            throw new RuntimeException("Unable to save image");
+    };
+}
+#+end_src
+
+Note: ~ContactRepo~ is an extension of the ~JpaRepository~ class, so any method that we call here that we didn't define are derived from the parent class.
+
+** ~@Service~ : annotating class as a service
+
+** ~@SLfF4j~ : logging
+This annotation allows us to use the ~log.info()~ function, passing in the information that we want to be appended to our log. See the ~uploadPhoto()~ function for an [[*Create a service to use in the controller of the application][example]].
+
+There are other functions available from ~log~, see what your IDE brings up as suggestions!
+
+*** TODO: How do we interact with this log?
+Where is the information saved? How do we view it?
+This would probably be answered the documentation for ~SLfF4j~
+
+** ~@Transactional~ : specify transaction behaviors (?)
+~rollbackOn = Exception.class~ will make it so that changes will be rolled back if an exception occurs during execution. This makes it so that we don't mess up our database when something goes wrong with our code!
+
+** ~@RequiredArgsConstructor~ : necessary for dependency injection
+
+*** TODO: What is dependency injection?
+[[file:dependency_injection.org][Dependency Injection]]
+
+** ~getAllContacts()~ method
+Function will return all contacts using the repository that this service class contains, returning a page of results. The ~findAll~ takes in a ~PageRequest~ that contains our query. In this case, we are asking for contacts.
+
+When in doubt, with functions like these, use the documentation to figure out what they do. IDEs usually have pop-up documentation that can help a lot.
+
+** ~getContact()~ method
+This method uses the ~findById()~ function that we defined in our repository's interface.
+
+** ~createContact()~ and ~deleteContact()~ methods
+Uses inherited ~JpaRepository~ methods to add or delete users from the database.
+
+** ~uploadPhoto()~ method
+The goal of this function is to take a user id and a photo that the user will upload as a file, and update the associated user's photo with the file.
+We are storing the [[*Defining the shape of some information: Classes][photo information as a URL]], so we need to [[*photoFunction() : functionality][convert this file into a URL]].
+
+*** BiFunction<>: brief introduction
+This is just a fancy way of writing a function in Java that takes in two types and returns the last type annotated in the ~<>~. So with, ~BiFunction<String, MultipartFile, String>~, we are defining a function that takes in a ~String~ and ~MultipartFile~, returning a ~String~.
+
+~(id, image)~ is the function signature, which has types of ~String~ and ~MultipartFile~. The ~->~ arrow operator denotes a function that takes in the parameters on the left, returning what is in the curly braces. Therefore, whatever we define in the curly braces must return a type of ~String~, as denoted by the type definitions in the ~BiFunction<>~ type definition.
+
+        These are anonymous functions in Java, but in this case we are defining an anonymous function and then binding it to the variable ~photoFunction~.
+
+*** photoFunction() : functionality
+We attempt to save the image, and throw an exception if this cannot happen.
+We get a path to where we want to store the file, storing it as ~fileStorageLocation~.
+        This is where the user stores their files: in another package called ~constants~, ~PHOTO_DIRECTORY~ is defined as ~System.getProperty("user.home") + "/Downloads/uploads"~. This is where the user stores their uploads.
+If this location does not exist, we make the directory for it.
+Then, we need to copy the MultipartFile and save it, naming it like the user UUID, and appending the appropriate file extension to it.
+        We write a function on the side that will take in the original file name from the MultipartFile, and will return the proper extension that we append to the end of the filename while saving it.
+        We also specify that if the file exists with the name, we are overwriting it with ~REPLACE_EXISTING~.
+
+**** TODO: ~ServeletUriComponentsBuilder~
+Appears to be used to create a URI that us used as the link to the file, which is our desired final result.
+
+The ~.path()~ method must be passed in the endpoint from which we are reading our file.
+
+* Controller: Exposing functionality over HTTP
+What we were writing so far is a *REST API*, so when we want to expose this functionality over the web, we write a controller.
+
+** TODO: What is a REST API?
+
+*** Implementing a REST API compliant controller class
+[[*~resource~ package : REST Controller]]
+
+** Resources Directory: configuring resources
+=src/resources/=
+
+Here, there is a file called =application.properties=. The tutorial renames this file to =application.yml=, because the person teaching this likes to use YAML for configuration.
+        This file is what we will be using to *configure the resources / endpoints of our project*!
+
+Here is the YAML config used for the example:
+#+begin_src yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.1.216:5432/testdatabase
+    username: postgresuser
+    password: securepassword
+  jpa:
+    database-platform: org.hibernate.dialect.PosgreSQLInnoDBDialect
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+  mvc:
+    throw-exception-if-no-handler-found: true
+    async:
+      request-timeout: 3600000
+server:
+  port: 8080
+  error:
+    path: /user/error
+    whitelabel:
+      enabled: false
+#+end_src
+
+*** Details about ~application.yaml~ configuration
+
+**** ~spring:~
+These are the configuration options offered by spring:
+
+***** datasource:
+We specify the url to our database, as well as credentials.
+
+****** TODO: more to think about
+Hardcoded user and password like this doesn't seem like that great of an idea though... This is something that we should be thinking about.
+
+***** jpa:
+Configuration for JPA. Tutorial does not go into much details about this, so I would assume that these are just sane defaults.
+
+****** TODO: We can look more into what these do
+Find options / configuration that are more appropriate for our particular use case.
+
+***** servlet:
+Here, we define some rules on ~multipart~, which is for ~MultipartFile~ restrictions.
+In this config, we define rules with ~max-file-size~ and ~max-request-size~ to /limit the size of files and transfers/ allowed for our webapp.
+
+***** mvc:
+Tutorial did not go over this much, but hinted that this section has to deal with some exeption handling.
+We can also set a ~request-timeout~ here too!
+
+****** TODO: look into this more for error handling
+Error handling is very important for a production-ready project. This is another avenue that we can look down later.
+
+**** server:
+Speicfy information about the server here, such as the port.
+We can also define some more error information here as well!
+
+***** TODO: look at this more, especially how we can configure our server.
+
+* Running the Application
+Should be run with annotations enabled, as we defined a lot of the functionality using these and their associated libraries.
+
+The application will start, and create tables as defined by our annotations from JPA. The server will aso start using the port specified by the [[*server:][specified port in the server section of the resources configuration]].
+
+** Postman: Creating Test Users
+
+We have defined our API, so all we need now is a REST Controller and a means of testing out our backend (preferrably without an interface at this point).
+
+*** ~resource~ package : REST Controller
+Another package is created, called ~resource~, containing the class ~ContactResource~.
+
+This is the controller class that we need to expose our ~ContactService~ class over HTTP. Thus, this class contains an instance of our ~ContactService~ class, using the /methods that it provides to modify our database/!
+
+#+begin_src java
+package io.getarrays.contactapi.resource;
+
+import io.getarrays.contactapi.domain.Contact;
+import io.getarrays.contactapi.service.ContactService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static io.getarrays.contactapi.constant.Constant.PHOTO_DIRECTORY;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+
+/**
+ * @author Junior RT
+ * @version 1.0
+ * @license Get Arrays, LLC (<a href="https://www.getarrays.io">Get Arrays, LLC</a>)
+ * @email getarrayz@gmail.com
+ * @since 11/22/2023
+ */
+
+@RestController
+@RequestMapping("/contacts")
+@RequiredArgsConstructor
+public class ContactResource {
+    private final ContactService contactService;
+
+    @PostMapping
+    public ResponseEntity<Contact> createContact(@RequestBody Contact contact) {
+        //return ResponseEntity.ok().body(contactService.createContact(contact));
+        return ResponseEntity.created(URI.create("/contacts/userID")).body(contactService.createContact(contact));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Contact>> getContacts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok().body(contactService.getAllContacts(page, size));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Contact> getContact(@PathVariable(value = "id") String id) {
+        return ResponseEntity.ok().body(contactService.getContact(id));
+    }
+
+    @PutMapping("/photo")
+    public ResponseEntity<String> uploadPhoto(@RequestParam("id") String id, @RequestParam("file")MultipartFile file) {
+        return ResponseEntity.ok().body(contactService.uploadPhoto(id, file));
+    }
+
+
+
+    @GetMapping(path = "/image/{filename}", produces = { IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE })
+    public byte[] getPhoto(@PathVariable("filename") String filename) throws IOException {
+        return Files.readAllBytes(Paths.get(PHOTO_DIRECTORY + filename));
+    }
+}
+#+end_src
+
+These look to be methods for the REST API to get data and upload data.
+
+We use the ~@RequestMapping("/contacts")~ annotation to map the =/contacts= subdomain of our web server to handle REST API requests.
+
+**** Headers
+In this example, when the server creates a REST response on creating a contact, there is a header called ~Location~ that will contain the value =/contacts/userID= in it. This was the value specified in the ~URI.create()~ function in our ~createContact()~ method.
+        This is the URI location of where the new user was created!
+
+**** TODO: look into how to use REST API and write code for it in detail.
+
+*** Utilizing Postman : Making Queries
+Postman uses the REST API functions that we define to make queries to our database.
+
+Responses are in the form of JSON, with information about our queries.
+
+Queries are addressed to the server port of our PostgreSQL database, which should be ~http://localhost:8080~ as defined in our YAML [[*Resources Directory: configuring resources][resource configuration]].
+Also, remember that when we were [[*Defining the shape of some information: Classes][defining our data with a class]], we specified with an annotation that ~@Table(name = "contacts")~. This means that we created a table with the name =contacts= that holds all our data.
+
+We also mapped our controller to handle requests on the =/contacts= subdomain of the server's web address using the ~@RequestMapping("/contacts")~ annotation in our controller class. This controller uses our [[*Create a service to use in the controller of the application][service class]] to make changes to our database.
+
+Putting this all together, now know that when we want to make queries for data on contacts, we will make queries to the following address:
+#+begin_example
+        http://localhost:8080/contacts
+#+end_example
+Here we are addressing to the server, and from the server we are trying to access the contacts table.
+
+**** Types of Queries - GET and POST
+Responses from the server are returned in a JSON format.
+
+~GET~ : tell our controller retrieve data from our database
+  - Any information from this type of request is returned in the ~content~ array in the JSON response.
+
+~POST~ : send data to our controller, which will try to a new entry to our database.
+  - We send data in a JSON format. An example of this would be:
+#+begin_src json
+{
+    "name": "Junior RT",
+    "email": "getarrayz@gmail.com",
+    "address": "Philadelphia PA",
+    "title": "Developer",
+    "status": "Active"
+}
+#+end_src
+
+Note that here we do not specify ~id~ for the user, which we defined as the primary key in our table. This will be generated on the fly, as specified by the [[*~@Id~ and ~@UuidGenerator~][@UuidGenerator annotation]].
+
+Also, we are not passing in an image in this request as well, as there will be a different way of setting the profile picture of a user.
+
+As a response, we can get an error:
+#+begin_src json
+{
+    "timestamp": "2023-11-23T04:26:29.389+00:00",
+    "status": 500,
+    "error": "Internal Server Error",
+    "path": "/contacts"
+}
+#+end_src
+Note: when we have an exception that occurs when we tell our controller class to utilize our service class to try to modify our database, we specified in our service class that upon an exception occuring, we will [[*~@Transactional~ : specify transaction behaviors][rollback changes]] that we tried to make, as specified by the ~@Transactional()~ annotation in the service class.
+
+        Also, if this happens, usually the console of the backend will /spit out some useful information/ for debugging what went wrong.
+
+We can also always use the ~GET~ query to check to see if a contact was actually added to our database!
+
+A successful ~POST~ response looks like the following:
+#+begin_src json
+{
+    "id": "gi3d7e4d7-6847-49d7-bOb0-ce6éc£5584a07",
+    "name": "Junior RT",
+    "email": "getarrayz@gmail.com",
+    "title": "Developer",
+    "address": "Philadelphia pa",
+    "status": "Active"
+}
+#+end_src
+Once again, note that the UUID was [[*~@Id~ and ~@UuidGenerator~][automatically generated]].
+
+Since we didn't pass in a photo URL or phone number, note that it is not returned at all, as it's default value is null. This is the result of the [[*~@JsonInclude(JsonInclude.Include.NON_DEFAULT)~][@JsonInlcude]] annotation in our data domain class.
+
+**** Updating users using ~POST~ request
+In our [[*Defining the shape of some information: Classes][domain definition of our contacts class]], we annotated the id as updatable.
+To update information of a contact, we would send a POST request with JSON that contains a UUID that matches a user already in our database and the information that we want to update it with.
+
+**** Request Pagination
+Pagination is a feature that is *already implemented in Spring*, so it should be good to go out of the box.
+We can alter the number of returned entries by altering the query.
+
+For instance, if we want to only get one entry from our database's table, we would use a ~GET~ request to the following address:
+#+begin_example
+        http://localhost:8080/contacts?size=1
+#+end_example
+where =size= is the number of entries that we want returned in the ~content~ array of the JSON response.
+
+The request should hold all the information required to make a paginated view in your frontend.
+
+*** Queries Continued - Dealing with images
+With the [[*~resource~ package : REST Controller][aforementioned source code]]:
+#+begin_src java
+@RestController
+@RequestMapping("/contacts")
+@RequiredArgsConstructor
+public class ContactResource {
+    private final ContactService contactService;
+
+    //... folded
+
+    @PutMapping("/photo")
+    public ResponseEntity<String> uploadPhoto(@RequestParam("id") String id, @RequestParam("file")MultipartFile file) {
+        return ResponseEntity.ok().body(contactService.uploadPhoto(id, file));
+    }
+
+    @GetMapping(path = "/image/{filename}", produces = { IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE })
+    public byte[] getPhoto(@PathVariable("filename") String filename) throws IOException {
+        return Files.readAllBytes(Paths.get(PHOTO_DIRECTORY + filename));
+    }
+}
+
+#+end_src
+We create bindings for ~/contacts/photo~ to recieve PUT requests, taking in an ID and a File.
+        This utilizes our service which has a method to upload a file and turn it into a URI that our app can store.
+
+If we want to upload an image, we would contact our controller with a request and the following ~form-data~:
+#+begin_example
+        PUT http://localhost:8080/contacts/photo
+
+        id (text): <user_uuid>
+        file (file): <uploaded_image_file>
+#+end_example
+The response for this request should be a URL like the following:
+#+begin_example
+        http://localhost:8080/contacts/photo/<user_uuid>
+#+end_example
+If we look back at the [[*Create a service to use in the controller of the application][service class's function]] for ~uploadPhoto()~, the function returns a string using the ~ServeletUriComponentsBuilder~ class to create a link to the file as it was saved on the server.
+        - This link can be used to access our image by visiting the address! This functionality is implemented via the ~getPhoto()~ function defined in our controller.
+
+This function will send a stream of bytes to the HTTP client making the request. Most browsers should be able to read this stream and display the image.
+
+**** Spring Web - Mapping Default Response : JSON
+By default, all HTTP responses from Spring Web's mappings are /by default a JSON response/.
+However, when we are trying to return an image via a byte stream like in the ~getPhoto()~ function, we need to explicitly tell Spring's framework that we are trying to send an image.
+
+This is achieved through annotations. Looking at the annotations more in detail:
+#+begin_src java
+    @GetMapping(path = "/image/{filename}", produces = { IMAGE_PNG_VALUE, IMAGE_JPEG_VALUE })
+    public byte[] getPhoto(@PathVariable("filename") String filename) throws IOException {
+        return Files.readAllBytes(Paths.get(PHOTO_DIRECTORY + filename));
+    }
+#+end_src
+When we create our ~@GetMapping()~ annotation, we can specify what it should be returning, and by extent how the client should be interpreting our data. Here we say that it is eitehr a PNG image or a JPEG image by passing in an array containing values provided by Spring Web.
+
+: If we were to not set this parameter, the response would be sent as JSON. In your browser, it would end up looking like a bunch of garbled text if you try to access the link.
+
+If we take a look at the headers of the response, we can see the key-value pair:
+#+begin_example
+        Content-Type : image/png
+#+end_example
+The ~Content-Type~ header is usable by your front end to tell the type of the information sent.
+
+*** TODO: Delete functionality
+Not discussed in this video.
+Guy said that it was easy using JPA tho :0
+
+* Viewing data in your database
+Use some database management software like pgAdmin. You can make SQL queries like:
+#+begin_src sql
+    SELECT * FROM contacts;
+#+end_src
+to get all records from the contacts table.
+
+Amazon RDS probably has an interface for working with a postgreSQL server as well.
+
+* Time Tracking
+*** DONE: clock out, continue from 43:30 on the video
+*** DONE: clock out, backend content ends at 50:47

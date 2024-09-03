@@ -1,0 +1,604 @@
+#+title: Dependency Injection
+#+author:kyuho
+#+startup: num
+
+* Purpose
+What is dependency injection? How is it used in Spring Boot, and what goals does it attempt to accomplish?
+
+** Resources
+https://www.baeldung.com/spring-injection-lombok
+https://www.baeldung.com/intro-to-project-lombok
+
+** Overview
+Lombock is a library for writing boilerplate code using annotations.
+Lombock makes dependency injection easier by allowing us to quickly write boilerplate constructors, which will be used for constructor-based dependency injections.
+
+* Lombock: Library for writing boilerplate code
+https://www.baeldung.com/intro-to-project-lombok
+
+** What is Lombock?
+Library for generating boilerplate code without us having to write it ourselves.
+Lombock plugs into the Java build process, generating Java bytecode that are added to .class files automatically through annotations added to code.
+
+Lombock is a *build dependency*, so it is only needed at runtime. Users do not need it to run a built Java binary.
+
+** Adding Dependency: Maven XML project
+#+begin_src xml
+<dependencies>
+    ...
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.30</version>
+        <scope>provided</scope>
+    </dependency>
+    ...
+</dependencies>
+#+end_src
+
+** Getters / Setters, Constructors
+Encapsulation with getters and setters is done a lot.
+Another pattern done a lot is the "Java Bean" pattern : a class with empty constructor and get/set methods for properties.
+
+When we want to add / change parameters of our classes, we would need to refactor all our getters and setters too. Lombock attempts to solve this problem.
+
+*** JPA Entity : Non-Lombock Code
+#+begin_src java
+@Entity
+public class User implements Serializable {
+
+    private @Id Long id; // will be set when persisting
+
+    private String firstName;
+    private String lastName;
+    private int age;
+
+    public User() {
+    }
+
+    public User(String firstName, String lastName, int age) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+    }
+
+    // getters and setters: ~30 extra lines of code
+}
+#+end_src
+
+*** JPA Entity: Lombock Code
+#+begin_src java
+@Entity
+@Getter @Setter @NoArgsConstructor // <--- THIS is it
+public class User implements Serializable {
+
+    private @Id Long id; // will be set when persisting
+
+    private String firstName;
+    private String lastName;
+    private int age;
+
+    public User(String firstName, String lastName, int age) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+    }
+}
+#+end_src
+The annotations ~@Getter~ ~@Setter~ ~@NoArgsConstructor~ tell Lombock to auto generate getters, setters, and the default constructor. There is no need to write this code ourselves!
+
+**** Specify Access Levels of Generated Getters / Setters
+We can add more fine grain information for Lombock to generate our code.
+If we want our setters for our class to instead be protected rather than public, we can specify it as an argument:
+#+begin_src java
+    private @Id @Setter(AccessLevel.PROTECTED) Long id;
+#+end_src
+
+** Lazy Getter
+Lazy loading - retrieve data only at the time when it is first needed.
+
+Lombock is able to generate Lazy Getters using the ~@Getter(lazy = true)~ annotation.
+
+#+begin_src java
+public class GetterLazy {
+
+    @Getter(lazy = true)
+    private final Map<String, Long> transactions = getTransactions();
+
+    private Map<String, Long> getTransactions() {
+
+        final Map<String, Long> cache = new HashMap<>();
+        List<String> txnRows = readTxnListFromFile();
+
+        txnRows.forEach(s -> {
+            String[] txnIdValueTuple = s.split(DELIMETER);
+            cache.put(txnIdValueTuple[0], Long.parseLong(txnIdValueTuple[1]));
+        });
+
+        return cache;
+    }
+}
+#+end_src
+This code reads information from a file and returns a Map of the information. This functions like a cache.
+We specified to Lombock that ~transactions~ will have a lazy getter, as well as specifying how we are supposed to get the value using the assignment operator and the ~getTransactions()~ function.
+
+Lombock will generate the following code, implementing the lazy getter:
+#+begin_src java
+public class GetterLazy {
+
+    private final AtomicReference<Object> transactions = new AtomicReference();
+
+    public GetterLazy() {
+    }
+
+    //other methods
+
+    public Map<String, Long> getTransactions() {
+        Object value = this.transactions.get();
+        if (value == null) {
+            synchronized(this.transactions) {
+                value = this.transactions.get();
+                if (value == null) {
+                    Map<String, Long> actualValue = this.readTxnsFromFile();
+                    value = actualValue == null ? this.transactions : actualValue;
+                    this.transactions.set(value);
+                }
+            }
+        }
+
+        return (Map)((Map)(value == this.transactions ? null : value));
+    }
+}
+#+end_src
+Note that Lombock wrapped ~transactions~ in an ~AtomicReference<>~ object.
+Therefore, when using this annotation to generate a lazy getter, it is recommended to use the generated getter methods instead of directly accessing the fields.
+        This is generally a good practice anyways.
+
+: Lombock can change your code! Just be aware of that.
+
+** Value Classes / DTO's
+=Data Transfer Objects / Value Classes= : data types for the sole purpose of representing complex values.
+        - Usually in the form of *immutable data structures* that we don't want to change.
+
+*** Example: LoginResult Class
+Requirement: We define a LoginResult class to represent a login operation. However, we want all fields to be non-null and immutable so that access to its fields is thread safe.
+
+#+begin_src java
+public class LoginResult {
+
+    private final Instant loginTs;
+
+    private final String authToken;
+    private final Duration tokenValidity;
+
+    private final URL tokenRefreshUrl;
+
+    // constructor taking every field and checking nulls
+
+    // read-only accessor, not necessarily as get*() form
+}
+#+end_src
+- ~final~ is used to declare a variable as immutable
+
+Instead of writing all the getters, setters, and constructors with associated logic, we could just use Lombock annotations:
+#+begin_src java
+@RequiredArgsConstructor
+@Accessors(fluent = true) @Getter
+public class LoginResult {
+
+    private final @NonNull Instant loginTs;
+
+    private final @NonNull String authToken;
+    private final @NonNull Duration tokenValidity;
+
+    private final @NonNull URL tokenRefreshUrl;
+
+}
+#+end_src
+
+**** ~@RequiredArgsConstructor~ : create constructor for all final fields of the class
+This annotation will generate a constructor for all the final fields of a class.
+
+**** ~@NonNull~ :
+Adding this annotation to attributes tells Lombock that its generated constructors must check that these fields will be non-null, and throw a ~NullPointerException~ otherwise.
+
+        This functions as well for non-final fields as well! With the ~@Setter~ annotation, the setters that Lombock generates will have null checks too.
+
+**** ~@Accessors(fluent = true)~ : removes "get" from getter names
+The ~@Accessors~ annotation is used to tell Lombock what naming convention it should be using for the getters.
+
+"fluent" form applies to all non-final fields for setters too, as well as allowing chained method calls:
+#+begin_src java
+// Imagine fields were no longer final now
+return new LoginResult()
+  .loginTs(Instant.now())
+  .authToken("asdasd")
+  . // and so on
+#+end_src
+
+** Core Java Boilerplate
+#+begin_example
+        toString(), equals(), hashCode() methods.
+#+end_example
+Lombock has annotations to make boilerplate like this easier to manage too.
+
+*** ~@ToString~
+Generates a ~toString()~ method including all class attributes. Makes adding / renaming / changing fields in classes easier and more flexible.
+
+*** ~@EqualsAndHashCode~
+Generates both ~equals()~ and ~hashCode()~ methods, by default considering all relevant fields. This is done by Lombock with [[https://www.artima.com/articles/how-to-write-an-equality-method-in-java][careful consideration]].
+
+*** ~callSuper=true~
+#+begin_quote
+        These generators ship very handy configuration options. For example, if our annotated classes take part of a hierarchy, we can just use the callSuper=true parameter and parent results will be considered when generating the method’s code.
+#+end_quote
+
+**** JPA Example
+Suppose we have a User JPA entity, and we want it to include a reference to events associated to this user:
+#+begin_src java
+@OneToMany(mappedBy = "user")
+private List<UserEvent> events;
+#+end_src
+
+#+begin_quote
+We wouldn’t want to have the whole list of events dumped whenever we call the toString() method of our User, just because we used the @ToString annotation. Instead, we can parameterize it like this, @ToString(exclude = {“events”}), and that won’t happen. This is also helpful to avoid circular references if, for example, UserEvents had a reference to a User.
+
+For the LoginResult example, we may want to define equality and hash code calculation just in terms of the token itself and not the other final attributes in our class. Then we can simply write something like @EqualsAndHashCode(of = {“authToken”}).
+
+If the features from the annotations we’ve reviewed so far are of interest, we may want to examine @Data and @Value annotations too, as they behave as if a set of them had been applied to our classes. After all, these discussed usages are very commonly put together in many cases.
+#+end_quote
+
+*** (Not) Using the ~@EqualsAndHashCode~ with JPA Entities
+Generally though, it is *best practice to avoid using Lombock to generate ~equals()~ and ~hashCode()~ methods for JPA Entities*.
+
+Whether to use this annotation with JPA entities is highly debated.
+There are [[multiple approaches][https://www.baeldung.com/jpa-entity-equality]] with their own pros and cons.
+
+By default, ~@EqualsAndHashCode~ will include *all non-final properties* of the entity class.
+        Adding the ~onlyExplicitlyIncluded~ attribute to the annotation will make Lombock use only the entity's *primary key*.
+
+If working with JPA Entities, just avoid using Lombock for these methods.
+
+** The Builder Pattern
+An object that is used to construct an instance of another object with the provided parameters.
+        The fields of the target class that builders construct are immutable (?).
+
+Sample configuration for a REST API client:
+#+begin_src java
+public class ApiClientConfiguration {
+
+    private String host;
+    private int port;
+    private boolean useHttps;
+
+    private long connectTimeout;
+    private long readTimeout;
+
+    private String username;
+    private String password;
+
+    // Whatever other options you may thing.
+
+    // Empty constructor? All combinations?
+
+    // getters... and setters?
+}
+#+end_src
+
+#+begin_quote
+We could have an initial approach based on using the class default empty constructor and providing setter methods for every field; however, we ideally want configurations not to be re-set once they’ve been built (instantiated), effectively making them immutable. Therefore, we want to avoid setters, but writing such a potentially long args constructor is an anti-pattern.
+
+Instead, we can tell the tool to generate a builder pattern, which negates us from having to write an extra Builder class and the associated fluent setter-like methods by simply adding the @Builder annotation to our ApiClientConfiguration:
+#+end_quote
+
+#+begin_src java
+@Builder
+public class ApiClientConfiguration {
+
+    // ... everything else remains the same
+
+}
+#+end_src
+
+We can now use the builder like so:
+#+begin_src java
+ApiClientConfiguration config =
+    ApiClientConfiguration.builder()
+        .host("api.server.com")
+        .port(443)
+        .useHttps(true)
+        .connectTimeout(15_000L)
+        .readTimeout(5_000L)
+        .username("myusername")
+        .password("secret")
+    .build();
+#+end_src
+
+** Checked Exceptions Burden
+Use ~@SneakyThrows~ for catching exceptions that we know won't ever happen.
+
+#+begin_src java
+public String resourceAsString() {
+    try (InputStream is = this.getClass().getResourceAsStream("sure_in_my_jar.txt")) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        return br.lines().collect(Collectors.joining("\n"));
+    } catch (IOException | UnsupportedCharsetException ex) {
+        // If this ever happens, then its a bug.
+        throw new RuntimeException(ex); <--- encapsulate into a Runtime ex.
+    }
+}
+#+end_src
+
+#+begin_src java
+@SneakyThrows
+public String resourceAsString() {
+    try (InputStream is = this.getClass().getResourceAsStream("sure_in_my_jar.txt")) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        return br.lines().collect(Collectors.joining("\n"));
+    }
+}
+#+end_src
+
+** Ensure Resources are Freed
+Java 7 - introduces ~try-with-resources~ block to ensure resources being held by instances of anything implementing ~java.lang.AutoCloseable~ are released when leaving the block.
+
+Lombock provides an alternative method through the ~@Cleanup~ annotation, with no special interface required. By default, it will call the ~close()~ method:
+#+begin_src java
+@Cleanup InputStream is = this.getClass().getResourceAsStream("res.txt");
+#+end_src
+
+If the cleanup function has a different name, you can specify it as a parameter:
+#+begin_src java
+@Cleanup("dispose") JFrame mainFrame = new JFrame("Main Window");
+#+end_src
+
+** Annotate Class to get a Logger
+We can use annotations like ~@Slf4j~ to get a logger object instead of having to create one for a class.
+
+#+begin_src java
+public class ApiClientConfiguration {
+
+    private static Logger LOG = LoggerFactory.getLogger(ApiClientConfiguration.class);
+
+    // LOG.debug(), LOG.info(), ...
+
+}
+#+end_src
+
+Instead becomes something like:
+#+begin_src java
+@Slf4j // or: @Log @CommonsLog @Log4j @Log4j2 @XSlf4j
+public class ApiClientConfiguration {
+
+    // log.debug(), log.info(), ...
+
+}
+#+end_src
+Much simpler and easier to read.
+
+** Write Thread-Safer Methods
+In Java, the ~synchronized~ keyword is used to implement critical sections, but it is not 100% safe.
+
+: Other client code can eventually also synchronize on our instance, potentially leading to unexpected deadlocks.
+
+~@Synchronized~ annotation : generates private, unexposed field that method will use for locking
+        Works on both instance methods and static methods!
+#+begin_src java
+@Synchronized
+public /* better than: synchronized */ void putValueInCache(String key, Object value) {
+    // whatever here will be thread-safe code
+}
+#+end_src
+
+** Automate Object Composition
+Java doesn't have language-level constructs for smooth implementation of compositions. (Language favors inheritance much more than composition.)
+
+Lombock's ~@Delegate~ annotation helps with the composition programming pattern.
+
+*** Example:
+- We want Users and Customers to share some common attributes for naming and phone number.
+- We define both an interface and an adapter class for these fields.
+- We’ll have our models implement the interface and ~@Delegate~ to their adapter, effectively composing them with our contact information.
+
+First, define the interface:
+#+begin_src java
+public interface HasContactInformation {
+
+    String getFirstName();
+    void setFirstName(String firstName);
+
+    String getFullName();
+
+    String getLastName();
+    void setLastName(String lastName);
+
+    String getPhoneNr();
+    void setPhoneNr(String phoneNr);
+
+}
+#+end_src
+
+Next define the adapter as a support class:
+#+begin_src java
+@Data
+public class ContactInformationSupport implements HasContactInformation {
+
+    private String firstName;
+    private String lastName;
+    private String phoneNr;
+
+    @Override
+    public String getFullName() {
+        return getFirstName() + " " + getLastName();
+    }
+}
+#+end_src
+
+Finally, use @Delegate in a class to create a composition:
+#+begin_src java
+public class User implements HasContactInformation {
+
+    // Whichever other User-specific attributes
+
+    @Delegate(types = {HasContactInformation.class})
+    private final ContactInformationSupport contactInformation =
+            new ContactInformationSupport();
+
+    // User itself will implement all contact information by delegation
+
+}
+
+public class Customer implements HasContactInformation {
+
+    // Whichever other Customer-specific attributes
+
+    @Delegate(types = {HasContactInformation.class})
+    private final ContactInformationSupport contactInformation =
+            new ContactInformationSupport();
+
+    // Customer itself will implement all contact information by delegation
+
+}
+#+end_src
+
+We can haved multiple delegates in a class in order to have a multi-composition (?).
+
+** Rolling Lombock Back
+When we begin to integrate Lombock into a project, it is not simple to remove it.
+We can replace the existing code with Lombock code in order to de-lombock a project.
+
+
+* Construction Injection in Spring Using Lombock
+https://www.baeldung.com/spring-injection-lombok
+
+** Constructor-Based Dependency Injection
+Spring generally uses constructor-based dependency injection, where dependencies are passed into an object's constructor.
+
+*** Advantages of Constructor-Based DI Versus Field-Based DI
+- no need to create a test-specific configuration component – dependencies are injected explicitly in a constructor
+- consistent design – all required dependencies are emphasized and looked after by constructor’s definition
+- simple unit tests – reduced Spring Framework’s overhead
+- reclaimed freedom of using final keywords
+
+*** Disadvantage: Boilerplate code.
+The disadvantage of constructor-based dependency injection is that you need boilerplate constructors, which means you have to write more code.
+
+#+begin_src java
+@Component
+public class FarewellService {
+
+    private final Translator translator;
+
+    public FarewellService(Translator translator) {
+        this.translator = translator;
+    }
+
+    public String produce() {
+        return translator.translate("bye");
+    }
+}
+#+end_src
+
+For a similar component, Lombock adds the ~@Autowired~ annotation to automatically generate the constructor for this dependency injection.
+#+begin_src java
+@Component
+public class GreetingService {
+
+    @Autowired
+    private Translator translator;
+
+    public String produce() {
+        return translator.translate("hello");
+    }
+}
+#+end_src
+
+In newer versions of Spring, constructors do not need to be annotated with ~@Autowired~!
+
+** Constructor Injection With Lombock
+Lombock provides a variety of annotations to automatically generate constructors for classes, which are used for dependency injections.
+
+*** ~@AllArgsConstructor~
+Generates a constructor for all fields in a class
+
+*** ~@RequiredArgsConstructor~
+Generates a constructor for all required (final) fields in a class
+
+*** ~@NoArgsConstructor~
+Generates a constructor that takes no arguments.
+
+*** Example:
+#+begin_src java
+@Component
+@RequiredArgsConstructor
+public class ThankingService {
+
+    private final Translator translator;
+
+    public String produce() {
+        return translator.translate("thank you");
+    }
+}
+#+end_src
+
+Lombock generates:
+#+begin_src java
+@Component
+public class ThankingService {
+
+    private final Translator translator;
+
+    public String thank() {
+        return translator.translate("thank you");
+    }
+
+    /* Generated by Lombok */
+    public ThankingService(Translator translator) {
+        this.translator = translator;
+    }
+}
+#+end_src
+
+** Multiple Constructors
+copied from website:
+
+A constructor doesn’t have to be annotated as long as there is only one in a component and Spring can unambiguously choose it as the right one to instantiate a new object. Once there are more, you also need to annotate the one that is to be used by IoC container.
+
+Consider the ApologizeService example:
+#+begin_src java
+@Component
+@RequiredArgsConstructor
+public class ApologizeService {
+
+    private final Translator translator;
+    private final String message;
+
+    @Autowired
+    public ApologizeService(Translator translator) {
+        this(translator, "sorry");
+    }
+
+    public String produce() {
+        return translator.translate(message);
+    }
+}
+#+end_src
+
+The above component is optionally configurable with the message field which cannot change after the component is created (hence the lack of a setter). It thus required us to provide two constructors – one with full configuration and the other with an implicit, default value of the message.
+
+Unless one of the constructors is annotated with either @Autowired, @Inject or @Resource, Spring will throw an error:
+
+: Failed to instantiate [...]: No default constructor found;
+
+If we wanted to annotate the Lombok-generated constructor, we would have to pass the annotation with an onConstructor parameter of the @AllArgsConstructor:
+
+#+begin_src java
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class ApologizeService {
+    // ...
+}
+#+end_src
+The onConstructor parameter accepts an array of annotations (or a single annotation like in this specific example) that are to be put on a generated constructor. The double underscore idiom has been introduced because of the backward compatibility issues. According to the documentation:
+
+    The reason of the weird syntax is to make this feature work in javac 7 compilers; the @__ type is an annotation reference to the annotation type __ (double underscore) which doesn’t actually exist; this makes javac 7 delay aborting the compilation process due to an error because it is possible an annotation processor will later create the __ type.

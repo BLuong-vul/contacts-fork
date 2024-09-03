@@ -1,0 +1,17 @@
+#+title: Personal Project Notes
+#+author:kyuho
+#+startup: num
+
+* What Technologies are we using?
+Frontend: React JS
+Framework: SpringBoot
+Database: Amazon AWS / SQL on Amazon RDS
+
+* Learning Full Stack Development:
+
+** Course: Full Stack Development with Spring Boot and ReactJS
+[[file:springboot_backend.org][Spring Boot Backend Tutorial]]
+
+** Loose Notes
+[[file:dependency_injection.org][Dependency Injection and Lombock]]
+[[file:spring_jpa.org][Spring JPA]]
