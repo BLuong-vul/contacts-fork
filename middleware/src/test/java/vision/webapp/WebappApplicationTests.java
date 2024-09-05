@@ -1,10 +1,10 @@
-package com.example.demo;
+package vision.webapp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DemoApplicationTests {
+class WebappApplicationTests {
 
 	@Test
 	void contextLoads() {
