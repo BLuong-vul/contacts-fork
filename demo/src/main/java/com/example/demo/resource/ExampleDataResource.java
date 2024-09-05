@@ -2,6 +2,7 @@ package com.example.demo.resource;
 
 import java.net.URI;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class ExampleDataResource {
         return ResponseEntity.created(URI.create("/exampledata/uuid")).body(service.createExampleData(exampleData));
     }
 
+    @CrossOrigin(origins = {"http://localhost:3000"})
     @GetMapping("/{id}")
     public ResponseEntity<ExampleData> getExampleData(@PathVariable(value = "id") String id) {
         return ResponseEntity.ok(service.getExampleData(id));
