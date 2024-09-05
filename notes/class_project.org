@@ -1,6 +1,6 @@
 #+title: Project Journal
 
-* Project Requirements
+* Project Requirements 
 Web service:
 Design a social media site similar to instragram, facebook, reddit, etc...
 Users can create an account, and you can subscribe to other people's feeds.
