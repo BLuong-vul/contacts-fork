@@ -5,7 +5,7 @@ Going forward:
 1. Verify if the use of the above technologies is actually compatible and reasonable
 2. Finalize design and create System Requirements Specification (SRS)
 3. Set up basic skeleton for technologies
-4. Begin development
+4. Begin development 
 
 
 
