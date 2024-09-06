@@ -1,0 +1,33 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: frontend/.next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
+
+backend:
+  phases:
+    preBuild:
+      commands:
+        - ./gradlew clean
+    build:
+      commands:
+        - ./gradlew build
+  artifacts:
+    baseDirectory: build/libs
+    files:
+      - '**/*.jar'
+  cache:
+    paths:
+      - ~/.gradle/caches/**/*
