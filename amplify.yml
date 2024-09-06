@@ -20,14 +20,14 @@ backend:
   phases:
     preBuild:
       commands:
-        - ./gradlew clean
+        - ./mvn clean
     build:
       commands:
-        - ./gradlew build
+        - ./mvn build
   artifacts:
-    baseDirectory: build/libs
+    baseDirectory: target
     files:
       - '**/*.jar'
   cache:
     paths:
-      - ~/.gradle/caches/**/*
+      - ~/.m2/repository/**/*
