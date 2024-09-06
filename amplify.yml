@@ -20,14 +20,14 @@ backend:
   phases:
     preBuild:
       commands:
-        - cd middleware
+        - cd demo
         - ./mvnw clean
     build:
       commands:
-        - cd middleware
+        - cd demo
         - ./mvnw package
   artifacts:
-    baseDirectory: backend/target
+    baseDirectory: demo/target
     files:
       - '*.jar'
   cache:
