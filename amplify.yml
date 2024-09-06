@@ -20,11 +20,11 @@ backend:
   phases:
     preBuild:
       commands:
-        - cd backend
+        - cd middleware
         - ./mvnw clean
     build:
       commands:
-        - cd backend
+        - cd middleware
         - ./mvnw package
   artifacts:
     baseDirectory: backend/target
