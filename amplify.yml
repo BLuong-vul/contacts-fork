@@ -23,11 +23,11 @@ backend:
         - ./mvnw clean
     build:
       commands:
-        - ./mvnw build
+        - ./mvnw package
   artifacts:
     baseDirectory: target
     files:
-      - '**/*.jar'
+      - '*.jar'
   cache:
     paths:
       - ~/.m2/repository/**/*
