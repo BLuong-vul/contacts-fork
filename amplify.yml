@@ -20,10 +20,10 @@ backend:
   phases:
     preBuild:
       commands:
-        - ./mvn clean
+        - mvnw clean
     build:
       commands:
-        - ./mvn build
+        - mvnw build
   artifacts:
     baseDirectory: target
     files:
