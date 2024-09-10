@@ -13,8 +13,10 @@ export default function RootLayout({ children }) {
               <Image
                 src="/app_name1.png"
                 width={200}
-                height={200} />
+                height={200} 
                 alt=""
+              />
+
             </header>
             <br></br>
             <p>
