@@ -1,0 +1,35 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: frontend/.next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
+
+backend:
+  phases:
+    preBuild:
+      commands:
+        - cd demo
+        - ./mvnw clean
+    build:
+      commands:
+        - cd demo
+        - ./mvnw package
+  artifacts:
+    baseDirectory: demo/target
+    files:
+      - '*.jar'
+  cache:
+    paths:
+      - ~/.m2/repository/**/*

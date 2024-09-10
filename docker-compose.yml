@@ -1,0 +1,24 @@
+services:
+
+  middleware:
+    container_name: spring-boot-vision
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    tty: true
+    stdin_open: true
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://test-db.chs4wq8g04j6.us-west-1.rds.amazonaws.com/postgres"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_PASSWORD: "testpassword"
+
+  frontend:
+    container_name: next-js-vision
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+

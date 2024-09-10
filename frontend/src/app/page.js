@@ -10,11 +10,13 @@ export default function Home() {
       		src="/logo.png"
       		width={200}
       		height={200}
+          alt="Vision logo"
       	/>
       	<Image
       		src="/vision_text.png"
       		width={200}
       		height={200}
+          alt="Vision text"
       	/>
       </header>
       <main className={styles.mainContent}>
