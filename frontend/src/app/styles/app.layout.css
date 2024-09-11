@@ -1,3 +1,8 @@
+.navbar{
+  display: flex;
+  background-color: white;
+  padding: 10px;
+}
 body {
     margin: 0;
     padding: 0;
