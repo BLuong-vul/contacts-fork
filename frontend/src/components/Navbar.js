@@ -1,4 +1,5 @@
-import * as React from 'react';
+'use client'
+import * as React from "react";
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
@@ -14,9 +15,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
-import '../app.layout.css'
+import '../app/styles/app.layout.css'
 
-const narbar = () => {
+
+const Navbar = () => {
 
     const [state, setState] = React.useState({
         top: false,
@@ -42,16 +44,7 @@ const narbar = () => {
             onKeyDown={toggleDrawer(anchor, false)}
         >
             <List>
-                {/* {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))} */}
+
 
                 <ListItem disablePadding>
                     <ListItemButton >
@@ -93,20 +86,7 @@ const narbar = () => {
     );
 
     return (
-        <div className='narbar'>
-            {/* {['left', 'right', 'top', 'bottom'].map((anchor) => (
-                <React.Fragment key={anchor}>
-                    <Button onClick={toggleDrawer(anchor, true)}>{anchor}</Button>
-                    <Drawer
-                        anchor={anchor}
-                        open={state[anchor]}
-                        onClose={toggleDrawer(anchor, false)}
-                    >
-                        {list(anchor)}
-                    </Drawer>
-                </React.Fragment>
-            ))} */}
-
+        <div className='Navbar'>
 
 
             <MenuIcon
@@ -127,4 +107,4 @@ const narbar = () => {
     )
 }
 
-export default narbar
+export default Navbar

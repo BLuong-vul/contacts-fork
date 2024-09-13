@@ -1,27 +1,26 @@
 import Image from "next/image";
 import styles from './styles/Home.module.css';
 import Link from 'next/link';
+import Navbar from "../components/Navbar";
 
 export default function Home() {
   return (
-    <div className={styles.container}>
+    <><Navbar /><div className={styles.container}>
       <header className={styles.banner}>
-      	<Image
-      		src="/logo.png"
-      		width={200}
-      		height={200}
-      	/>
-      	<Image
-      		src="/vision_text.png"
-      		width={200}
-      		height={200}
-      	/>
+        <Image
+          src="/logo.png"
+          width={200}
+          height={200} />
+        <Image
+          src="/vision_text.png"
+          width={200}
+          height={200} />
       </header>
       <main className={styles.mainContent}>
-      	<header className="text-center">
-        	<h1 className="font-bold">Steven Diep | Bryan Luong | Kyung Ho Min | Phi Nguyen | Garrett Rogers</h1>
-      	</header>
-      	<br></br>
+        <header className="text-center">
+          <h1 className="font-bold">Steven Diep | Bryan Luong | Kyung Ho Min | Phi Nguyen | Garrett Rogers</h1>
+        </header>
+        <br></br>
         <p>
           &emsp;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.
           Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at
@@ -44,11 +43,11 @@ export default function Home() {
         </p>
         <br></br>
         <header className="text-center">
-	        <Link href="/projects" className="text-blue-500 underline">
-	        	Project List
-	        </Link>
+          <Link href="/projects" className="text-blue-500 underline">
+            Project List
+          </Link>
         </header>
       </main>
-    </div>
+    </div></>
   );
 }
