@@ -1,12 +1,12 @@
-package com.example.demo.service;
+package com.vision.middleware.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.repo.ExampleDataRepo;
-import com.example.demo.domain.ExampleData;
+import com.vision.middleware.repo.ExampleDataRepo;
+import com.vision.middleware.domain.ExampleData;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
