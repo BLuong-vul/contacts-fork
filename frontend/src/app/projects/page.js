@@ -45,6 +45,6 @@ export default function Projects() {
 				</div>
 
 			</main>
-		</div></>
+		</div>
 	);
 }
