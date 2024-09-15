@@ -1,5 +1,6 @@
 import Image from "next/image";
 import styles from '../styles/app.layout.css';
+import Navbar from "../../components/Navbar";
 
 export default function Projects() {
   return (

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Navbar from "../../components/Navbar";
 import styles from '../styles/app.layout.css';
 
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
@@ -6,8 +7,8 @@ import styles from '../styles/app.layout.css';
 
 export default function RootLayout({ children }) {
   return (
-      <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
-        <div className="w-full flex-none md:w-64">
+    <div className="flex h-screen flex-col md:flex-row md:overflow-hidden">
+        <div className="w-full flex-none md:w-60">
           <aside id="sidebar">
             <header className={"header"}>
               <Image
