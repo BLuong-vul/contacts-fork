@@ -7,14 +7,18 @@ export default function Home() {
   return (
     <><Navbar /><div className={styles.container}>
       <header className={styles.banner}>
-        <Image
-          src="/logo.png"
-          width={200}
-          height={200} />
-        <Image
-          src="/vision_text.png"
-          width={200}
-          height={200} />
+      	<Image
+      		src="/logo.png"
+      		width={200}
+      		height={200}
+          alt="Vision logo"
+      	/>
+      	<Image
+      		src="/vision_text.png"
+      		width={200}
+      		height={200}
+          alt="Vision text"
+      	/>
       </header>
       <main className={styles.mainContent}>
         <header className="text-center">

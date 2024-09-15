@@ -4,22 +4,26 @@ import Link from 'next/link';
 import Navbar from "../../components/Navbar";
 
 export default function Projects() {
-	return (
-		<><Navbar /><div className={styles.container}>
-			<header className={styles.banner}>
-				<Image
-					src="/logo.png"
-					width={200}
-					height={200} />
-				<Image
-					src="/vision_text.png"
-					width={200}
-					height={200} />
-			</header>
-			<main className={styles.mainContent}>
-				<header className="text-center">
-					<h1 className="font-bold">Projects</h1>
-			</header>
+  return (
+    <div className={styles.container}>
+      <header className={styles.banner}>
+      	<Image
+      		src="/logo.png"
+      		width={200}
+      		height={200}
+          alt="Vision logo"
+      	/>
+      	<Image
+      		src="/vision_text.png"
+      		width={200}
+      		height={200}
+          alt="Vision text"
+      	/>
+      </header>
+      <main className={styles.mainContent}>
+      	<header className="text-center">
+        	<h1 className="font-bold">Projects</h1>
+      	</header>
 
 				<div className="flex justify-center min-h-screen">
 					<div className="flex p-4 shadow-md">
