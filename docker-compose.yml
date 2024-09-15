@@ -3,7 +3,7 @@ services:
   middleware:
     container_name: spring-boot-vision
     build:
-      context: ./demo
+      context: ./middleware
       dockerfile: Dockerfile
     ports:
       - 8080:8080

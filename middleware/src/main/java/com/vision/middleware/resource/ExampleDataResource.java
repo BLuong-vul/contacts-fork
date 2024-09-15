@@ -1,4 +1,4 @@
-package com.example.demo.resource;
+package com.vision.middleware.resource;
 
 import java.net.URI;
 
@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.domain.ExampleData;
-import com.example.demo.service.ExampleDataService;
+
+import com.vision.middleware.domain.ExampleData;
+import com.vision.middleware.service.ExampleDataService;
 
 import lombok.RequiredArgsConstructor;
 

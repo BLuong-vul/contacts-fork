@@ -1,4 +1,4 @@
-package com.example.demo.domain;
+package com.vision.middleware.domain;
 
 import org.hibernate.annotations.UuidGenerator;
 
