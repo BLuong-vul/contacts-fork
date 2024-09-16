@@ -62,7 +62,10 @@ public class SecurityConfig {
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
-                auth.anyRequest().authenticated(); // authentication required for all queries
+
+                auth.anyRequest().permitAll(); // some changes for the demo
+
+                // auth.anyRequest().authenticated(); // authentication required for all queries
             })
             .oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))

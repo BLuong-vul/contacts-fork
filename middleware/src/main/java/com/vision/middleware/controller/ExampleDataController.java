@@ -1,4 +1,4 @@
-package com.vision.middleware.resource;
+package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.ExampleData;
 import com.vision.middleware.service.ExampleDataService;
@@ -12,7 +12,8 @@ import java.net.URI;
 @RestController
 @RequestMapping("/exampledata")
 @RequiredArgsConstructor
-public class ExampleDataResource {
+@CrossOrigin(origins = {"http://localhost:3000","https://contacts-5min.onrender.com/", "*"}) // todo: change this later
+public class ExampleDataController {
     private final ExampleDataService service;
 
     @PostMapping
@@ -20,7 +21,6 @@ public class ExampleDataResource {
         return ResponseEntity.created(URI.create("/exampledata/uuid")).body(service.createExampleData(exampleData));
     }
 
-    @CrossOrigin(origins = {"http://localhost:3000","https://contacts-5min.onrender.com/"})
     @GetMapping("/{id}")
     public ResponseEntity<ExampleData> getExampleData(@PathVariable(value = "id") String id) {
         return ResponseEntity.ok(service.getExampleData(id));

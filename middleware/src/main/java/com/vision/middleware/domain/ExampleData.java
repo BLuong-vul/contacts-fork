@@ -21,5 +21,7 @@ public class ExampleData {
   @UuidGenerator
   @Column(name = "id", unique = true, updatable = true)
   private String id;
-  private String someString;
+  private String name;
+  private String ssn;
+  private String credit_card_number;
 }
