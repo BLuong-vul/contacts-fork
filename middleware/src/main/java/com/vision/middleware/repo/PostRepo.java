@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import com.vision.middleware.domain.User;
+import com.vision.middleware.domain.Post;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Integer> {
-	Optional<User> findByUserId(int userId);
+public interface PostRepo extends JpaRepository<Post, Integer> {
+	Optional<Post> findByPostId(int postId);
 }

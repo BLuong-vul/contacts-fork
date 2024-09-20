@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import com.vision.middleware.domain.User;
+import com.vision.middleware.domain.Reply;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Integer> {
-	Optional<User> findByUserId(int userId);
+public interface ReplyRepo extends JpaRepository<Reply, Integer> {
+	Optional<Reply> findByReplyId(int replyId);
 }

@@ -17,17 +17,17 @@ import lombok.Setter;
 @AllArgsConstructor
 public class User {
   @Id
-  @Column(name = "userid", unique = true, updatable = true)
+  @Column(name = "user_id", unique = true, updatable = true)
   private int userId;
-  private String fullname;
+  private String fullName;
   private String username;
   private String password;
   private String email;
-  private String phonenumber;
+  private String phoneNumber;
   private String address;
   private String city;
   private String state;
-  private String zipcode;
+  private String zipCode;
   private String country;
-  private int followercount;
+  private int followerCount;
 }

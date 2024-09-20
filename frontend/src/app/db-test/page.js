@@ -4,89 +4,181 @@ import { useState } from 'react';
 import styles from '../styles/demo.module.css';
 
 export default function Home() {
-	const [textBoxData, setTextBoxData] = useState({
-		fullName: '',
-		username: '',
-		password: '',
-		email: '',
-		phoneNumber: '',
-		address: '',
-		city: '',
-		state: '',
-		zipCode: '',
-		country: '',
-		followerCount: '',
+	{/* Setting these this way is probably not even necessary*/}
+	const [userData, setUserData] = useState({
+		userId:'',
+		fullName:'',
+		username:'',
+		password:'',
+		email:'',
+		phoneNumber:'',
+		address:'',
+		city:'',
+		state:'',
+		zipCode:'',
+		country:'',
+		followerCount:'',
+	});
+	const [postData, setPostData] = useState({
+		postId:'',
+		userId:'',
+		likeCount:'',
+		dislikeCount:'',
+		datePosted:'',
+		title:'',
+		text:''
+	});
+	const [replyData, setReplyData] = useState({
+		replyId:'',
+		postId:'',
+		datePosted:'',
+		text:'',
+		userId:'',
+		parentReplyId:'',
 	});
 
 	const [userId, setUserId] = useState('');
+	const [postId, setPostId] = useState('');
+	const [replyId, setReplyId] = useState('');
 
-	const fetchDataFromBackend = async () => {
+	{/* These functions should probably be reworked so that they can be merged into one */}
+	const fetchUserData = async () => {
 		try {
-			const response = await fetch(`http://localhost:8080/demo-fetch/${userId}`);
-			 
-
+			const response = await fetch(`http://localhost:8080/demo-fetch/user/${userId}`);
 			if (!response.ok){
 				throw new Error('Error fetching user data');
 			}
-
-			const userData = await response.json();
-			setTextBoxData(userData);
+			const userDataResponse = await response.json();
+			setUserData(userDataResponse);
 		} catch (err) {
 			console.log("error");
 		}
-		// const mockData = {
-		// 	fullName: 'John',
-		// 	username: 'Doe',
-		// 	password: 'john.doe@example.com',
-		// 	email: '123-456-7890',
-		// 	phoneNumber: '1234 Elm St',
-		// 	address: 'Metropolis',
-		// 	city: 'NY',
-		// 	state: '10001',
-		// 	zipCode: 'USA',
-		// 	country: 'Software Engineer',
-		// 	followerCount: 'Tech Co',
-		// };
+	};
 
-		// setTextBoxData(mockData);
+	const fetchPostData = async () => {
+		try {
+			const response = await fetch(`http://localhost:8080/demo-fetch/post/${postId}`);
+			if (!response.ok){
+				throw new Error('Error fetching user data');
+			}
+			const postDataResponse = await response.json();
+			setPostData(postDataResponse);
+		} catch (err) {
+			console.log("error");
+		}
+	};
+
+	const fetchReplyData = async () => {
+		try {
+			const response = await fetch(`http://localhost:8080/demo-fetch/reply/${replyId}`);
+			if (!response.ok){
+				throw new Error('Error fetching reply data');
+			}
+			const postReplyResponse = await response.json();
+			setReplyData(postReplyResponse);
+		} catch (err) {
+			console.log("error");
+		}
 	};
 
 	return (
 		<div>
 			<h1>Database Fetch Demo</h1>
 
-			<div style={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
-				<button
-					onClick={fetchDataFromBackend}
-					style={{
-						backgroundColor: 'white',
-						color: 'black',
-						border: '1px solid black',
-						padding: '10px 20px',
-						cursor: 'pointer',
-					}}
-					onMouseOver={(e) => (e.target.style.backgroundColor = 'lightgrey')}
-					onMouseOut={(e) => (e.target.style.backgroundColor = 'white')}
-				>
-					Fetch User Data
-				</button>
-				<input
-					type="text"
-					placeholder="Enter User ID"
-					value={userId}
-					onChange={(e) => setUserId(e.target.value)}
-					style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc', color: 'black'}}
-				/>
+			{/* Div containing all other elements (so they display in a row) */}
+			<div style={{ display: 'flex' }}>
+
+				{/* User data */}
+				<div>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
+						<button
+							onClick={fetchUserData}
+							className={styles.fetchButton}
+							onMouseOver={(e) => (e.target.style.backgroundColor = 'lightgrey')}
+							onMouseOut={(e) => (e.target.style.backgroundColor = 'white')}
+						>
+							Fetch User Data
+						</button>
+						<input
+							type="text"
+							placeholder="Enter User ID"
+							value={userId}
+							onChange={(e) => setUserId(e.target.value)}
+							className={styles.idInput}
+						/>
+					</div>
+					<div className={styles.formContainer}>
+						{Object.entries(userData).map(([key, value]) => (
+							<div className={styles.formRow} key={key}>
+								<label className={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</label>
+								<input className={styles.input} type="text" value={value} readOnly />
+							</div>
+						))}
+					</div>
+				</div>
+			
+				<div style={{height: '100px'}}></div>
+
+				{/* Post data */}
+				<div>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
+						<button
+							onClick={fetchPostData}
+							className={styles.fetchButton}
+							onMouseOver={(e) => (e.target.style.backgroundColor = 'lightgrey')}
+							onMouseOut={(e) => (e.target.style.backgroundColor = 'white')}
+						>
+							Fetch Post Data
+						</button>
+						<input
+							type="text"
+							placeholder="Enter Post ID"
+							value={postId}
+							onChange={(e) => setPostId(e.target.value)}
+							className={styles.idInput}
+						/>
+					</div>
+					<div className={styles.formContainer}>
+						{Object.entries(postData).map(([key, value]) => (
+							<div className={styles.formRow} key={key}>
+								<label className={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</label>
+								<input className={styles.input} type="text" value={value} readOnly />
+							</div>
+						))}
+					</div>
 				</div>
 
-				<div className={styles.formContainer}>
-				{Object.entries(textBoxData).map(([key, value]) => (
-					<div className={styles.formRow} key={key}>
-						<label className={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</label>
-						<input className={styles.input} type="text" value={value} readOnly />
+				{/* Reply data */}
+				<div>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '10px'}}>
+						<button
+							onClick={fetchReplyData}
+							className={styles.fetchButton}
+							onMouseOver={(e) => (e.target.style.backgroundColor = 'lightgrey')}
+							onMouseOut={(e) => (e.target.style.backgroundColor = 'white')}
+						>
+							Fetch Reply Data
+						</button>
+						<input
+							type="text"
+							placeholder="Enter Reply ID"
+							value={replyId}
+							onChange={(e) => setReplyId(e.target.value)}
+							className={styles.idInput}
+						/>
 					</div>
-				))}
+					<div className={styles.formContainer}>
+						{Object.entries(replyData).map(([key, value]) => (
+							<div className={styles.formRow} key={key}>
+								<label className={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}:</label>
+								<input className={styles.input} type="text" value={value} readOnly />
+							</div>
+						))}
+					</div>
+				</div>
+
 			</div>
+
 		</div>
 	);
 }
