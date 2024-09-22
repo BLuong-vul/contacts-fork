@@ -23,9 +23,31 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "user_id")
     private long userId;
 
+    @Column(name = "username", unique = true)
     private String username;
+
     private String password;
 
+    private String fullName;
+
+    @Column(unique = true)
+    private String email;
+
+    @Column(unique = true)
+    private String phoneNumber;
+
+    // todo: a lot of this information is not necessary tbh, discuss this later.
+    private String address;
+
+    private String city;
+
+    private String state;
+
+    private String zipCode;
+
+    private String country;
+
+    private String followerCount;
 
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles
     @JoinTable(
