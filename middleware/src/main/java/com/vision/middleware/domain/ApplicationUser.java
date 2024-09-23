@@ -12,7 +12,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "application_users")
 @Entity
 @Builder
 public class ApplicationUser implements UserDetails {
@@ -34,7 +34,6 @@ public class ApplicationUser implements UserDetails {
     @Column(unique = true)
     private String phoneNumber;
 
-    // todo: a lot of this information is not necessary for our application tbh, discuss this later.
     private String address;
 
     private String city;
