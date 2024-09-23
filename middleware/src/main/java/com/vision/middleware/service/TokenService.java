@@ -1,5 +1,7 @@
 package com.vision.middleware.service;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,14 +14,13 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Service
 public class TokenService {
 
-    @Autowired
-    private JwtEncoder jwtEncoder;
-
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
 
     public String generateJwt(Authentication auth) {
 
