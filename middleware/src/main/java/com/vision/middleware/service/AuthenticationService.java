@@ -44,7 +44,9 @@ public class AuthenticationService {
 
         Role userRole;
         try {
-            userRole = roleRepository.findByAuthority("USER").orElseThrow(() -> new RoleNotFoundException("USER role not found (should not happen)"));
+            userRole = roleRepository.findByAuthority("USER").orElseThrow(
+                    () -> new RoleNotFoundException("USER role not found (should not happen)")
+            );
         } catch (RoleNotFoundException e) {
             // this shouldn't happen: USER role should be created at program start.
             throw new RuntimeException(e);
@@ -61,14 +63,14 @@ public class AuthenticationService {
 
         try {
             Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
 
             String token = tokenService.generateJwt(auth);
 
             return new LoginResponseDTO(
-                userRepository.findByUsername(username)
-                              .orElseThrow(() -> new UsernameNotFoundException("user not found")), token
+                    userRepository.findByUsername(username)
+                            .orElseThrow(() -> new UsernameNotFoundException("user not found")), token
             );
 
         } catch (AuthenticationException e) {

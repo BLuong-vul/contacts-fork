@@ -1,10 +1,7 @@
 package com.vision.middleware.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,16 +9,17 @@ import java.util.Collection;
 import java.util.Set;
 
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Setter
 @Table(name = "users")
 @Entity
+@Builder
 public class ApplicationUser implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private long userId;
+    private final long userId;
 
     @Column(name = "username", unique = true)
     private String username;
@@ -36,7 +34,7 @@ public class ApplicationUser implements UserDetails {
     @Column(unique = true)
     private String phoneNumber;
 
-    // todo: a lot of this information is not necessary tbh, discuss this later.
+    // todo: a lot of this information is not necessary for our application tbh, discuss this later.
     private String address;
 
     private String city;
@@ -49,13 +47,16 @@ public class ApplicationUser implements UserDetails {
 
     private String followerCount;
 
-    @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles
+    @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(
         name = "user_role_junction",
         joinColumns = {@JoinColumn(name = "user_id")},
         inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> authorities;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Post> posts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,29 +1,26 @@
 package com.vision.middleware.domain;
 
-import java.sql.Date;
-
-import org.hibernate.annotations.ValueGenerationType;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor
+import java.sql.Date;
+
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Setter
-@Entity
+@MappedSuperclass
 public class Post {
     @Id
-    @GeneratedValue(GenerationType = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private long postId;
+    private final long postId;
+
+    @OneToOne(mappedBy = "userId")
+    private ApplicationUser poster;
 
     private String title;
     private String text;
