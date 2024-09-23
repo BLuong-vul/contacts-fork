@@ -24,9 +24,6 @@ export default function RootLayout({ children }) {
             nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec
             tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.
           </p>
-          <Link href="/social-media-app/friends-list" className="text-blue-500 underline">
-            		Friends List
-        </Link>
         </aside>
       </div>
       <div className="flex-grow p-0 md:overflow-y-auto md:p-0">{children}</div>
