@@ -1,6 +1,7 @@
 package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.dto.LoginDTO;
 import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.service.AuthenticationService;
@@ -22,8 +23,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public LoginResponseDTO loginUser(@RequestBody RegistrationDTO body) {
-        //todo: maybe make a loginDTO, but we can just use RegistrationDTO for now.
+    public LoginResponseDTO loginUser(@RequestBody LoginDTO body) {
         return authenticationService.loginUser(body.getUsername(), body.getPassword());
     }
 

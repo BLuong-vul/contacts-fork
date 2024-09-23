@@ -12,15 +12,16 @@ import java.sql.Date;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@MappedSuperclass
+@Entity(name = "posts")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private final long postId;
+    private long postId;
 
-    @OneToOne(mappedBy = "userId")
-    private ApplicationUser poster;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false) // todo: maybe change this later, if maybe we want posts to exist without an associated user.
+    private ApplicationUser postedBy;
 
     private String title;
     private String text;

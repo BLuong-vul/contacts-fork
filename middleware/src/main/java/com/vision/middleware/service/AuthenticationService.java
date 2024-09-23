@@ -55,8 +55,13 @@ public class AuthenticationService {
         Set<Role> authorities = new HashSet<>();
         authorities.add(userRole);
 
-        // todo: does 0 here mean that it is a generated value?
-        return userRepository.save(new ApplicationUser(0, username, encodedPassword, authorities));
+        ApplicationUser newUser = ApplicationUser.builder()
+                .username(username)
+                .password(encodedPassword)
+                .authorities(authorities)
+                .build();
+
+        return userRepository.save(newUser);
     }
 
     public LoginResponseDTO loginUser(String username, String password) {

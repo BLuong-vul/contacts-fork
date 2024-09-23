@@ -23,7 +23,7 @@ public class TokenService {
 
     public String generateJwt(Authentication auth) {
 
-        Instant now = Instant.now(); // time tocken issued
+        Instant now = Instant.now(); // time token issued
 
         // go through all authorities in auth and map -> granted authority. (Role implements GrantedAuthority)
         String scope = auth.getAuthorities().stream()
