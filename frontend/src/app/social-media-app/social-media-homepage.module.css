@@ -1,0 +1,78 @@
+.homeContainer {
+  	padding: 20px
+}
+  
+/* Container for navigation links */
+.navContainer {
+    display: flex;              /* Aligns children horizontally */
+    justify-content: space-between;   /* Centers the items horizontally */
+    padding: 0 15px;           /* Adds padding to the top and bottom */
+    flex-wrap: wrap;
+    margin-bottom: 15px;       /* Adds space below the nav container */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Styling for each link box */
+.linkBox {
+	flex: 1;
+	margin: 0;
+    border: 2px solid black;  /* Outline for the box */
+    padding: 10px 20px;       /* Adds space inside the box */
+    text-align: center;       /* Centers text inside the box */
+    text-decoration: none;    /* Removes underline (no effect as no <a> tag) */
+    color: black;             /* Sets text color */
+    display:inline-block;
+    transition: background-color 0.3s; /* Smooth background color change */
+    min-width: 50px;
+}
+
+.linkBox:hover {
+    background-color: #f0f0f0; /* Changes background color on hover */
+}
+
+.contentContainer {
+	transition: margin-right 0.3s ease;
+	padding: 20px;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.sidebar {
+	position: fixed;
+  	top: 100px; /* lower the ceiling by value*/
+  	right: 0;
+  	height: 100vh; /* Adjust this value for height */
+  	background-color: #f0f0f0;
+  	border-left: 2px solid #ccc;
+  	display: flex;
+  	flex-direction: column;
+  	padding: 20px;
+  	box-sizing: border-box;
+  	transition: width 0.3s ease;
+  	overflow: hidden;
+  	z-index: 1000;
+}
+
+.dragHandle {
+	position: absolute;
+  	top: 50%; /* Center vertically */
+  	left: -15px; /* Adjust to match the new width */
+  	width: 30px; /* Width of the handle */
+  	height: 40px; /* Height of the handle */
+  	transform: translateY(-50%); /* Center the handle */
+  	cursor: ew-resize;
+  	z-index: 1001;
+  	display: flex;
+  	align-items: center; /* Center content vertically */
+  	justify-content: center; /* Center content horizontally */
+  	background-color: #ccc; /* Background color */
+  	border-radius: 5px; /* Optional: round corners */
+}
+
+.indicator {
+	font-size: 16px; /* size of indicator text */
+	color: black;
+	user-select: none;
+}
