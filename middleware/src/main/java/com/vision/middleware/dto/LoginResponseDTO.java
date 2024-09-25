@@ -1,19 +1,22 @@
 package com.vision.middleware.dto;
 
-import com.vision.middleware.domain.ApplicationUser;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.vision.middleware.domain.Role;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class LoginResponseDTO {
 
-    // todo: probably want a user DTO instead of this
-    private ApplicationUser user;
+    private String username;
+    private String email;
+    private Collection<? extends GrantedAuthority> roles;
     private String jwt;
 
 }

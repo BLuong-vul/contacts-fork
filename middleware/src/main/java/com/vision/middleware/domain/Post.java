@@ -1,30 +1,32 @@
 package com.vision.middleware.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.sql.Date;
 
-@Entity
-@Table(name = "text_post")
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity(name = "posts")
 public class Post {
-  @Id
-  @Column(name = "post_id", unique = true, updatable = true)
-  private int postId;
-  private int userId;
-  private int likeCount;
-  private int dislikeCount;
-  private LocalDate datePosted;
-  private String title;
-  private String text;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
+    private long postId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false) // todo: maybe change this later, if maybe we want posts to exist without an associated user.
+    private ApplicationUser postedBy;
+
+    private String title;
+    private String text;
+    private long likeCount;
+    private long dislikeCount;
+
+    private Date datePosted;
 }

@@ -34,10 +34,14 @@ public class Application {
 			Set<Role> roles = new HashSet<>();
 			roles.add(adminRole);
 
-			ApplicationUser admin = new ApplicationUser(1, "admin", passwordEncoder.encode("password"), roles);
+			ApplicationUser admin = ApplicationUser.builder()
+					.userId(1)
+					.username("admin")
+					.password(passwordEncoder.encode("password"))
+					.authorities(roles)
+					.build();
 
 			userRepository.save(admin);
 		};
 	}
-
 }

@@ -1,5 +1,6 @@
 package com.vision.middleware.dto;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,13 @@ public class RegistrationDTO {
     private String username;
     private String password;
 
-    public String toString() {
-        return "Registration info | username: " + this.username + " password: " + this.password; //todo
-    }
+    private String fullName;
+    private String email;
+    private String phoneNumber;
+    private String address;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
+
 }
