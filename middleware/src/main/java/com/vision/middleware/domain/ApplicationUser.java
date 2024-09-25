@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "application_users")
@@ -19,7 +19,7 @@ public class ApplicationUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private final long userId;
+    private long userId;
 
     @Column(name = "username", unique = true)
     private String username;
@@ -44,7 +44,7 @@ public class ApplicationUser implements UserDetails {
 
     private String country;
 
-    private String followerCount;
+    private long followerCount;
 
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(

@@ -1,6 +1,7 @@
 package com.vision.middleware.service;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,6 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@AllArgsConstructor
 @Service
 public class TokenService {
 

@@ -3,6 +3,7 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Role;
 import com.vision.middleware.dto.LoginResponseDTO;
+import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.repo.RoleRepository;
 import com.vision.middleware.repo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,7 +21,6 @@ import javax.management.relation.RoleNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
-@AllArgsConstructor
 @RequiredArgsConstructor
 @Service
 @Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
@@ -33,8 +33,8 @@ public class AuthenticationService {
     private final TokenService tokenService;
 
     // todo: you do not want to be sending over a password ike this
-    public ApplicationUser registerUser(String username, String password) {
-        String encodedPassword = passwordEncoder.encode(password);
+    public ApplicationUser registerUser(RegistrationDTO user) {
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
 
         Role userRole;
         try {
@@ -50,9 +50,17 @@ public class AuthenticationService {
         authorities.add(userRole);
 
         ApplicationUser newUser = ApplicationUser.builder()
-                .username(username)
+                .username(user.getUsername())
                 .password(encodedPassword)
                 .authorities(authorities)
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .city(user.getCity())
+                .state(user.getState())
+                .zipCode(user.getZipCode())
+                .country(user.getCountry())
+                .followerCount(0)
                 .build();
 
         return userRepository.save(newUser);
