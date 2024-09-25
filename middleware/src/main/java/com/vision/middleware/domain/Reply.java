@@ -8,20 +8,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
+
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "sometable")
+@Table(name = "reply")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExampleData {
+public class Reply {
   @Id
-  @UuidGenerator
-  @Column(name = "id", unique = true, updatable = true)
-  private String id;
-  private String name;
-  private String ssn;
-  private String credit_card_number;
+  @Column(name = "reply_id", unique = true, updatable = true)
+  private int replyId;
+  private int postId;
+  private LocalDate datePosted;
+  private String text;
+  private int userId;
+  private Integer parentReplyId;
 }

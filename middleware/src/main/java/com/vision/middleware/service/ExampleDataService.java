@@ -18,7 +18,7 @@ public class ExampleDataService {
     private final ExampleDataRepo repo;
 
     public Page<ExampleData> getAllExampleData(int page, int size) {
-        return repo.findAll(PageRequest.of(page, size, Sort.by("someString")));
+        return repo.findAll(PageRequest.of(page, size, Sort.by("name")));
     }
 
     public ExampleData getExampleData(String id) {
