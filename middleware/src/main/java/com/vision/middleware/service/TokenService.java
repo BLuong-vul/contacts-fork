@@ -1,5 +1,6 @@
 package com.vision.middleware.service;
 
+import com.vision.middleware.config.Consts;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class TokenService {
     public String generateJwt(Authentication auth) {
 
         Instant now = Instant.now(); // time token issued
+        Instant expTime = now.plusMillis(Consts.SESSION_TIMEOUT_MILLIS); // time token should expire
 
         // go through all authorities in auth and map -> granted authority. (Role implements GrantedAuthority)
         String scope = auth.getAuthorities().stream()
@@ -36,6 +38,7 @@ public class TokenService {
                 .issuedAt(now)
                 .subject(auth.getName())
                 .claim("roles", scope) // can add more stuff here, we just need roles though.
+                .expiresAt(expTime)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
