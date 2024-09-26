@@ -28,7 +28,7 @@ public class ExampleDataController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ExampleData>> getExampl  eData(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<Page<ExampleData>> getExampleData(@RequestParam(value = "page", defaultValue = "0") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
         return ResponseEntity.ok(service.getAllExampleData(page, size));
     }
