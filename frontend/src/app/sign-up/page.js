@@ -35,8 +35,8 @@ export default function SignUp() {
 	      return;
 	    }
 
-	    try {							//CHANGE URL BEFORE DEPLOYING
-	      const response = await fetch('http://localhost:8080/auth/register', {
+	    try {							
+	      const response = await fetch('https://four800-webapp.onrender.com/auth/register', {
 	        method: 'POST',
 	        headers: {
 	          'Content-Type': 'application/json',
