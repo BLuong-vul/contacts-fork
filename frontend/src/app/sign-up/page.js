@@ -150,7 +150,6 @@ export default function SignUp() {
                   <Link href="/login" className="text-white cursor-pointer transition hover:text-black">
                     Already Registered?
                   </Link>
-                  {/* Add the button here */}
                   <button
                     type="button"
                     onClick={createUser}
