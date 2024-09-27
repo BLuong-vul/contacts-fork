@@ -1,5 +1,8 @@
 package com.vision.middleware.service;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,18 +15,16 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class TokenService {
 
-    @Autowired
-    private JwtEncoder jwtEncoder;
-
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
 
     public String generateJwt(Authentication auth) {
 
-        Instant now = Instant.now(); // time tocken issued
+        Instant now = Instant.now(); // time token issued
 
         // go through all authorities in auth and map -> granted authority. (Role implements GrantedAuthority)
         String scope = auth.getAuthorities().stream()

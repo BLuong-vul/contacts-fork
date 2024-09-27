@@ -44,7 +44,7 @@ export default function Home() {
 	{/* These functions should probably be reworked so that they can be merged into one */}
 	const fetchUserData = async () => {
 		try {
-			const response = await fetch(`http://localhost:8080/demo-fetch/user/${userId}`);
+			const response = await fetch(`https://four800-webapp.onrender.com/demo-fetch/user/${userId}`);
 			if (!response.ok){
 				throw new Error('Error fetching user data');
 			}
@@ -57,7 +57,7 @@ export default function Home() {
 
 	const fetchPostData = async () => {
 		try {
-			const response = await fetch(`http://localhost:8080/demo-fetch/post/${postId}`);
+			const response = await fetch(`https://four800-webapp.onrender.com/demo-fetch/post/${postId}`);
 			if (!response.ok){
 				throw new Error('Error fetching user data');
 			}
@@ -70,7 +70,7 @@ export default function Home() {
 
 	const fetchReplyData = async () => {
 		try {
-			const response = await fetch(`http://localhost:8080/demo-fetch/reply/${replyId}`);
+			const response = await fetch(`https://four800-webapp.onrender.com/demo-fetch/reply/${replyId}`);
 			if (!response.ok){
 				throw new Error('Error fetching reply data');
 			}
