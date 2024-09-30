@@ -42,6 +42,7 @@ export default function Projects() {
 	
 	//create post form state
 	const [isCreatingPost, setIsCreatingPost] = useState(false);
+	const [postTitle, setPostTitle] = useState('');
 	const [postText, setPostText] = useState('');
 	const [postImage, setPostImage] = useState(null);
 	const [postVideo, setPostVideo] = useState(null);
@@ -178,8 +179,13 @@ export default function Projects() {
 					<>
 					<div className={homepagestyles.modalOverlay}></div>
 					<div className={homepagestyles.createPostModal}>
+						<textarea //title upload
+							placeholder="Enter title"
+							value={postTitle}
+							onChange={(e) => setPostTitle(e.target.value)}
+						/>
 						<textarea //text upload
-							placeholder="Enter text"
+							placeholder="Enter body"
 							value={postText}
 							onChange={(e) => setPostText(e.target.value)}
 						/>
@@ -239,16 +245,6 @@ export default function Projects() {
             </div>
 			{/*end posts display section*/}
 		</div>
-			<div>
-        	<Image
-				src="/vision_text.png"
-				width={200}
-				height={200} />
-			<Image
-				src="/logo.png"
-				width={200}
-				height={200} />
-			</div>
 		</main></>
 	);
 }
