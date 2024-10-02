@@ -13,7 +13,7 @@ public class TokenService {
     @Autowired
     private final JwtUtil jwtUtil;
 
-    public String generateJwt(Authentication auth) {
-        return jwtUtil.generateToken(auth);
+    public String generateJwt(Authentication auth, long userId) {
+        return jwtUtil.generateToken(auth, userId);
     }
 }

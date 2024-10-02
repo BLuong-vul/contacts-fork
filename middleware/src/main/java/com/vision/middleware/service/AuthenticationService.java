@@ -5,6 +5,7 @@ import com.vision.middleware.domain.Role;
 import com.vision.middleware.dto.LoginDTO;
 import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.RoleRepository;
 import com.vision.middleware.repo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -74,7 +75,10 @@ public class AuthenticationService {
                     new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword())
             );
 
-            String token = tokenService.generateJwt(auth);
+            long userId = userRepository.findByUsername(credentials.getUsername()).orElseThrow(
+                    () -> new IdNotFoundException("username does not pair with a known id in database")
+            ).getUserId();
+            String token = tokenService.generateJwt(auth, userId);
 
             ApplicationUser user =  userRepository.findByUsername(credentials.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("user not found"));

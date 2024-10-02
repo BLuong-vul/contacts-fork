@@ -1,5 +1,6 @@
 package com.vision.middleware.service;
 
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,8 +26,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("in the user details service."); // todo: remove later
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user " + username + " not found"));
+    }
+
+    public UserDetails loadUserById(long id) throws IdNotFoundException {
+        return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("id " + id + " not found"));
     }
 
     private Collection<GrantedAuthority> getAuthorities(String role) {

@@ -2,6 +2,7 @@ package com.vision.middleware.utils;
 
 
 import com.vision.middleware.config.Consts;
+import com.vision.middleware.exceptions.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class JwtUtil {
     @Autowired
     private final JwtDecoder jwtDecoder;
 
-    public String generateToken(Authentication auth) {
+    public String generateToken(Authentication auth, long userId) {
         Instant now = Instant.now(); // time token issued
         Instant expTime = now.plusMillis(Consts.SESSION_TIMEOUT_MILLIS); // time token should expire
 
@@ -43,7 +44,7 @@ public class JwtUtil {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
-                .subject(auth.getName())
+                .subject(String.valueOf(userId))
                 .claim("roles", scope) // can add more stuff here, we just need roles though.
                 .expiresAt(expTime)
                 .build();
@@ -64,11 +65,36 @@ public class JwtUtil {
         return extractClaims(token).getSubject();
     }
 
-    public boolean isTokenValid(String token, String username) {
-        return extractUsername(token).equals(username) && !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        // note: this is where we would probably want to manually intervene
+        //       with a blacklist if we want to deny a token for whatever reason.
+        return !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
         return extractClaims(token).getExpiration().before(new Date());
+    }
+
+    public long extractId(String token) {
+        String subject = extractClaims(token).getSubject();
+        if (subject == null) {
+            throw new InvalidTokenException("Token subject is invalid");
+        }
+        return Long.parseLong(subject);
+    }
+
+    public long checkJwtAuthAndGetUserId(String jwt) {
+
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7);
+            long id = this.extractId(jwt);
+
+            if (this.isTokenValid(jwt)) {
+                return id;
+            }
+        }
+
+        // checks above failed, jwt is invalid.
+        throw new InvalidTokenException("Jwt not valid.");
     }
 }

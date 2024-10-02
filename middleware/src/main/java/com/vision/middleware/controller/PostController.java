@@ -24,15 +24,6 @@ public class PostController {
     @PostMapping("/new")
     public Post newPost(@RequestHeader String token, PostDTO postDTO) {
 
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-            String username = jwtUtil.extractUsername(token);
-
-            if (username != null && jwtUtil.isTokenValid(token, username)) {
-                // actions to be performed
-            }
-        }
-
         return null;
     }
 }
