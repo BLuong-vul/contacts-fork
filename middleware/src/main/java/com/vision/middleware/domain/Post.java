@@ -11,6 +11,9 @@ import java.sql.Date;
 @Setter
 @Builder
 @Entity(name = "posts")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("TEXT") // Add this line to ImagePost too but as "IMAGE" (?)
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

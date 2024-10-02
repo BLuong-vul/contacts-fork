@@ -75,6 +75,9 @@ public class SecurityConfig {
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
 
+                auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
+                auth.requestMatchers("/post/all").permitAll();
+
                 auth.anyRequest().permitAll(); // some changes for the demo
 
                 // auth.anyRequest().authenticated(); // authentication required for all queries

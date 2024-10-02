@@ -7,6 +7,9 @@ import com.vision.middleware.repo.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -25,7 +28,7 @@ public class PostService {
     @Autowired
     private final UserService userService;
 
-    public void createPost(PostDTO postDTO, long userId) {
+    public Post createPost(PostDTO postDTO, long userId) {
 
         java.util.Date utilDate = new java.util.Date();
         Date sqlDate = new Date(utilDate.getTime());
@@ -39,6 +42,10 @@ public class PostService {
                 .text(postDTO.getText())
                 .build();
 
-        postRepository.save(newPost);
+        return postRepository.save(newPost);
+    }
+
+    public Page<Post> getAllPosts(int page, int size) {
+        return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));
     }
 }

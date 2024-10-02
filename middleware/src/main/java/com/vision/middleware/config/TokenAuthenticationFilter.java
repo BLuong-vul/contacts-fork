@@ -13,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,10 +54,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                     .getBody();
 
             String username = claims.get("username", String.class);
-            List<?> roles = claims.get("roles", List.class);
+            String rolesString = claims.get("roles", String.class);
+            List<String> roles = Arrays.asList(rolesString.split(",")); //todo: verify what format this is...
 
             Collection<GrantedAuthority> authorities = roles.stream()
-                    .map(role -> (GrantedAuthority) role)
+                    .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
 
             return new UsernamePasswordAuthenticationToken(username, null, authorities);
