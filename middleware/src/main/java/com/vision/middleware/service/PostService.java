@@ -1,5 +1,12 @@
 package com.vision.middleware.service;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@RequiredArgsConstructor
+@Service
+@Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
 public class PostService {
     /*
     todo: allow creation of posts, using the JWT of the user that is posting.

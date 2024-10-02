@@ -2,6 +2,7 @@ package com.vision.middleware.service;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Role;
+import com.vision.middleware.dto.LoginDTO;
 import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.repo.RoleRepository;
@@ -66,16 +67,16 @@ public class AuthenticationService {
         return userRepository.save(newUser);
     }
 
-    public LoginResponseDTO loginUser(String username, String password) {
+    public LoginResponseDTO loginUser(LoginDTO credentials) {
 
         try {
             Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
+                    new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword())
             );
 
             String token = tokenService.generateJwt(auth);
 
-            ApplicationUser user =  userRepository.findByUsername(username)
+            ApplicationUser user =  userRepository.findByUsername(credentials.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
             return LoginResponseDTO.builder()
