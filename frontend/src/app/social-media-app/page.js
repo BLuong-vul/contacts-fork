@@ -1,10 +1,27 @@
 'use client';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import homepagestyles from './social-media-homepage.module.css'; // adjust the path as necessary
 import styles from '../styles/app.layout.css';
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
 import Link from 'next/link';
+
+import { Post } from './Post.js';
+
+
+async function fetchPostsBeforeDate(date){
+	const response = await fetch(`http://localhost:8080/post/before/${date}`);
+	if (!response.ok){
+		throw new Error('Network response not ok ' + response.statusText);
+	}
+	const posts = await response.json();
+	console.log(posts);
+
+	const postData = posts.map(post => new Post(post));
+
+	return postData;
+}
+
 
 export default function Projects() {
 	{/*Adjustable sidebar function section*/}
@@ -31,9 +48,8 @@ export default function Projects() {
 		window.addEventListener('mousemove', onMouseMove);
 		window.addEventListener('mouseup', onMouseUp);
 	};
-	{/*Adjustable sidebar function end*/}
-	
-	// Track like, dislike, and comment countd for each post
+
+		// Track like, dislike, and comment countd for each post
 	const [likes, setLikes] = useState({});
 	const [dislikes, setDislikes] = useState({});
 	const [comments, setCOmments] = useState({});
@@ -72,73 +88,50 @@ export default function Projects() {
 			setIsCreatingPost(false);
 		}
 	};
-	
-	// handle likes
-	const handleLike = (postId) => {
-		// Check if the user has already liked the post
-		if (userLiked[postId]) {
-			// If liked, unlike the post
-			setLikes(prev => ({ ...prev, [postId]: (prev[postId] || 1) - 1 }));
-			setUserLiked(prev => ({ ...prev, [postId]: false }));
-		} else {
-			// If not liked, like the post (check if it's disliked to adjust the dislike count)
-			setLikes(prev => ({ ...prev, [postId]: (prev[postId] || 0) + 1 }));
-			setUserLiked(prev => ({ ...prev, [postId]: true }));
 
-			if (userDisliked[postId]) {
-				setDislikes(prev => ({ ...prev, [postId]: (prev[postId] || 1) - 1 }));
-				setUserDisliked(prev => ({ ...prev, [postId]: false }));
-			}
-		}
-	};
-	
-	// handle dislikes
-	const handleDislike = (postId) => {
-		// Check if the user has already disliked the post
-		if (userDisliked[postId]) {
-			// If disliked, remove dislike
-			setDislikes(prev => ({ ...prev, [postId]: (prev[postId] || 1) - 1 }));
-			setUserDisliked(prev => ({ ...prev, [postId]: false }));
-		} else {
-			// If not disliked, dislike the post (check if it's liked to adjust the like count)
-			setDislikes(prev => ({ ...prev, [postId]: (prev[postId] || 0) + 1 }));
-			setUserDisliked(prev => ({ ...prev, [postId]: true }));
 
-			if (userLiked[postId]) {
-				setLikes(prev => ({ ...prev, [postId]: (prev[postId] || 1) - 1 }));
-				setUserLiked(prev => ({ ...prev, [postId]: false }));
-			}
-		}
-	};
-
-	
-	// handle comments
-	const handleComment = (postId) => {
-		//place holder for handling comment functionality
-	};
-	
 	//temporary posts
-	const [posts, setPosts] = useState([
-		{
-            id: 1,
-            text: "This is the first post.",
-            image: "/path/to/image1.jpg", // Image for the post
-            video: "" // No video in this post
-        },
-        {
-            id: 2,
-            text: "Here is a second post with a video!",
-            image: "",
-            video: "/path/to/video.mp4" // Video for this post
-        },
-        {
-            id: 3,
-            text: "Third post with another image.",
-            image: "/path/to/image2.jpg", // Image for the post
-            video: ""
-        }
-		// Add more posts as needed
-	]);
+	// const tempPostData = [
+	// 	{
+ //            id: 1,
+ //            text: "This is the first post.",
+ //            image: "/path/to/image1.jpg", // Image for the post
+ //            video: "" // No video in this post
+ //        },
+ //        {
+ //            id: 2,
+ //            text: "Here is a second post with a video!",
+ //            image: "",
+ //            video: "/path/to/video.mp4" // Video for this post
+ //        },
+ //        {
+ //            id: 3,
+ //            text: "Third post with another image.",
+ //            image: "/path/to/image2.jpg", // Image for the post
+ //            video: ""
+ //        }
+	// ];
+
+
+	const [posts, setPosts] = useState([]);
+	// Fetches posts from database and saves to "posts"
+	useEffect(() => {
+	    const fetchAndSetPosts = async () => {
+	        try {
+	            const fetchedPosts = await fetchPostsBeforeDate('2025-01-30');
+	            setPosts(fetchedPosts.map(postData => new Post(postData))); 
+	        } catch (error) {
+	            console.error('Error fetching posts:', error);
+	            setError('Failed to load posts.');
+	        }
+	    };
+
+	    fetchAndSetPosts();
+	}, []); 
+	
+
+
+	
 	
 	return (
 		<>
@@ -216,34 +209,10 @@ export default function Projects() {
 					</>
 				)}
 
-				{/*display posts section*/}
-				<div className={homepagestyles.postsContainer}>
-                	{posts.map(post => (
-                    	<div key={post.id} className={homepagestyles.post}>
-                  	      <p>{post.text}</p>
-               	           {post.image && (
-         	                  <Image src={post.image} alt={`Post ${post.id} image`} width={400} height={300} />
-       	                   )}
-                           {post.video && (
-                      	     <video width="400" height="300" controls>
-                        	     <source src={post.video} type="video/mp4" />
-                        	         Your browser does not support the video tag.
-                             </video>
-                         )}
-                         {/* Like, Dislike, and Comment buttons */}
-                         <div className={homepagestyles.postButtons}>
-                         	<button onClick={() => handleLike(post.id)}>
-								{userLiked[post.id] ? 'Unlike' : 'Like'} ({likes[post.id] || 0})
-							</button>
-							<button onClick={() => handleDislike(post.id)}>
-								{userDisliked[post.id] ? 'Undislike' : 'Dislike'} ({dislikes[post.id] || 0})
-							</button>
-							<button onClick={() => handleComment(post.id)}>Comment</button>
-                         </div>
-                     </div>
-                  ))}
+			{/*display posts section*/}
+			<div className={homepagestyles.postsContainer}>
+				{posts.map(post => post.render())}
             </div>
-			{/*end posts display section*/}
 		</div>
 		</main></>
 	);

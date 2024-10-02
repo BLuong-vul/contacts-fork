@@ -12,7 +12,11 @@ import java.sql.Date;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Entity(name = "posts")
+@Entity
+@Table(name="posts")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("TEXT") // Add this line
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
