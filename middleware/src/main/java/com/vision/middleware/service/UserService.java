@@ -1,5 +1,6 @@
 package com.vision.middleware.service;
 
+import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user " + username + " not found"));
     }
 
-    public UserDetails loadUserById(long id) throws IdNotFoundException {
+    public ApplicationUser loadUserById(long id) throws IdNotFoundException {
         return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("id " + id + " not found"));
     }
 
