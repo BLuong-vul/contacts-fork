@@ -1,0 +1,230 @@
+.homeContainer {
+  	display: flex;
+  	flex-direction: column; /*Stack container vertically*/
+  	align-items: center;
+  	padding: 20px;
+  	width: 100%;
+  	box-sizing: border-box;
+  	overflow: visible; /*Allow container to grow vertically*/
+}
+  
+/* Container for navigation links */
+.navContainer {
+    display: flex;              /* Aligns children horizontally */
+    justify-content: space-between;   /* Centers the items horizontally */
+    padding: 0 15px;           /* Adds padding to the top and bottom */
+    flex-wrap: wrap;
+    margin-bottom: 15px;       /* Adds space below the nav container */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Styling for each link box */
+.linkBox {
+	flex: 1;
+	margin: 0;
+    border: 2px solid black;  /* Outline for the box */
+    padding: 10px 20px;       /* Adds space inside the box */
+    text-align: center;       /* Centers text inside the box */
+    text-decoration: none;    /* Removes underline (no effect as no <a> tag) */
+    color: black;             /* Sets text color */
+    display:inline-block;
+    transition: background-color 0.3s; /* Smooth background color change */
+    min-width: 50px;
+}
+
+.linkBox:hover {
+    background-color: #f0f0f0; /* Changes background color on hover */
+}
+
+.contentContainer {
+	transition: margin-right 0.3s ease;
+	padding: 20px;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.sidebar {
+	position: fixed;
+  	top: 130px; /* lower the ceiling by value*/
+  	right: 0;
+  	height: 100vh; /* Adjust this value for height */
+  	background-color: #f0f0f0;
+  	border-left: 2px solid #ccc;
+  	display: flex;
+  	flex-direction: column;
+  	padding: 20px;
+  	box-sizing: border-box;
+  	transition: width 0.3s ease;
+  	overflow: hidden;
+  	z-index: 1000;
+}
+
+.dragHandle {
+	position: absolute;
+  	top: 50%; /* Center vertically */
+  	left: -15px; /* Adjust to match the new width */
+  	width: 30px; /* Width of the handle */
+  	height: 40px; /* Height of the handle */
+  	transform: translateY(-50%); /* Center the handle */
+  	cursor: ew-resize;
+  	z-index: 1001;
+  	display: flex;
+  	align-items: center; /* Center content vertically */
+  	justify-content: center; /* Center content horizontally */
+  	background-color: #ccc; /* Background color */
+  	border-radius: 5px; /* Optional: round corners */
+}
+
+.indicator {
+	font-size: 16px; /* size of indicator text */
+	color: black;
+	user-select: none;
+}
+
+.post img, .post video {
+	width: 100%;
+	max-width: 500px;
+	height: auto;
+	margin-top: 10px;
+	border-radius: 8px;
+}
+
+.postsContainer {
+	margin-top: 20px; /*Space between nav and the posts*/
+	display: flex;
+	flex-direction: column; /*Stack posts vertically*/
+	align-items: center; /*center posts*/
+	width: 100%; /*posts take width*/
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.posts {
+	border: 1px solid #ccc;
+	padding: 10px; /*Space inside the post*/
+	margin: 10px 0; /*Space between posts*/
+	width: 100%;
+	max-width: 500px;
+	text-align: center;
+}
+/* Begin like, dislike, and comment buttons */
+.postButtons {
+	display: flex;
+	gap: 10px;
+	margin-top: 10px;
+}
+
+.postButtons button{
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 5px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.postButtons button:hover {
+	background-color: #0056b3;
+}
+/* End like, dislike, and comment buttons */
+
+.createPostContainer {
+	display: flex;
+	justify-content: flex-end; /*adjust to the right*/
+	margin: 15px 10px;
+}
+
+.createPostButton {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    padding: 0 10px; /* Adjust as needed */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.createPostButton:hover {
+    background-color: #0056b3; /* Dark blue background on hover */
+}
+
+/* Ensure the form inside the modal aligns properly */
+.createPostModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-25%, -75%);
+    flex-direction: column;
+    z-index: 1002;
+    gap: 15px;
+}
+
+.modalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1001;
+}
+
+.createPostModal input[type="file"],
+.createPostModal textarea {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.createPostModal button {
+    align-self: flex-end;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.createPostModal button:hover {
+    background-color: #0056b3;
+}
+
+.createPostModal .buttonGroup {
+	display: flex;
+	justify-content: space-between;
+	width: 70%;
+	margin-top: 10px;
+}
+
+.createPostModal .buttonGroup button {
+	width: 48%; /*for both post and cancel button to fit*/
+}
+
+/* Specific style for the Cancel button */
+.createPostModal .buttonGroup button:nth-child(2) {
+    background-color: #f44336; /* Red background for the Cancel button */
+}
+
+.createPostModal .buttonGroup button:nth-child(2):hover {
+    background-color: #d32f2f; /* Darker red on hover */
+}
+
+.errorText {
+	color: red;
+	font-size: 14px;
+	margin-top: 5px;
+}
+
+.fileLabel {
+	display: block;
+	margin: 10px 0;
+}

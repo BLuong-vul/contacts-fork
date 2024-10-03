@@ -72,6 +72,7 @@ public class SecurityConfig {
                 // by default, spring boot will lock down everything.
                 // We can change what endpoints are available to what users here.
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
+                auth.requestMatchers("/post/**").permitAll();
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
 
@@ -82,9 +83,10 @@ public class SecurityConfig {
 
                 // auth.anyRequest().authenticated(); // authentication required for all queries
             })
-            .oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            ) // tell jwt to use oauth2 resource server and use our jwtAuthenticationConverter defined in this class
+// commenting out oauth2 for now so I can test other code more easily
+            // .oauth2ResourceServer(oauth2 ->
+            //     oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            // ) // tell jwt to use oauth2 resource server and use our jwtAuthenticationConverter defined in this class
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless because we are using JWT
             .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
