@@ -6,20 +6,20 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.RSAKeyProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @AllArgsConstructor
 @Configuration
@@ -39,17 +40,28 @@ public class SecurityConfig {
     @Autowired
     private final RSAKeyProperties keys;
 
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService detailsService) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
-        daoProvider.setUserDetailsService(detailsService);
+        daoProvider.setUserDetailsService(userService);
         daoProvider.setPasswordEncoder(passwordEncoder());
-        return new ProviderManager(daoProvider);
+        return daoProvider;
     }
 
     @Bean
@@ -60,19 +72,21 @@ public class SecurityConfig {
                 // by default, spring boot will lock down everything.
                 // We can change what endpoints are available to what users here.
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
-                auth.requestMatchers("/post/**").permitAll();
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
+
+                auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
+                auth.requestMatchers("/post/all").permitAll();
 
                 auth.anyRequest().permitAll(); // some changes for the demo
 
                 // auth.anyRequest().authenticated(); // authentication required for all queries
             })
-// commenting out oauth2 for now so I can test other code more easily
-            // .oauth2ResourceServer(oauth2 ->
-            //     oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            // ) // tell jwt to use oauth2 resource server and use our jwtAuthenticationConverter defined in this class
+            .oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            ) // tell jwt to use oauth2 resource server and use our jwtAuthenticationConverter defined in this class
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless because we are using JWT
+            .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
 

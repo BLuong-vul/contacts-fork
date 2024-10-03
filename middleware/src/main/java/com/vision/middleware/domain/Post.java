@@ -1,10 +1,7 @@
 package com.vision.middleware.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Date;
 
@@ -12,8 +9,8 @@ import java.sql.Date;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Entity
-@Table(name="posts")
+@Builder
+@Entity(name = "posts")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("TEXT") // Add this line to ImagePost too but as "IMAGE" (?)

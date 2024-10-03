@@ -1,34 +1,38 @@
 package com.vision.middleware.controller;
 
+import com.vision.middleware.domain.ExampleData;
+import com.vision.middleware.domain.Post;
+import com.vision.middleware.dto.PostDTO;
+import com.vision.middleware.repo.PostRepository;
+import com.vision.middleware.service.PostService;
+import com.vision.middleware.utils.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.time.LocalDateTime;
-import java.sql.Date;
-
-import com.vision.middleware.domain.Post;
-import com.vision.middleware.repo.PostRepository;
-
-
 @RestController
 @RequestMapping("/post")
 @CrossOrigin("*") // todo: change this later
+@RequiredArgsConstructor
 public class PostController {
-	@Autowired
-	private PostRepository postRepo;
 
-    @GetMapping("/id/{id}")
-    public Post getPostById(@PathVariable("id") long postId) {
-        return postRepo.findByPostId(postId).orElseThrow(()->new RuntimeException("Post not found"));
+    @Autowired
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    private final PostService postService;
+
+    @PostMapping("/new")
+    public Post createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        return postService.createPost(postDTO, id);
     }
 
-    @GetMapping("/before/{date}")
-    public List<Post> getPostsBeforeDate(@PathVariable("date") String dateStr) {
-        // LocalDateTime date = LocalDateTime.parse(dateStr);
-        return postRepo.findAllByDatePostedBefore(Date.valueOf(dateStr));
+    @GetMapping("/all")
+    public ResponseEntity<Page<Post>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(postService.getAllPosts(page, size));
     }
 }
