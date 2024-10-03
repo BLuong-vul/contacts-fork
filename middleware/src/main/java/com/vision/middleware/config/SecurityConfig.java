@@ -68,6 +68,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configure(http))
             .authorizeHttpRequests(auth -> {
                 // by default, spring boot will lock down everything.
                 // We can change what endpoints are available to what users here.
