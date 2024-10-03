@@ -9,17 +9,52 @@ import Link from 'next/link';
 import { Post } from './Post.js';
 
 
+// This does not currently actually fetch posts before a current date
+// It just gets all posts.
 async function fetchPostsBeforeDate(date){
-	const response = await fetch(`http://localhost:8080/post/before/${date}`);
+	const page=0;
+	const size=10;
+	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
-	const posts = await response.json();
+	const pagedData = await response.json();
+	console.log(pagedData.content);
+
+	const posts = pagedData.content.map(postData => new Post(postData));
 	console.log(posts);
+	return posts;
+}
 
-	const postData = posts.map(post => new Post(post));
+async function uploadPost(postDTO){
+	const token = localStorage.getItem('token');
+	if (!token) {
+	    console.error('User not authenticated. Redirecting to login page.');
+	    window.location.href = '/login'; 
+	    return;
+	}
+	console.log(token);
+	try {
+		const response = await fetch('http://localhost:8080/post/new', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(postDTO)
+		});
 
-	return postData;
+		if (!response.ok){
+			throw new Error('Failed to create post: ' + response.statusText);
+		}
+
+		const createdPost = await response.json();
+		console.log("Post upload successful", createdPost);
+		return createdPost;
+	} catch (error){
+		console.error('Error creating post:', error);
+		throw error;
+	}
 }
 
 
@@ -66,20 +101,29 @@ export default function Projects() {
 	
 	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
 	
-	const handleCreatePost = () => {
+	const handleCreatePost = async () => {
+		const token = localStorage.getItem('token');
+		if (!token) {
+		    console.error('User not authenticated. Redirecting to login page.');
+		    window.location.href = '/login'; 
+		    return;
+		}
+
 		if (!postText && !postImage && !postVideo) {
 			setError('Must enter text, or upload an image or video.')
 		}
 		else {
 			const newPost = {
-				id: posts.length + 1,
+				title: postTitle,
 				text: postText, 
-				image: postImage ? URL.createObjectURL(postImage) : '', //URL for image
-				video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
+				// image: postImage ? URL.createObjectURL(postImage) : '', //URL for image
+				// video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
 			};
 			
-			// add new post to the array
-			setPosts([...posts, newPost]);
+			await uploadPost(newPost);
+			const updatedPosts = await fetchPostsBeforeDate('');
+			setPosts(updatedPosts);
+			
 			// reset form once submission is done
 			setPostText('');
 			setPostImage(null);
@@ -90,36 +134,13 @@ export default function Projects() {
 	};
 
 
-	//temporary posts
-	// const tempPostData = [
-	// 	{
- //            id: 1,
- //            text: "This is the first post.",
- //            image: "/path/to/image1.jpg", // Image for the post
- //            video: "" // No video in this post
- //        },
- //        {
- //            id: 2,
- //            text: "Here is a second post with a video!",
- //            image: "",
- //            video: "/path/to/video.mp4" // Video for this post
- //        },
- //        {
- //            id: 3,
- //            text: "Third post with another image.",
- //            image: "/path/to/image2.jpg", // Image for the post
- //            video: ""
- //        }
-	// ];
-
-
 	const [posts, setPosts] = useState([]);
 	// Fetches posts from database and saves to "posts"
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {
 	        try {
 	            const fetchedPosts = await fetchPostsBeforeDate('2025-01-30');
-	            setPosts(fetchedPosts.map(postData => new Post(postData))); 
+	            setPosts(fetchedPosts); 
 	        } catch (error) {
 	            console.error('Error fetching posts:', error);
 	            setError('Failed to load posts.');
