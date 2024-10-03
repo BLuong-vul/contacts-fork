@@ -1,4 +1,3 @@
-/** Need to import -> npm install @mui/material @emotion/react @emotion/styled @mui/icons-material */
 'use client'
 import * as React from "react";
 import Box from '@mui/material/Box';
