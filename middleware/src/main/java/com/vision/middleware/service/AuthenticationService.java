@@ -91,6 +91,8 @@ public class AuthenticationService {
                     .build();
 
         } catch (AuthenticationException e) {
+            //temporary
+            System.out.println("Authentication error: " + e.getMessage());
             // todo: throw custom exception here, make sure response is a 401
             return new LoginResponseDTO();
         }

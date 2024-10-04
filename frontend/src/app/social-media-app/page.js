@@ -1,12 +1,65 @@
 'use client';
-import { useState } from 'react';
-import homepagestyles from './social-media-homepage.module.css'; // adjust the path as necessary
+import React, { useEffect, useState } from 'react';
+import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
 import Link from 'next/link';
 
+import { Post } from './Post.js';
+
+
+// This does not currently actually fetch posts before a current date
+// It just gets all posts.
+async function fetchPostsBeforeDate(date){
+	const page=0;
+	const size=10;
+	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
+	if (!response.ok){
+		throw new Error('Network response not ok ' + response.statusText);
+	}
+	const pagedData = await response.json();
+	console.log(pagedData.content);
+
+	const posts = pagedData.content.map(postData => new Post(postData));
+	console.log(posts);
+	return posts;
+}
+
+async function uploadPost(postDTO){
+	const token = localStorage.getItem('token');
+	if (!token) {
+	    console.error('User not authenticated. Redirecting to login page.');
+	    window.location.href = '/login'; 
+	    return;
+	}
+	console.log(token);
+	try {
+		const response = await fetch('http://localhost:8080/post/new', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(postDTO)
+		});
+
+		if (!response.ok){
+			throw new Error('Failed to create post: ' + response.statusText);
+		}
+
+		const createdPost = await response.json();
+		console.log("Post upload successful", createdPost);
+		return createdPost;
+	} catch (error){
+		console.error('Error creating post:', error);
+		throw error;
+	}
+}
+
+
 export default function Projects() {
+	{/*Adjustable sidebar function section*/}
 	const [sidebarWidth, setSidebarWidth] = useState(250); //initial width of the sidebar
 	const minWidth = 5; //minimum width for sidebar
 	const maxWidth = 600; //maximum width
@@ -30,6 +83,76 @@ export default function Projects() {
 		window.addEventListener('mousemove', onMouseMove);
 		window.addEventListener('mouseup', onMouseUp);
 	};
+
+		// Track like, dislike, and comment countd for each post
+	const [likes, setLikes] = useState({});
+	const [dislikes, setDislikes] = useState({});
+	const [comments, setCOmments] = useState({});
+	const [userLiked, setUserLiked] = useState({});
+	const [userDisliked, setUserDisliked] = useState({});
+	
+	//create post form state
+	const [isCreatingPost, setIsCreatingPost] = useState(false);
+	const [postTitle, setPostTitle] = useState('');
+	const [postText, setPostText] = useState('');
+	const [postImage, setPostImage] = useState(null);
+	const [postVideo, setPostVideo] = useState(null);
+	const [error, setError] = useState('');
+	
+	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
+	
+	const handleCreatePost = async () => {
+		const token = localStorage.getItem('token');
+		if (!token) {
+		    console.error('User not authenticated. Redirecting to login page.');
+		    window.location.href = '/login'; 
+		    return;
+		}
+
+		if (!postText && !postImage && !postVideo) {
+			setError('Must enter text, or upload an image or video.')
+		}
+		else {
+			const newPost = {
+				title: postTitle,
+				text: postText, 
+				// image: postImage ? URL.createObjectURL(postImage) : '', //URL for image
+				// video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
+			};
+			
+			await uploadPost(newPost);
+			const updatedPosts = await fetchPostsBeforeDate('');
+			setPosts(updatedPosts);
+			
+			// reset form once submission is done
+			setPostText('');
+			setPostImage(null);
+			setPostVideo(null);
+			setError('');
+			setIsCreatingPost(false);
+		}
+	};
+
+
+	const [posts, setPosts] = useState([]);
+	// Fetches posts from database and saves to "posts"
+	useEffect(() => {
+	    const fetchAndSetPosts = async () => {
+	        try {
+	            const fetchedPosts = await fetchPostsBeforeDate('2025-01-30');
+	            setPosts(fetchedPosts); 
+	        } catch (error) {
+	            console.error('Error fetching posts:', error);
+	            setError('Failed to load posts.');
+	        }
+	    };
+
+	    fetchAndSetPosts();
+	}, []); 
+	
+
+
+	
 	
 	return (
 		<>
@@ -48,6 +171,7 @@ export default function Projects() {
 			</div>
 			{/* sidebar section ends */}
 			
+			{/*display tabs section for navigation*/}
 			<div className={homepagestyles.contentContainer} style={{ marginRight: setSidebarWidth}}>
           		<nav className={homepagestyles.navContainer}>
           			<Link href="/social-media-app" className={homepagestyles.linkBox}>
@@ -57,17 +181,60 @@ export default function Projects() {
             			Friends List
           			</Link>
           		</nav>
-			</div>
-			<div>
-        	<Image
-				src="/vision_text.png"
-				width={200}
-				height={200} />
-			<Image
-				src="/logo.png"
-				width={200}
-				height={200} />
-			</div>
-			</main></>
+				{/*button for creating post*/}
+				<div className={homepagestyles.createPostContainer}>
+					<button onClick={toggleCreatePost} className={homepagestyles.createPostButton}>
+						Create Post
+					</button>
+				</div>
+				
+				{/*Create Post Form*/}
+				{isCreatingPost && (
+					<>
+					<div className={homepagestyles.modalOverlay}></div>
+					<div className={homepagestyles.createPostModal}>
+						<textarea //title upload
+							placeholder="Enter title"
+							value={postTitle}
+							onChange={(e) => setPostTitle(e.target.value)}
+						/>
+						<textarea //text upload
+							placeholder="Enter body"
+							value={postText}
+							onChange={(e) => setPostText(e.target.value)}
+						/>
+						<div>
+						<label htmlFor="imageUpload" className={homepagestyles.fileLabel}>Upload Image:</label>
+							<input //image upload
+							type="file"
+							accept="image/*"
+							onChange={(e) => setPostImage(e.target.files[0])}
+							/>
+						</div>
+						<div>
+							<label htmlFor="imageUpload" className={homepagestyles.fileLabel}>Upload Video:</label>
+							<input //video upload 
+							id="videoUpload"
+							type="file"
+							accept="video/*"
+							onChange={(e) => setPostVideo(e.target.files[0])}
+							/>
+						</div>
+						{error && <p className={homepagestyles.errorText}>{error}</p>}
+						
+						<div className={homepagestyles.buttonGroup}>
+							<button onClick={handleCreatePost}>Post</button>
+							<button onClick={() => setIsCreatingPost(false)}>Cancel</button>
+						</div>
+					</div>
+					</>
+				)}
+
+			{/*display posts section*/}
+			<div className={homepagestyles.postsContainer}>
+				{posts.map(post => post.render())}
+            </div>
+		</div>
+		</main></>
 	);
 }
