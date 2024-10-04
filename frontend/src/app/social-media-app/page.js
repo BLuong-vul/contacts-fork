@@ -35,7 +35,7 @@ async function uploadPost(postDTO){
 	}
 	console.log(token);
 	try {
-		const response = await fetch('http://localhost:8080/post/new', {
+		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,
