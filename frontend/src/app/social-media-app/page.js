@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import homepagestyles from './social-media-homepage.module.css'; // adjust the path as necessary
+import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
