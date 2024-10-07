@@ -3,7 +3,7 @@ package com.vision.middleware.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
+import java.util.Date;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
@@ -20,8 +20,8 @@ public class Post {
     @Column(name = "post_id")
     private long postId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // todo: maybe change this later, if maybe we want posts to exist without an associated user.
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "user_id", nullable = false)
     private ApplicationUser postedBy;
 
     private String title;
