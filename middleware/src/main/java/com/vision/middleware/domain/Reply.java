@@ -1,15 +1,13 @@
 package com.vision.middleware.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name = "reply")
@@ -20,10 +18,30 @@ import java.time.LocalDate;
 public class Reply {
   @Id
   @Column(name = "reply_id", unique = true, updatable = true)
-  private int replyId;
-  private int postId;
-  private LocalDate datePosted;
+  private long replyId;
+
+  // Replies can be grouped by a post: the only place for a reply
+  // to appear would be a post.
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "post_id", nullable = false)
+  private Post post;
+
+  // associated with an author: only retrieve when needed.
+  // replies must have an associated user when created.
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private ApplicationUser author;
+
+  private Date datePosted;
   private String text;
-  private int userId;
-  private Integer parentReplyId;
+
+  // replies can have a parent: the reply that they are replying to.
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_reply_id_junction")
+  private Reply parentReply;
+
+  // nested replies: a reply can be associated with many replies.
+  // at the moment, if a reply is deleted, all child replies will also be too.
+  @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<Reply> childReplies;
 }

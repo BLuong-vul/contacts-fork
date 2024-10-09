@@ -1,9 +1,7 @@
 package com.vision.middleware.controller;
 
-import com.vision.middleware.domain.ExampleData;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.dto.PostDTO;
-import com.vision.middleware.repo.PostRepository;
 import com.vision.middleware.service.PostService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
