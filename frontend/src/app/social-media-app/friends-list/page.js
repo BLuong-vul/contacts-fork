@@ -12,16 +12,6 @@ export default function FriendsListPage() {
         <div className={styles.friendsContainer}>
             <h1 className={styles.title}>Your Friends</h1>
             
-            {/* Link boxes section */}
-            <nav className={styles.navContainer}>
-            	<Link href="/social-media-app" className={styles.linkBox}>
-            		Home
-          		</Link>
-                <Link href="/social-media-app/friends-list" className={styles.linkBox}>
-            		Friends List
-          		</Link>
-            </nav>
-
             {/* Friends list section */}
             <ul className={styles.friendList}>
                 {friends.map(friend => (
