@@ -36,7 +36,9 @@ public class Reply {
   private String text;
 
   // replies can have a parent: the reply that they are replying to.
-  private Long parentReplyId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_reply_id_junction")
+  private Reply parentReply;
 
   // nested replies: a reply can be associated with many replies.
   // at the moment, if a reply is deleted, all child replies will also be too.

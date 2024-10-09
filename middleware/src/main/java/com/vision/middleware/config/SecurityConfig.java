@@ -74,6 +74,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
+                auth.requestMatchers("/chat/**").hasAnyRole("ADMIN", "USER");
 
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/post/all").permitAll();

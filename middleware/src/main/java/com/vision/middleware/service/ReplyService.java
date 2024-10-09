@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class ReplyService {
 
     public List<Reply> getReplyTree(Long postId) {
 
-        List<Reply> rootReplies = replyRepository.findByPostId(postId); // todo: does this return all posts and not just root posts?
+        List<Reply> rootReplies = replyRepository.findByReplyId(postId); // todo: does this return all posts and not just root posts?
 
         for (Reply reply : rootReplies) {
             populateChildReplies(reply);
@@ -36,7 +35,7 @@ public class ReplyService {
 
     // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
     private void populateChildReplies(Reply reply) {
-        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyId(reply.getReplyId()));
+        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getReplyId()));
 
         reply.setChildReplies(childReplies);
 

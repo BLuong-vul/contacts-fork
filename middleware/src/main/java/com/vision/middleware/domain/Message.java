@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.Date;
 
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "messages")
@@ -16,7 +16,7 @@ public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "message_id")
-    private final long messageID;
+    private long messageID;
 
     private ApplicationUser sendingUser;
     private ApplicationUser receivingUser;
