@@ -1,110 +1,70 @@
+/** Need to import -> npm install @mui/material @emotion/react @emotion/styled @mui/icons-material */
 'use client'
 import * as React from "react";
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-import MenuIcon from '@mui/icons-material/Menu';
-import HomeIcon from '@mui/icons-material/Home';
-import InfoIcon from '@mui/icons-material/Info';
-import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import '../app/styles/app.layout.css'
+import Link from "next/link";
+import Image from "next/image";
+import MobileMenu from "../app//styles/mobile.menu";
 
 
 const Navbar = () => {
-
-    const [state, setState] = React.useState({
-        top: false,
-        left: false,
-        bottom: false,
-        right: false,
-    });
-
-    const toggleDrawer = (anchor, open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-
-        setState({ ...state, [anchor]: open });
-    };
-
-
-    const list = (anchor) => (
-        <Box
-            sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
-            role="presentation"
-            onClick={toggleDrawer(anchor, false)}
-            onKeyDown={toggleDrawer(anchor, false)}
-        >
-            <List>
-
-
-                <ListItem disablePadding>
-                    <ListItemButton >
-                        <ListItemIcon>
-                            <HomeIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={"Home"} />
-                    </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                    <ListItemButton>
-                        <ListItemIcon>
-                            <InfoIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={"About"} />
-                    </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                    <ListItemButton>
-                        <ListItemIcon>
-                            <PermContactCalendarIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={"Contact"} />
-                    </ListItemButton>
-                </ListItem>
-            </List>
-            <Divider />
-            <List>
-                <ListItem disablePadding>
-                    <ListItemButton>
-                        <ListItemIcon>
-                            <InboxIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={"inbox"} />
-                    </ListItemButton>
-                </ListItem>
-            </List>
-        </Box>
-    );
-
-    return (
-        <div className='Navbar'>
-
-
-            <MenuIcon
-                onClick={
-                    toggleDrawer("left", true)
-                }
+  return (
+    <div className="h-24 flex items-center justify-between">
+      {/* LEFT */}
+      <div className="md:hidden lg:block w-[20%]">
+        <Link href="/" className="font-bold text-xl text-blue-600">
+          CONT@CTS
+        </Link>
+      </div>
+      {/* CENTER */}
+      <div className="hidden md:flex w-[50%] text-sm items-center justify-between">
+        {/* LINKS */}
+        <div className="flex gap-6 text-gray-600">
+          <Link href="/social-media-app" className="flex items-center gap-2">
+            <Image
+              src="/home.png"
+              alt="Homepage"
+              width={16}
+              height={16}
+              className="w-4 h-4"
             />
-
-            <Drawer
-                anchor={"left"}
-                open={state["left"]}
-                onClose={toggleDrawer("left", false)}
-            >
-                {list("left")}
-            </Drawer>
-
+            <span>Home</span>
+          </Link>
+          <Link href="/social-media-app/friends-list" className="flex items-center gap-2">
+            <Image
+              src="/friends.png"
+              alt="Friends"
+              width={16}
+              height={16}
+              className="w-4 h-4"
+            />
+            <span>Friends</span>
+          </Link>
         </div>
-    )
-}
+        <div className='hidden xl:flex p-2 bg-slate-100 items-center rounded-xl'>
+          <input type="text" placeholder="search..." className="bg-transparent outline-none"/>
+          <Image src="/search.png" alt="" width={14} height={14}/>
+        </div>
+      </div>
+      {/* RIGHT */}
+      <div className="w-[30%] flex items-center gap-4 xl:gap-8 justify-end">
+            <div className="cursor-pointer">
+              <Image src="/people.png" alt="" width={24} height={24} />
+            </div>
+            <Link href="/social-media-app/direct-messages">
+              <Image src="/messages.png" alt="" width={20} height={20} />
+            </Link>
+            <div className="cursor-pointer">
+              <Image src="/notifications.png" alt="" width={20} height={20} />
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Image src="/login.png" alt="" width={20} height={20} />
+              <Link href="/sign-up">Login/Register</Link>
+            </div>
+            <MobileMenu/>
+      </div>
+    </div>
+  );
+};
 
-export default Navbar
+export default Navbar;
