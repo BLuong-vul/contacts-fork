@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import homepagestyles from './social-media-homepage.module.css'; // adjust the path as necessary
+import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
@@ -14,7 +14,7 @@ import { Post } from './Post.js';
 async function fetchPostsBeforeDate(date){
 	const page=0;
 	const size=10;
-	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
+	const response = await fetch(`https://four800-webapp.onrender.com/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
@@ -35,7 +35,7 @@ async function uploadPost(postDTO){
 	}
 	console.log(token);
 	try {
-		const response = await fetch('http://localhost:8080/post/new', {
+		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,
