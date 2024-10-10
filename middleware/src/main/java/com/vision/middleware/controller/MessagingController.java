@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
+@CrossOrigin("*") // todo: change this later
 public class MessagingController {
 
     @Autowired
