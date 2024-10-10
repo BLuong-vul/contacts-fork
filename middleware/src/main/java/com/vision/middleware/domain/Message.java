@@ -18,8 +18,8 @@ public class Message {
     @Column(name = "message_id")
     private long messageID;
 
-    private ApplicationUser sendingUser;
-    private ApplicationUser receivingUser;
+    private long sendingUserId;
+    private long receivingUserId;
 
     private String messageBody;
 

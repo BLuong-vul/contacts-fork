@@ -74,10 +74,11 @@ public class SecurityConfig {
                 // We can change what endpoints are available to what users here.
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                auth.requestMatchers("/user/id/**").permitAll();
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
-
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/post/all").permitAll();
+                auth.requestMatchers("/ws/**").permitAll(); // websocket
 
                 auth.anyRequest().permitAll(); // some changes for the demo
 
