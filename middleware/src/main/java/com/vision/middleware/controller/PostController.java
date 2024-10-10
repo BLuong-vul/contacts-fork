@@ -2,6 +2,7 @@ package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.dto.PostDTO;
+import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.service.PostService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +30,24 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Page<Post>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
+    public ResponseEntity<Page<PostDTO>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok(postService.getAllPosts(page, size));
+        Page<Post> posts = postService.getAllPosts(page, size);
+
+        Page<PostDTO> postsDTO = posts.map(
+                post -> PostDTO.builder()
+                        .datePosted(post.getDatePosted())
+                        .dislikeCount(post.getDislikeCount())
+                        .text(post.getText())
+                        .title(post.getTitle())
+                        .postedBy(
+                                UserDTO.builder().username(post.getPostedBy().getUsername())
+                                        .userId(post.getPostedBy().getUserId())
+                                        .build()
+                        )
+                        .build()
+        );
+
+        return ResponseEntity.ok(postsDTO);
     }
 }
