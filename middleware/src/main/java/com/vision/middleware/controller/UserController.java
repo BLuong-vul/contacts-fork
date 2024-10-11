@@ -29,4 +29,10 @@ public class UserController {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
         return userService.loadUserById(id);
     }
+
+    @GetMapping("/id/{username}")
+    public Long getIdByUsername(@PathVariable String username){
+        long userId = userService.loadUserByUsername(username).getUserId();
+        return userId;
+    }
 }

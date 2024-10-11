@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function Projects() {
 	return (
-		<><Navbar /><div className={styles.container}>
+		<><div className={styles.container}>
 			<header className={styles.banner}>
 				<Image
 					src="/logo.png"
