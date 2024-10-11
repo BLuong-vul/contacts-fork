@@ -42,7 +42,7 @@ public class MessagingController {
         );
     }
 
-    // Old temp code
+    // Old code, reuse later 
 
     // @PostMapping("/sendMessage")
     // public ResponseEntity<String> sendMessage(

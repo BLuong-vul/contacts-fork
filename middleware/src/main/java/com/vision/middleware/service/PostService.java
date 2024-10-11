@@ -12,7 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
+import java.util.Date;
 
 @RequiredArgsConstructor
 @Service
@@ -20,7 +20,7 @@ import java.sql.Date;
 public class PostService {
 
     // todo: decide on whether it is okay to access repositories directly through services, or if
-    // services should expose functionality of the repositories...
+    // services should expose functionality of the repositories...does it matter? maybe not.
 
     @Autowired
     private final PostRepository postRepository;
@@ -30,14 +30,12 @@ public class PostService {
 
     public Post createPost(PostDTO postDTO, long userId) {
 
-        java.util.Date utilDate = new java.util.Date();
-        Date sqlDate = new Date(utilDate.getTime());
-
+        Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
 
         Post newPost = Post.builder()
                 .postedBy(postingUser)
-                .datePosted(sqlDate)
+                .datePosted(date)
                 .title(postDTO.getTitle())
                 .text(postDTO.getText())
                 .build();
