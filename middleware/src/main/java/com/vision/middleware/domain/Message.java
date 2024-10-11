@@ -18,8 +18,9 @@ public class Message {
     @Column(name = "message_id")
     private long messageID;
 
-    private long sendingUserId;
-    private long receivingUserId;
+    // todo: set up relation between sender and receiver and the ApplicationUser class
+    private ApplicationUser sendingUser;
+    private ApplicationUser receivingUser;
 
     private String messageBody;
 
