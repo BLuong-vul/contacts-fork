@@ -26,7 +26,7 @@ const DirectMessages = () => {
 	                return;
 	            }
 
-	            const response = await fetch(`http://localhost:8080/user/info`, {
+	            const response = await fetch(`https://four800-webapp.onrender.com/user/info`, {
 	                method: 'GET',
 	                headers: {
 	                    'Authorization': `Bearer ${token}`,
@@ -54,7 +54,7 @@ const DirectMessages = () => {
 	// websocket connection and subscription
     useEffect(() => {
         if (userId && otherId) {
-            const socket = new SockJS('http://localhost:8080/ws');
+            const socket = new SockJS('https://four800-webapp.onrender.com/ws');
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
@@ -107,7 +107,7 @@ const DirectMessages = () => {
 
 			const token = localStorage.getItem('token');
 			try {
-			    const response = await fetch(`http://localhost:8080/user/id/${inputUsername}`);
+			    const response = await fetch(`https://four800-webapp.onrender.com/user/id/${inputUsername}`);
 
 			    if (!response.ok) {
 			        throw new Error(`Network response not ok: ${response.statusText}`);
