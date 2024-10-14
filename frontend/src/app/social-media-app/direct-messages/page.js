@@ -4,6 +4,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
 
+import { validateToken } from '../../../components/Functions';
 
 
 const DirectMessages = () => {
@@ -20,11 +21,7 @@ const DirectMessages = () => {
 	    const fetchUserId = async () => {
 	        try {
 	            const token = localStorage.getItem('token');
-	            if (!token) {
-	                console.error('User not authenticated. Redirecting to login page.');
-	                window.location.href = '/login';
-	                return;
-	            }
+	            validateToken(token);
 
 	            const response = await fetch(`https://four800-webapp.onrender.com/user/info`, {
 	                method: 'GET',

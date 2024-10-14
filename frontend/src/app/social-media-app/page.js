@@ -8,35 +8,36 @@ import Link from 'next/link';
 
 import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
+import { validateToken } from '../../components/Functions';
 
 import { Post } from './Post.js';
 
 // Checks for token and if it is valid
-async function validateToken(token){
-	if (!token){
-		console.error('User not logged in. Redirecting to login page.');
-		window.location.href = '/login'; 
-		return;
-	}
+// async function validateToken(token){
+// 	if (!token){
+// 		console.error('User not logged in. Redirecting to login page.');
+// 		window.location.href = '/login'; 
+// 		return;
+// 	}
 
-	try {
-		const response = await fetch('/api/validate', {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-			},
-		});
+// 	try {
+// 		const response = await fetch('/api/validate', {
+// 			method: 'GET',
+// 			headers: {
+// 				'Authorization': `Bearer ${token}`,
+// 			},
+// 		});
 
-		if (!response.ok){
-			throw new Error('Invalid token');
-		}
+// 		if (!response.ok){
+// 			throw new Error('Invalid token');
+// 		}
 		
-	} catch (error){
-		console.error('Login expired. Redirecting to login page.');
-		localStorage.removeItem('token');
-		window.location.href = '/login';
-	}
-}
+// 	} catch (error){
+// 		console.error('Login expired. Redirecting to login page.');
+// 		localStorage.removeItem('token');
+// 		window.location.href = '/login';
+// 	}
+// }
 
 
 
