@@ -2,7 +2,6 @@ package com.vision.middleware.repo;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Notification;
-import com.vision.middleware.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

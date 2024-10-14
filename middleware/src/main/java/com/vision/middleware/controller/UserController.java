@@ -1,11 +1,14 @@
 package com.vision.middleware.controller;
 
+import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -32,7 +35,14 @@ public class UserController {
 
     @GetMapping("/id/{username}")
     public Long getIdByUsername(@PathVariable String username){
-        long userId = userService.loadUserByUsername(username).getUserId();
-        return userId;
+        return userService.loadUserByUsername(username).getUserId();
+    }
+
+    @GetMapping("/friend/list")
+    public List<UserDTO> getFriends(@RequestHeader("Authorization") String token) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+
+
+        return null; //todo: implement
     }
 }
