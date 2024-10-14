@@ -29,7 +29,7 @@ public class NotificationService {
         // send their own message to acknowledge it through a websocket. This must be done before that.
         notificationRepository.saveAndFlush(notification);
 
-        long userId = notification.getAssociatedUser().getUserId();
+        long userId = notification.getAssociatedUser().getId();
 
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .notificationId(notification.getId())

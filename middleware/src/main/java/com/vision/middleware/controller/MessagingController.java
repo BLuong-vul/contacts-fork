@@ -79,8 +79,8 @@ public class MessagingController {
          List<MessageDTO> chatDTO = chat.stream().map(
                  message -> MessageDTO.builder()
                          .body(message.getMessageBody())
-                         .senderId(message.getSendingUser().getUserId())
-                         .recipientId(message.getReceivingUser().getUserId())
+                         .senderId(message.getSendingUser().getId())
+                         .recipientId(message.getReceivingUser().getId())
                          .dateSent(message.getDateSent())
                          .build()
          ).toList();

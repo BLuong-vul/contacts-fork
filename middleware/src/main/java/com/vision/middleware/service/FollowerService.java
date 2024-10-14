@@ -4,6 +4,7 @@ import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.relations.UserFollows;
 import com.vision.middleware.repo.UserFollowsRepository;
 import com.vision.middleware.utils.JwtUtil;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,15 @@ public class FollowerService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Transactional
     public void followUser(long followerId, long followeeId) {
         ApplicationUser follower = userService.loadUserById(followerId);
         ApplicationUser followee = userService.loadUserById(followeeId);
+
+        // does relation exist already?
+        if (followsRepository.findByFollowerAndFollowee(follower, followee).isPresent()) {
+            return; // exists, no need to add this again.
+        }
 
         // create entity that states relationship
         UserFollows follow = UserFollows.builder()
@@ -39,6 +46,7 @@ public class FollowerService {
         followsRepository.save(follow);
     }
 
+    @Transactional
     public void unfollowUser(long followerId, long followeeId) {
         ApplicationUser follower = userService.loadUserById(followerId);
         ApplicationUser followee = userService.loadUserById(followeeId);

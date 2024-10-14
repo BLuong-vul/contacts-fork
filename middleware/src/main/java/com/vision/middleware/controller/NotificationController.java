@@ -16,7 +16,7 @@ public class NotificationController {
     @Autowired
     private final NotificationService notificationService;
 
-    @MessageMapping("/notifications")
-    @SendTo("/notifications")
-    public NotificationDTO sendNotification()
+//    @MessageMapping("/notifications")
+//    @SendTo("/notifications")
+//    public NotificationDTO sendNotification()
 }

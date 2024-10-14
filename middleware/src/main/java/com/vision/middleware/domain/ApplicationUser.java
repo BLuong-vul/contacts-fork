@@ -20,7 +20,7 @@ public class ApplicationUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private long userId;
+    private long id;
 
     @Column(name = "username", unique = true)
     private String username;

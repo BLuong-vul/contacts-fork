@@ -40,7 +40,7 @@ public class UserController {
 
     @GetMapping("/id/{username}")
     public Long getIdByUsername(@PathVariable String username){
-        return userService.loadUserByUsername(username).getUserId();
+        return userService.loadUserByUsername(username).getId();
     }
 
     @GetMapping("/following/list")
@@ -51,7 +51,7 @@ public class UserController {
 
         return userFollowsList.stream().map(UserFollows::getFollowee).map(
                 user -> UserDTO.builder()
-                        .userId(user.getUserId())
+                        .userId(user.getId())
                         .username(user.getUsername())
                         .build()
         ).toList();
@@ -65,7 +65,7 @@ public class UserController {
 
         return userFollowersRelation.stream().map(UserFollows::getFollower).map(
                 user -> UserDTO.builder()
-                        .userId(user.getUserId())
+                        .userId(user.getId())
                         .username(user.getUsername())
                         .build()
         ).toList();
