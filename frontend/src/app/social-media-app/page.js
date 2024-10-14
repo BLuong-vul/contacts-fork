@@ -11,13 +11,41 @@ import LeftMenu from '../../components/leftmenu/left-menu';
 
 import { Post } from './Post.js';
 
+// Checks for token and if it is valid
+async function validateToken(token){
+	if (!token){
+		console.error('User not logged in. Redirecting to login page.');
+		window.location.href = '/login'; 
+		return;
+	}
+
+	try {
+		const response = await fetch('/api/validate', {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+			},
+		});
+
+		if (!response.ok){
+			throw new Error('Invalid token');
+		}
+		
+	} catch (error){
+		console.error('Login expired. Redirecting to login page.');
+		localStorage.removeItem('token');
+		window.location.href = '/login';
+	}
+}
+
+
 
 // This does not currently actually fetch posts before a current date
 // It just gets all posts.
 async function fetchPostsBeforeDate(date){
 	const page=0;
 	const size=10;
-	const response = await fetch(`https://four800-webapp.onrender.com/post/all?page=${page}&size=${size}`);
+	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
@@ -31,14 +59,10 @@ async function fetchPostsBeforeDate(date){
 
 async function uploadPost(postDTO){
 	const token = localStorage.getItem('token');
-	if (!token) {
-	    console.error('User not authenticated. Redirecting to login page.');
-	    window.location.href = '/login'; 
-	    return;
-	}
-	console.log(token);
+	validateToken(token)
+
 	try {
-		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
+		const response = await fetch('http://localhost:8080/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,

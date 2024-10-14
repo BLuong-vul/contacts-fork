@@ -72,6 +72,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> {
                 // by default, spring boot will lock down everything.
                 // We can change what endpoints are available to what users here.
+                auth.requestMatchers("/auth/validate").hasAnyRole("ADMIN", "USER"); //this endpoint is used for lazy validation
                 auth.requestMatchers("/auth/**").permitAll(); //allow any user to access /auth/** to be able to sign up.
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/id/**").permitAll();
