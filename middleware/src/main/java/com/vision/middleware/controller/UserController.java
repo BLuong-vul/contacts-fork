@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import com.vision.middleware.dto.UserDTO;
+
 @RestController
 @RequestMapping("/user")
 @CrossOrigin("*") // todo: change this later
@@ -28,6 +30,13 @@ public class UserController {
     public UserDetails getUserInfo(@RequestHeader("Authorization") String token) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
         return userService.loadUserById(id);
+    }
+
+    @GetMapping("/username/{id}")
+    public String getUsernameById(@RequestHeader("Authorization") String token, @PathVariable String id){
+        long userId = Long.parseLong(id);
+        UserDetails userDetails = userService.loadUserById(userId);
+        return userDetails.getUsername();
     }
 
     @GetMapping("/id/{username}")

@@ -9,7 +9,7 @@ export async function validateToken(token){
 	}
 
 	try {
-		const response = await fetch('/api/validate', {
+		const response = await fetch('http://localhost:8080/auth/validate', {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${token}`,

@@ -7,8 +7,10 @@ import styles from './direct-messages.module.css';
 import { validateToken } from '../../../components/Functions';
 
 
+
 const DirectMessages = () => {
 	const [userId, setUserId] = useState('');
+    const [currentUsername, setCurrentUsername] = useState('');
 	const [inputUsername, setInputUsername] = useState('');
 	const [otherId, setOtherId] = useState('');
 	const [message, setMessage] = useState(""); //track input
@@ -16,14 +18,14 @@ const DirectMessages = () => {
 	const [conversation, setConversation] = useState([]); // holds received messages
 	const stompClient = useRef(null); // websocket client ref
 
-	// Fetch User ID when the component mounts
+	// Fetch User ID and username when the component mounts
 	useEffect(() => {
 	    const fetchUserId = async () => {
 	        try {
 	            const token = localStorage.getItem('token');
 	            validateToken(token);
 
-	            const response = await fetch(`https://four800-webapp.onrender.com/user/info`, {
+	            const response = await fetch(`http://localhost:8080/user/info`, {
 	                method: 'GET',
 	                headers: {
 	                    'Authorization': `Bearer ${token}`,
@@ -38,6 +40,7 @@ const DirectMessages = () => {
 	            const result = await response.json();
 	            console.log("Current user ID: " + result.userId);
 	            setUserId(result.userId);
+                setCurrentUsername(result.username);
 	        } catch (error) {
 	            console.error('Error fetching ID:', error);
 	            throw error;
@@ -51,7 +54,7 @@ const DirectMessages = () => {
 	// websocket connection and subscription
     useEffect(() => {
         if (userId && otherId) {
-            const socket = new SockJS('https://four800-webapp.onrender.com/ws');
+            const socket = new SockJS('http://localhost:8080/ws');
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
@@ -62,8 +65,7 @@ const DirectMessages = () => {
                 // subscribe to topic to receive messages for current user
                 stompClient.current.subscribe(`/user/conversations/${conversationId}`, (message) => {
                     const receivedMessage = JSON.parse(message.body);
-                    setConversation((prev) => [...prev, receivedMessage]); // append the new message
-                    console.log(receivedMessage);
+                    setConversation((prev) => [...prev, receivedMessage]);
                 });
             });
 
@@ -101,10 +103,8 @@ const DirectMessages = () => {
 		event.preventDefault();
 		if (inputUsername.trim() !== '') {
 			console.log('Starting chat with:', inputUsername);
-
-			const token = localStorage.getItem('token');
 			try {
-			    const response = await fetch(`https://four800-webapp.onrender.com/user/id/${inputUsername}`);
+			    const response = await fetch(`http://localhost:8080/user/id/${inputUsername}`);
 
 			    if (!response.ok) {
 			        throw new Error(`Network response not ok: ${response.statusText}`);
@@ -170,7 +170,7 @@ const DirectMessages = () => {
                 <div className={styles.conversationArea}>
                     {conversation.map((msg, index) => (
                         <div key={index} className={styles.messageBubble}>
-                            <strong>{msg.sendingUser}: </strong>
+                            <strong>{msg.sendingUserId === userId ? currentUsername : inputUsername}: </strong>
                             {msg.messageBody}
                         </div>
                     ))}
