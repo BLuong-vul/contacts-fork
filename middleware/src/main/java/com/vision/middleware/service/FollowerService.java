@@ -3,7 +3,6 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.relations.UserFollows;
 import com.vision.middleware.repo.UserFollowsRepository;
-import com.vision.middleware.repo.UserRepository;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +46,13 @@ public class FollowerService {
         followsRepository.deleteByFollowerAndFollowee(follower, followee);
     }
 
-    public List<UserFollows> getFollowing(long userId) {
+    public List<UserFollows> getByFollowingUser(long userId) {
         ApplicationUser user = userService.loadUserById(userId);
         return followsRepository.findByFollower(user);
+    }
+
+    public List<UserFollows> getByFolloweeUser(long userId) {
+        ApplicationUser user = userService.loadUserById(userId);
+        return followsRepository.findByFollowee(user);
     }
 }
