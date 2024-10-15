@@ -35,7 +35,7 @@ public class Application {
 			roles.add(adminRole);
 
 			ApplicationUser admin = ApplicationUser.builder()
-					.userId(1)
+					.id(1)
 					.username("admin")
 					.password(passwordEncoder.encode("password"))
 					.authorities(roles)
