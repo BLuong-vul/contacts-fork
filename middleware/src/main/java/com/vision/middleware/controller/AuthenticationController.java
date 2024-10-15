@@ -6,12 +6,14 @@ import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.service.AuthenticationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("*") // todo: update this later
@@ -37,6 +39,7 @@ public class AuthenticationController {
 
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
+            log.error("Error registering user: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account creation failed.");
         }
     }
@@ -47,6 +50,7 @@ public class AuthenticationController {
             LoginResponseDTO user = authenticationService.loginUser(body.getUsername(), body.getPassword());
             return ResponseEntity.ok(user);
         } catch (AuthenticationException e) {
+            log.error("Failed to login user: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed.");
         }
     }
