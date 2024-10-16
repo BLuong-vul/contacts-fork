@@ -1,5 +1,6 @@
 package com.vision.middleware.domain;
 
+import com.vision.middleware.domain.relations.UserFollows;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,13 +20,12 @@ public class ApplicationUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private long userId;
+    private long id;
 
     @Column(name = "username", unique = true)
     private String username;
 
     private String password;
-
     private String fullName;
 
     @Column(unique = true)
@@ -35,16 +35,17 @@ public class ApplicationUser implements UserDetails {
     private String phoneNumber;
 
     private String address;
-
     private String city;
-
     private String state;
-
     private String zipCode;
-
     private String country;
-
     private long followerCount;
+
+    @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserFollows> followers;
+
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserFollows> following;
 
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(

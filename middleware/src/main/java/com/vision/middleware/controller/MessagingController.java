@@ -29,54 +29,44 @@ public class MessagingController {
 
     // endpoint to receive messages from User A
     @MessageMapping("/sendMessage")
-    public void sendMessage(Message message) {
-        System.out.println("MESSAGE RECEIVED: " + message.getMessageBody());
-        String conversationId = message.getSendingUserId() < message.getReceivingUserId()
-            ? message.getSendingUserId() + "-" + message.getReceivingUserId()
-            : message.getReceivingUserId() + "-" + message.getSendingUserId();
-        System.out.println("SENDING TO DESTINATION: " + "/user/conversations/" + conversationId);
+    public void sendMessage(MessageDTO message) {
+        System.out.println("MESSAGE RECEIVED: " + message.getBody());
+
+        messagingService.sendMessage(message.getRecipientId(), message);
+
+        String conversationId = message.getSenderId() < message.getRecipientId()
+            ? message.getSenderId() + "-" + message.getRecipientId()
+            : message.getRecipientId() + "-" + message.getSenderId();
+        System.out.println("SENDING TO DESTINATION: " + "/topic/conversations/" + conversationId);
+
         // assuming we are sending a message to User B via "/topic/messages"
         messagingTemplate.convertAndSend(
-            "/user/conversations/" + conversationId,
+            "/topic/conversations/" + conversationId,
             message
         );
     }
+    
 
-    // Old code, reuse later 
+    private static String getConversationId(long userId1, long userId2) {
+        return userId1 < userId2 ? "%d-%d".formatted(userId1, userId2) : "%d-%d".formatted(userId2, userId1);
+    }
 
-    // @PostMapping("/sendMessage")
-    // public ResponseEntity<String> sendMessage(
-    //         @RequestHeader("Authorization") String token,
-    //         @RequestBody MessageDTO messageDTO
-    // ) {
-    //     long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+    // @GetMapping("/getChat")
+    //  public ResponseEntity<List<MessageDTO>> getConversation(
+    //          @RequestHeader("Authorization") String token,
+    //          @RequestParam(value = "otherUId") long otherUId
+    //  ) {
+    //      List<Message> chat = messagingService.getChatBetween(jwtUtil.checkJwtAuthAndGetUserId(token), otherUId);
 
-    //     // save message to repository
-    //     messagingService.sendMessage(userId, messageDTO);
+    //      List<MessageDTO> chatDTO = chat.stream().map(
+    //              message -> MessageDTO.builder()
+    //                      .body(message.getMessageBody())
+    //                      .senderId(message.getSendingUser().getId())
+    //                      .recipientId(message.getReceivingUser().getId())
+    //                      .dateSent(message.getDateSent())
+    //                      .build()
+    //      ).toList();
 
-    //     // send websocket notification to appropriate topic
-    //     messagingTemplate.convertAndSend("/topic/messages/" + userId, "New Message"); //todo: figure out something more appropriate
-
-    //     // respond to user
-    //     return ResponseEntity.ok("Message sent");
-    // }
-
-    // @GetMapping("/getchat")
-    // public ResponseEntity<List<MessageDTO>> getConversation(
-    //         @RequestHeader("Authorization") String token,
-    //         @RequestParam(value = "otherUId") long otherUId
-    // ) {
-    //     List<Message> chat = messagingService.getChatBetween(jwtUtil.checkJwtAuthAndGetUserId(token), otherUId);
-
-    //     List<MessageDTO> chatDTO = chat.stream().map(
-    //             message -> MessageDTO.builder()
-    //                     .body(message.getMessageBody())
-    //                     .senderId(message.getSendingUser().getUserId())
-    //                     .recipientId(message.getReceivingUser().getUserId())
-    //                     .dateSent(message.getDateSent())
-    //                     .build()
-    //     ).toList();
-
-    //     return ResponseEntity.ok(chatDTO);
-    // }
+    //      return ResponseEntity.ok(chatDTO);
+    //  }
 }
