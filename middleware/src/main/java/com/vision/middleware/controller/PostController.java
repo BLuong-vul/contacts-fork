@@ -42,7 +42,7 @@ public class PostController {
                         .title(post.getTitle())
                         .postedBy(
                                 UserDTO.builder().username(post.getPostedBy().getUsername())
-                                        .userId(post.getPostedBy().getUserId())
+                                        .userId(post.getPostedBy().getId())
                                         .build()
                         )
                         .build()

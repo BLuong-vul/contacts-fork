@@ -77,7 +77,7 @@ public class AuthenticationService {
 
             long userId = userRepository.findByUsername(credentials.getUsername()).orElseThrow(
                     () -> new IdNotFoundException("username does not pair with a known id in database")
-            ).getUserId();
+            ).getId();
             String token = tokenService.generateJwt(auth, userId);
 
             ApplicationUser user =  userRepository.findByUsername(credentials.getUsername())

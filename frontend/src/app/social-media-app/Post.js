@@ -6,6 +6,7 @@ export class Post {
     constructor(postData) {
         this.id = postData.id;
         this.title = postData.title;
+        this.author = postData.postedBy.username;
         this.text = postData.text;
         this.image = postData.image;
         this.video = postData.video;
@@ -16,6 +17,7 @@ export class Post {
     render() {
         return (
             <div key={this.id} className={styles.post}>
+                <p className={styles.postAuthor}>{this.author}</p>
                 <h3 className={styles.postTitle}>{this.title}</h3>
                 <p className={styles.postText}>{this.text}</p>
                 {this.image && (

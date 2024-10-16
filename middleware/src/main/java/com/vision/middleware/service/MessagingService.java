@@ -25,24 +25,15 @@ public class MessagingService {
     @Autowired
     private final UserService userService;
 
+
     public void sendMessage(long senderId, MessageDTO messageDTO) {
 
-        // ApplicationUser sender = userService.loadUserById(senderId);
-        // ApplicationUser receiver = userService.loadUserById(messageDTO.getRecipientId());
-
-        // Message message = Message.builder()
-        //         .messageBody(messageDTO.getBody())
-        //         .sendingUser(sender)
-        //         .receivingUser(receiver)
-        //         .dateSent(new Date())
-        //         .build();
-
         Message message = Message.builder()
-            .messageBody(messageDTO.getBody())
-            .sendingUserId(senderId)
-            .receivingUserId(messageDTO.getRecipientId())
-            .dateSent(new Date())
-            .build();
+                .messageBody(messageDTO.getBody())
+                .sendingUserId(senderId)
+                .receivingUserId(messageDTO.getRecipientId())
+                .dateSent(new Date())
+                .build();
 
         messageRepository.save(message);
     }
