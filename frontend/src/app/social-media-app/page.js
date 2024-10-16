@@ -8,9 +8,12 @@ import Link from 'next/link';
 
 import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
+import RightMenu from '../../components/rightmenu/right-menu';
 import { validateToken } from '../../components/Functions';
 
 import { Post } from './Post.js';
+
+
 
 
 // This does not currently actually fetch posts before a current date
@@ -169,7 +172,8 @@ export default function Projects() {
 							Create Post
 						</button>
 					</div>
-					
+
+
 					{/*Create Post Form*/}
 					{isCreatingPost && (
 						<>
@@ -218,6 +222,9 @@ export default function Projects() {
 	            </div>
 			</div>
 			</main>
+			<div className="hidden lg:block w-[30%]">
+				<RightMenu/>
+			</div>
 		</div>
 		</>
 	);
