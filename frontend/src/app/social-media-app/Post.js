@@ -1,5 +1,6 @@
 import Image from "next/image";
 import styles from './social-media-homepage.module.css';
+import Link from 'next/link';
 
 
 export class Post {
@@ -17,7 +18,9 @@ export class Post {
     render() {
         return (
             <div key={this.id} className={styles.post}>
-                <p className={styles.postAuthor}>{this.author}</p>
+                <Link href={`/social-media-app/profile/${this.author}`} className={styles.postAuthor}>
+                                    {this.author}
+                                </Link>
                 <h3 className={styles.postTitle}>{this.title}</h3>
                 <p className={styles.postText}>{this.text}</p>
                 {this.image && (
