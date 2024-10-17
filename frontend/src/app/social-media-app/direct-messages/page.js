@@ -4,7 +4,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
 
-import { validateToken } from '../../../components/Functions';
+import { validateTokenWithRedirect } from '../../../components/Functions';
 
 
 
@@ -23,7 +23,7 @@ const DirectMessages = () => {
         const fetchUserId = async () => {
             try {
                 const token = localStorage.getItem('token');
-                validateToken(token);
+                validateTokenWithRedirect(token);
 
                 const response = await fetch(`http://localhost:8080/user/info`, {
                     method: 'GET',

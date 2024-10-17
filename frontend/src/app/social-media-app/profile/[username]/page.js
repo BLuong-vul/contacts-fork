@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import LeftMenu from '../../../../components/leftmenu/left-menu';
-import { validateToken } from '../../../../components/Functions';
+import { validateToken, validateTokenWithRedirect } from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
 
@@ -14,28 +14,43 @@ export default function ProfilePage({ params }) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   // Fetch info for page
+  // Also check if we are logged in. If we are, update isFollowing
   useEffect(() => {
-    const fetchData = async () => {
+    const init = async () => {
       try {
+        // Get user page info
         const res = await fetch(`http://localhost:8080/user/public-info?username=${username}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setProfileData(data);
 
+        // Check if we are logged in
+        console.log("DEBUG: checking login...");
+        const token = localStorage.getItem('token');
+        if (await validateToken(token)){
+          //If logged in, check if already following
+          const followedRes = await fetch('http://localhost:8080/user/following/list', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (!followedRes.ok) throw new Error("Failed to fetch followed users");
+          const followedUsers = await followedRes.json();
+          const followed = followedUsers.some(user => user.userId === data.userId);
+          setIsFollowing(followed);
+        }
       } catch (error) {
         setError(error.message);
       }
     };
-
-    fetchData();
+    init();
   }, [username]);
 
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
     const token = localStorage.getItem('token');
-    if (validateToken(token)){
-      console.log(token);
+    if (validateTokenWithRedirect(token)){
       //If logged in, check if already following
       const followedRes = await fetch('http://localhost:8080/user/following/list', {
         headers: {
@@ -46,11 +61,25 @@ export default function ProfilePage({ params }) {
       const followedUsers = await followedRes.json();
       const followed = followedUsers.some(user => user.userId === profileData.userId);
       setIsFollowing(followed);
-    }
 
-    if (isFollowing){
-      try {
-        const res = await fetch(`http://localhost:8080/user/follow/${profileData.userId}`, {
+      if (!followed){
+        try {
+          const res = await fetch(`http://localhost:8080/user/follow/${profileData.userId}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (!res.ok) throw new Error('Failed to follow');
+
+          console.log("DEBUG: followed successfully");
+          setIsFollowing(true);
+        } catch (error) {
+          setError(error.message);
+        }
+      } else {
+        const res = await fetch(`http://localhost:8080/user/unfollow/${profileData.userId}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -59,13 +88,9 @@ export default function ProfilePage({ params }) {
         });
         if (!res.ok) throw new Error('Failed to follow');
 
-        console.log("poggers bro");
-        setIsFollowing(true);
-      } catch (error) {
-        setError(error.message);
+        console.log("DEBUG: unfollowed successfully");
+        setIsFollowing(false);
       }
-    } else {
-      console.log("UNFOLLOW NOT IMPLEMENTED YET");
     }
   };
 
@@ -122,7 +147,6 @@ export default function ProfilePage({ params }) {
           <button
                       onClick={handleFollow}
                       className="bg-blue-500 text-white text-xs p-2 rounded-md"
-                      disabled={isFollowing}
                     >
                       {isFollowing ? 'Unfollow' : 'Follow'}
                     </button>
