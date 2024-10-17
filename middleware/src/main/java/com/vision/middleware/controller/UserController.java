@@ -38,6 +38,11 @@ public class UserController {
         return userService.loadUserById(id);
     }
 
+    @GetMapping("/public-info")
+    public UserDetails getPublicInfoByUsername(@RequestParam("username") String username) {
+        return userService.loadUserByUsername(username);
+    }
+
     @GetMapping("/id/{username}")
     public Long getIdByUsername(@PathVariable String username){
         return userService.loadUserByUsername(username).getId();

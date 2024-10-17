@@ -1,11 +1,34 @@
-
-{/*import Feed from "@/components/feed/Feed";
-import RightMenu from "@/components/rightMenu";*/}
-import LeftMenu from '../../../components/leftmenu/left-menu';
+'use client';
+import { useEffect, useState } from "react";
+import LeftMenu from '../../../../components/leftmenu/left-menu';
 import Image from "next/image";
 import Link from "next/link";
 
-const userProfile = () => {
+export default function ProfilePage({ params }) {
+  const { username } = params;
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log(username);
+        const res = await fetch(`http://localhost:8080/user/public-info?username=${username}`);
+        if (!res.ok) throw new Error("Failed to fetch data");
+
+        const data = await res.json();
+        setProfile(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchData();
+  }, [username]);
+
+  if (error) return <div>Error: {error}</div>;
+  if (!profile) return <div>Loading...</div>;
+
   return (
     <div className="flex gap-6 pt-6">
       <div className="hidden xl:block w-[20%]">
@@ -31,7 +54,7 @@ const userProfile = () => {
             </div>
             {/** Name of user*/}
             <h1 className="mt-20 mb-4 text-2xl font-medium">
-              Captian Crunch
+              {username}
             </h1>
             {/** Display for followers*/}
             <div className="flex items-center justify-center gap-12 mb-4">
@@ -50,7 +73,7 @@ const userProfile = () => {
             </div>
             {/** End display for followers */}
           </div>
-          <Link href="/social-media-app/user-profile" className="bg-blue-500 text-white text-xs p-2 rounded-md">Follow</Link>
+          <Link href={`/social-media-app/profile/${username}`} className="bg-blue-500 text-white text-xs p-2 rounded-md">Follow</Link>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
         </div>
@@ -60,6 +83,4 @@ const userProfile = () => {
       </div>*/}
     </div>
   );
-};
-
-export default userProfile;
+}
