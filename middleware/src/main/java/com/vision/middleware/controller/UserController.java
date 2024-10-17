@@ -1,5 +1,6 @@
 package com.vision.middleware.controller;
 
+import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.relations.UserFollows;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.service.FollowerService;
@@ -39,8 +40,13 @@ public class UserController {
     }
 
     @GetMapping("/public-info")
-    public UserDetails getPublicInfoByUsername(@RequestParam("username") String username) {
-        return userService.loadUserByUsername(username);
+    public UserDTO getPublicInfoByUsername(@RequestParam("username") String username) {
+        ApplicationUser userDetails = userService.loadUserByUsername(username);
+
+        return UserDTO.builder()
+            .userId(userDetails.getId())
+            .username(userDetails.getUsername())
+            .build();
     }
 
     @GetMapping("/id/{username}")
@@ -64,7 +70,9 @@ public class UserController {
 
     @GetMapping("/followers/list")
     public List<UserDTO> getFollowers(@RequestHeader("Authorization") String token) {
+        System.out.println("TEST1");
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        System.out.println("TEST2");
 
         List<UserFollows> userFollowersRelation = followerService.getByFolloweeUser(id);
 

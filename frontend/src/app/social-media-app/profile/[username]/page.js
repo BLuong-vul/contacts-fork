@@ -1,23 +1,27 @@
 'use client';
 import { useEffect, useState } from "react";
 import LeftMenu from '../../../../components/leftmenu/left-menu';
+import { validateToken } from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
 
+
 export default function ProfilePage({ params }) {
   const { username } = params;
-  const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
 
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  // Fetch info for page
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log(username);
         const res = await fetch(`http://localhost:8080/user/public-info?username=${username}`);
         if (!res.ok) throw new Error("Failed to fetch data");
-
         const data = await res.json();
-        setProfile(data);
+        setProfileData(data);
+
       } catch (error) {
         setError(error.message);
       }
@@ -26,8 +30,49 @@ export default function ProfilePage({ params }) {
     fetchData();
   }, [username]);
 
+  // Handle follow button click
+  const handleFollow = async () => {
+    // Check if logged in
+    const token = localStorage.getItem('token');
+    if (validateToken(token)){
+      console.log(token);
+      //If logged in, check if already following
+      const followedRes = await fetch('http://localhost:8080/user/following/list', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!followedRes.ok) throw new Error("Failed to fetch followed users");
+      const followedUsers = await followedRes.json();
+      const followed = followedUsers.some(user => user.userId === profileData.userId);
+      setIsFollowing(followed);
+    }
+
+    if (isFollowing){
+      try {
+        const res = await fetch(`http://localhost:8080/user/follow/${profileData.userId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!res.ok) throw new Error('Failed to follow');
+
+        console.log("poggers bro");
+        setIsFollowing(true);
+      } catch (error) {
+        setError(error.message);
+      }
+    } else {
+      console.log("UNFOLLOW NOT IMPLEMENTED YET");
+    }
+  };
+
+
+
   if (error) return <div>Error: {error}</div>;
-  if (!profile) return <div>Loading...</div>;
+  if (!profileData) return <div>Loading...</div>;
 
   return (
     <div className="flex gap-6 pt-6">
@@ -73,7 +118,14 @@ export default function ProfilePage({ params }) {
             </div>
             {/** End display for followers */}
           </div>
-          <Link href={`/social-media-app/profile/${username}`} className="bg-blue-500 text-white text-xs p-2 rounded-md">Follow</Link>
+          {/** FOLLOW BUTTON **/}
+          <button
+                      onClick={handleFollow}
+                      className="bg-blue-500 text-white text-xs p-2 rounded-md"
+                      disabled={isFollowing}
+                    >
+                      {isFollowing ? 'Unfollow' : 'Follow'}
+                    </button>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
         </div>

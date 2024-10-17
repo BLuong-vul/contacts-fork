@@ -77,6 +77,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/user/id/**").permitAll();
                 auth.requestMatchers("/user/public-info").permitAll();
+                auth.requestMatchers("/user/following/list").hasAnyRole("ADMIN", "USER"); //probably very unnecessary
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/chat/**").hasAnyRole("ADMIN", "USER"); // is this being used?
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
