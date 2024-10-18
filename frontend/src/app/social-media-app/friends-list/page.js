@@ -16,7 +16,7 @@ export default function FriendsListPage() {
                 const token = localStorage.getItem('token');
                 validateTokenWithRedirect(token);
 
-                const res = await fetch(`https://contacts-5min.onrender.com/user/info`, {
+                const res = await fetch(`https://four800-webapp.onrender.com/user/info`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -32,7 +32,7 @@ export default function FriendsListPage() {
                 console.log(result);
 
 
-                const followedRes = await fetch('https://contacts-5min.onrender.com/user/following/list', {
+                const followedRes = await fetch('https://four800-webapp.onrender.com/user/following/list', {
                     headers: {
                       'Authorization': `Bearer ${token}`,
                     },
