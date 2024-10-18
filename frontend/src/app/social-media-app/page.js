@@ -21,7 +21,7 @@ import { Post } from './Post.js';
 async function fetchPostsBeforeDate(date){
 	const page=0;
 	const size=10;
-	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
+	const response = await fetch(`https://contacts-5min.onrender.com/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
@@ -38,7 +38,7 @@ async function uploadPost(postDTO){
 	validateToken(token)
 
 	try {
-		const response = await fetch('http://localhost:8080/post/new', {
+		const response = await fetch('https://contacts-5min.onrender.com/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,

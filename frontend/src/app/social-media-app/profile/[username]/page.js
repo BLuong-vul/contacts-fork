@@ -19,7 +19,7 @@ export default function ProfilePage({ params }) {
     const init = async () => {
       try {
         // Get user page info
-        const res = await fetch(`http://localhost:8080/user/public-info?username=${username}`);
+        const res = await fetch(`https://contacts-5min.onrender.com/user/public-info?username=${username}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setProfileData(data);
@@ -29,7 +29,7 @@ export default function ProfilePage({ params }) {
         const token = localStorage.getItem('token');
         if (await validateToken(token)){
           //If logged in, check if already following
-          const followedRes = await fetch('http://localhost:8080/user/following/list', {
+          const followedRes = await fetch('https://contacts-5min.onrender.com/user/following/list', {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -52,7 +52,7 @@ export default function ProfilePage({ params }) {
     const token = localStorage.getItem('token');
     if (validateTokenWithRedirect(token)){
       //If logged in, check if already following
-      const followedRes = await fetch('http://localhost:8080/user/following/list', {
+      const followedRes = await fetch('https://contacts-5min.onrender.com/user/following/list', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -64,7 +64,7 @@ export default function ProfilePage({ params }) {
 
       if (!followed){
         try {
-          const res = await fetch(`http://localhost:8080/user/follow/${profileData.userId}`, {
+          const res = await fetch(`https://contacts-5min.onrender.com/user/follow/${profileData.userId}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -79,7 +79,7 @@ export default function ProfilePage({ params }) {
           setError(error.message);
         }
       } else {
-        const res = await fetch(`http://localhost:8080/user/unfollow/${profileData.userId}`, {
+        const res = await fetch(`https://contacts-5min.onrender.com/user/unfollow/${profileData.userId}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

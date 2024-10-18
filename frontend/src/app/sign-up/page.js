@@ -36,7 +36,7 @@ export default function SignUp() {
 	    }
 
 	    try {							
-	      const response = await fetch('http://localhost:8080/auth/register', {
+	      const response = await fetch('https://contacts-5min.onrender.com/auth/register', {
 	        method: 'POST',
 	        headers: {
 	          'Content-Type': 'application/json',
