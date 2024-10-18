@@ -26,10 +26,10 @@ async function fetchPostsBeforeDate(date){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
 	const pagedData = await response.json();
-	console.log(pagedData.content);
+	// console.log(pagedData.content);
 
 	const posts = pagedData.content.map(postData => new Post(postData));
-	console.log(posts);
+	// console.log(posts);
 	return posts;
 }
 

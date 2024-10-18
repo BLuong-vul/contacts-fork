@@ -38,8 +38,8 @@ const DirectMessages = () => {
                 }
 
                 const result = await response.json();
-                console.log("Current user ID: " + result.id);
-                setUserId(result.id);
+                console.log("Current user ID: " + result.userId);
+                setUserId(result.userId);
                 setCurrentUsername(result.username);
             } catch (error) {
                 console.error('Error fetching ID:', error);

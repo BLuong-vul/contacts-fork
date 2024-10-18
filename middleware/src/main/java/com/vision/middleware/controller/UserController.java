@@ -33,10 +33,17 @@ public class UserController {
         return "User access level";
     }
 
+    // Right now there is not much point to using this over /public-info
+    // but the idea is that this can return more private info about the logged in user
+    // while public-info should not do that
     @GetMapping("/info")
-    public UserDetails getUserInfo(@RequestHeader("Authorization") String token) {
+    public UserDTO getUserInfo(@RequestHeader("Authorization") String token) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
-        return userService.loadUserById(id);
+        ApplicationUser userDetails = userService.loadUserById(id);
+        return UserDTO.builder()
+            .userId(userDetails.getId())
+            .username(userDetails.getUsername())
+            .build();
     }
 
     @GetMapping("/public-info")
