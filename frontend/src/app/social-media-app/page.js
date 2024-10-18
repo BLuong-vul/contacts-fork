@@ -8,8 +8,12 @@ import Link from 'next/link';
 
 import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
+import RightMenu from '../../components/rightmenu/right-menu';
+import { validateToken } from '../../components/Functions';
 
 import { Post } from './Post.js';
+
+
 
 
 // This does not currently actually fetch posts before a current date
@@ -17,28 +21,24 @@ import { Post } from './Post.js';
 async function fetchPostsBeforeDate(date){
 	const page=0;
 	const size=10;
-	const response = await fetch(`https://four800-webapp.onrender.com/post/all?page=${page}&size=${size}`);
+	const response = await fetch(`http://localhost:8080/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
 	const pagedData = await response.json();
-	console.log(pagedData.content);
+	// console.log(pagedData.content);
 
 	const posts = pagedData.content.map(postData => new Post(postData));
-	console.log(posts);
+	// console.log(posts);
 	return posts;
 }
 
 async function uploadPost(postDTO){
 	const token = localStorage.getItem('token');
-	if (!token) {
-	    console.error('User not authenticated. Redirecting to login page.');
-	    window.location.href = '/login'; 
-	    return;
-	}
-	console.log(token);
+	validateToken(token)
+
 	try {
-		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
+		const response = await fetch('http://localhost:8080/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -172,7 +172,8 @@ export default function Projects() {
 							Create Post
 						</button>
 					</div>
-					
+
+
 					{/*Create Post Form*/}
 					{isCreatingPost && (
 						<>
@@ -221,6 +222,9 @@ export default function Projects() {
 	            </div>
 			</div>
 			</main>
+			<div className="hidden lg:block w-[30%]">
+				<RightMenu/>
+			</div>
 		</div>
 		</>
 	);

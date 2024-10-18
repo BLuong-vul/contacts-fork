@@ -4,57 +4,57 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
 
+import { validateTokenWithRedirect } from '../../../components/Functions';
+
 
 
 const DirectMessages = () => {
-	const [userId, setUserId] = useState('');
-	const [inputUsername, setInputUsername] = useState('');
-	const [otherId, setOtherId] = useState('');
-	const [message, setMessage] = useState(""); //track input
-	const [isSendDisabled, setIsSendDisabled] = useState(true);
-	const [conversation, setConversation] = useState([]); // holds received messages
-	const stompClient = useRef(null); // websocket client ref
+    const [userId, setUserId] = useState('');
+    const [currentUsername, setCurrentUsername] = useState('');
+    const [inputUsername, setInputUsername] = useState('');
+    const [otherId, setOtherId] = useState('');
+    const [message, setMessage] = useState(""); //track input
+    const [isSendDisabled, setIsSendDisabled] = useState(true);
+    const [conversation, setConversation] = useState([]); // holds received messages
+    const stompClient = useRef(null); // websocket client ref
 
-	// Fetch User ID when the component mounts
-	useEffect(() => {
-	    const fetchUserId = async () => {
-	        try {
-	            const token = localStorage.getItem('token');
-	            if (!token) {
-	                console.error('User not authenticated. Redirecting to login page.');
-	                window.location.href = '/login';
-	                return;
-	            }
+    // Fetch User ID and username when the component mounts
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                validateTokenWithRedirect(token);
 
-	            const response = await fetch(`https://four800-webapp.onrender.com/user/info`, {
-	                method: 'GET',
-	                headers: {
-	                    'Authorization': `Bearer ${token}`,
-	                    'Content-Type': 'application/json',
-	                },
-	            });
+                const response = await fetch(`http://localhost:8080/user/info`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-	            if (!response.ok) {
-	                throw new Error('Failed to fetch ID: ' + response.statusText);
-	            }
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ID: ' + response.statusText);
+                }
 
-	            const result = await response.json();
-	            console.log("Current user ID: " + result.userId);
-	            setUserId(result.userId);
-	        } catch (error) {
-	            console.error('Error fetching ID:', error);
-	            throw error;
-	        }
-	    };
+                const result = await response.json();
+                console.log("Current user ID: " + result.userId);
+                setUserId(result.userId);
+                setCurrentUsername(result.username);
+            } catch (error) {
+                console.error('Error fetching ID:', error);
+                throw error;
+            }
+        };
 
-	    fetchUserId();
-	}, []);
+        fetchUserId();
+    }, []);
 
 
-	// websocket connection and subscription
+    // websocket connection and subscription
     useEffect(() => {
         if (userId && otherId) {
-            const socket = new SockJS('https://four800-webapp.onrender.com/ws');
+            const socket = new SockJS('http://localhost:8080/ws');
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
@@ -63,10 +63,9 @@ const DirectMessages = () => {
                 const conversationId = userId < otherId ? `${userId}-${otherId}` : `${otherId}-${userId}`;
 
                 // subscribe to topic to receive messages for current user
-                stompClient.current.subscribe(`/user/conversations/${conversationId}`, (message) => {
+                stompClient.current.subscribe(`/topic/conversations/${conversationId}`, (message) => {
                     const receivedMessage = JSON.parse(message.body);
-                    setConversation((prev) => [...prev, receivedMessage]); // append the new message
-                    console.log(receivedMessage);
+                    setConversation((prev) => [...prev, receivedMessage]);
                 });
             });
 
@@ -85,9 +84,9 @@ const DirectMessages = () => {
     const handleSendMessage = () => {
         if (message.trim() && stompClient.current) {
             const newMessage = {
-                messageBody: message,
-                sendingUserId: userId,
-                receivingUserId: otherId,
+                body: message,
+                senderId: userId,
+                recipientId: otherId,
                 dateSent: new Date(),
             };
 
@@ -98,51 +97,49 @@ const DirectMessages = () => {
     };
 
 
-	// For inputting username
-	// Gets ID of corresponding user, assigns it to otherId
-	const handleUsernameSubmit = async (event) => {
-		event.preventDefault();
-		if (inputUsername.trim() !== '') {
-			console.log('Starting chat with:', inputUsername);
+    // For inputting username
+    // Gets ID of corresponding user, assigns it to otherId
+    const handleUsernameSubmit = async (event) => {
+        event.preventDefault();
+        if (inputUsername.trim() !== '') {
+            console.log('Starting chat with:', inputUsername);
+            try {
+                const response = await fetch(`http://localhost:8080/user/id/${inputUsername}`);
 
-			const token = localStorage.getItem('token');
-			try {
-			    const response = await fetch(`https://four800-webapp.onrender.com/user/id/${inputUsername}`);
+                if (!response.ok) {
+                    throw new Error(`Network response not ok: ${response.statusText}`);
+                }
 
-			    if (!response.ok) {
-			        throw new Error(`Network response not ok: ${response.statusText}`);
-			    }
-
-			    const result = await response.json();
-			    setOtherId(result);
-			    console.log("Other user ID: " + result);
-			} catch (error) {
-			    console.error('Error:', error);
-			}
-		}
-	};
+                const result = await response.json();
+                setOtherId(result);
+                console.log("Other user ID: " + result);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    };
 
 
-	
-	const handleMessageChange = (e) => {
-		setMessage(e.target.value); //update message state
-		setIsSendDisabled(e.target.value.trim() === '')
-	};
-	
-	//handling file input change
-	const handleFileChange = (event) => {
-		const file = event.target.files[0];
-	};
-	
-	const handleAttachClick = () => {
-		const fileInput = document.getElementById('fileInput');
-		if (fileInput){
-			fileInput.click();
-		}
-	};
-	
+    
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value); //update message state
+        setIsSendDisabled(e.target.value.trim() === '')
+    };
+    
+    //handling file input change
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+    };
+    
+    const handleAttachClick = () => {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput){
+            fileInput.click();
+        }
+    };
+    
 
-	 return (
+     return (
         <div className={styles.container}>
             {/* Select user to chat */}
             <aside className={styles.container}>
@@ -173,8 +170,8 @@ const DirectMessages = () => {
                 <div className={styles.conversationArea}>
                     {conversation.map((msg, index) => (
                         <div key={index} className={styles.messageBubble}>
-                            <strong>{msg.sendingUser}: </strong>
-                            {msg.messageBody}
+                            <strong>{msg.senderId === userId ? currentUsername : inputUsername}: </strong>
+                            {msg.body}
                         </div>
                     ))}
                 </div>

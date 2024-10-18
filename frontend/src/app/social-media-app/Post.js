@@ -1,11 +1,13 @@
 import Image from "next/image";
 import styles from './social-media-homepage.module.css';
+import Link from 'next/link';
 
 
 export class Post {
     constructor(postData) {
         this.id = postData.id;
         this.title = postData.title;
+        this.author = postData.postedBy.username;
         this.text = postData.text;
         this.image = postData.image;
         this.video = postData.video;
@@ -16,6 +18,9 @@ export class Post {
     render() {
         return (
             <div key={this.id} className={styles.post}>
+                <Link href={`/social-media-app/profile/${this.author}`} className={styles.postAuthor}>
+                                    {this.author}
+                                </Link>
                 <h3 className={styles.postTitle}>{this.title}</h3>
                 <p className={styles.postText}>{this.text}</p>
                 {this.image && (

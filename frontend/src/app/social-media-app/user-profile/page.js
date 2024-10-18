@@ -3,6 +3,7 @@
 import RightMenu from "@/components/rightMenu";*/}
 import LeftMenu from '../../../components/leftmenu/left-menu';
 import Image from "next/image";
+import Link from "next/link";
 
 const userProfile = () => {
   return (
@@ -47,7 +48,9 @@ const userProfile = () => {
                 <span className="text-sm">Following</span>
               </div>
             </div>
+            {/** End display for followers */}
           </div>
+          <Link href="/social-media-app/user-profile" className="bg-blue-500 text-white text-xs p-2 rounded-md">Follow</Link>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
         </div>

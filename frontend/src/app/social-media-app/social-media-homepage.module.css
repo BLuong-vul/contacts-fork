@@ -107,7 +107,7 @@
 	padding: 10px; /*Space inside the post*/
 	margin: 20px 0; /*Space between posts*/
 	width: 100%;
-	max-width: 500px;
+	max-width: 700px;
   background-color: #263043;
   border-radius: 8px;
 }
@@ -122,6 +122,11 @@
 .postText {
   color: #a1abc3;
   font-size: 1rem;
+}
+
+.postAuthor {
+  color: #a1abc3;
+  font-size: 0.75rem;
 }
 
 /* Begin like, dislike, and comment buttons */

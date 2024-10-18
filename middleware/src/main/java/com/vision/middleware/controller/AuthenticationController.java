@@ -7,6 +7,7 @@ import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,6 +26,14 @@ public class AuthenticationController {
     @PostMapping("/login")
     public LoginResponseDTO loginUser(@RequestBody LoginDTO body) {
         return authenticationService.loginUser(body);
+    }
+
+    // Lazy validation.
+    @GetMapping("/validate")
+    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String token) {
+        // This is only reached if the token is valid
+        // because in SecurityConfig this endpoint only accepts USER or ADMIN
+        return ResponseEntity.ok("Token is valid");
     }
 
 }
