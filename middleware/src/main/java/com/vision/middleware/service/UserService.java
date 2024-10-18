@@ -27,11 +27,15 @@ public class UserService implements UserDetailsService {
 
     @Override
     public ApplicationUser loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("user " + username + " not found"));
+        return userRepository.findByUsername(username).orElseThrow(
+                () -> new UsernameNotFoundException("user " + username + " not found")
+        );
     }
 
     public ApplicationUser loadUserById(long id) throws IdNotFoundException {
-        return userRepository.findById(id).orElseThrow(() -> new IdNotFoundException("id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(
+                () -> new IdNotFoundException("id " + id + " not found")
+        );
     }
 
     private Collection<GrantedAuthority> getAuthorities(String role) {

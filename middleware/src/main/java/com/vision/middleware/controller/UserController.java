@@ -77,9 +77,7 @@ public class UserController {
 
     @GetMapping("/followers/list")
     public List<UserDTO> getFollowers(@RequestHeader("Authorization") String token) {
-        System.out.println("TEST1");
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
-        System.out.println("TEST2");
 
         List<UserFollows> userFollowersRelation = followerService.getByFolloweeUser(id);
 
