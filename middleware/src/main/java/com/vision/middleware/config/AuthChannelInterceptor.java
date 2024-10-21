@@ -1,5 +1,6 @@
 package com.vision.middleware.config;
 
+import com.vision.middleware.events.WsNotificationConnectEvent;
 import com.vision.middleware.exceptions.InvalidTokenException;
 import com.vision.middleware.repo.UserRepository;
 import com.vision.middleware.service.NotificationService;
@@ -7,6 +8,8 @@ import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNullApi;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -27,10 +30,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     private final JwtUtil jwtUtil;
 
     @Autowired
-    private final NotificationService notificationService;
-
-    @Autowired
-    private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -48,7 +48,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
                 // if the connection is for notifications, then send all unread notifications.
                 if ("/ws/notifications".equals(accessor.getDestination())) {
-                    notificationService.sendUnreadNotifications(userService.loadUserById(userId));
+                    eventPublisher.publishEvent(new WsNotificationConnectEvent(this, userId));
                 }
             }
         }
