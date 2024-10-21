@@ -50,7 +50,16 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getUnreadNotifications(ApplicationUser user) {
-        return notificationRepository.findByAssociatedUserAndAcknowledgedFalse(user);
+    public void sendUnreadNotifications(ApplicationUser user) {
+        notificationRepository.findByAssociatedUserAndAcknowledgedFalse(user).stream().map(
+                notification -> NotificationDTO.builder()
+                        .notificationType(notification.getNotificationType())
+                        .notificationBody(notification.getNotificationBody())
+                        .notificationId(notification.getId())
+                        .timeCreated(notification.getTimeCreated())
+                        .build()
+        ).forEach(
+                dto -> messagingTemplate.convertAndSendToUser(String.valueOf(user.getId()), "/queue/notifications", dto)
+        );
     }
 }

@@ -1,8 +1,12 @@
 package com.vision.middleware.config;
 
 import com.vision.middleware.exceptions.InvalidTokenException;
+import com.vision.middleware.repo.UserRepository;
+import com.vision.middleware.service.NotificationService;
+import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNullApi;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -19,7 +23,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthChannelInterceptor implements ChannelInterceptor {
 
+    @Autowired
     private final JwtUtil jwtUtil;
+
+    @Autowired
+    private final NotificationService notificationService;
+
+    @Autowired
+    private final UserService userService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -34,6 +45,11 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 accessor.setUser(auth);
+
+                // if the connection is for notifications, then send all unread notifications.
+                if ("/ws/notifications".equals(accessor.getDestination())) {
+                    notificationService.sendUnreadNotifications(userService.loadUserById(userId));
+                }
             }
         }
 

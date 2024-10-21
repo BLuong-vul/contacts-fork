@@ -30,6 +30,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // main endpoint
         registry.addEndpoint("/ws").setAllowedOriginPatterns("https://contacts-5min.onrender.com/", "*").withSockJS(); // todo: clean up later when done with testing
+
+        // notification specific endpoint
+        registry.addEndpoint("/ws/notifications").setAllowedOriginPatterns("https://contacts-5min.onrender.com/", "*").withSockJS(); // todo: clean up later when done with testing
     }
 }
