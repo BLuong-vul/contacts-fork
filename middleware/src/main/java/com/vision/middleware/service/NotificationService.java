@@ -37,8 +37,8 @@ public class NotificationService {
                 .timeCreated(notification.getTimeCreated())
                 .build();
 
-        // send notification to user.
-        messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/notifications", notificationDTO);
+        // send notification to user. routes to /user/queue/notifications
+        messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/queue/notifications", notificationDTO);
     }
 
     public void acknowledgeNotification(long notificationId) {

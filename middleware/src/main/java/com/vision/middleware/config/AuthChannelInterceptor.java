@@ -10,6 +10,9 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -25,10 +28,17 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = accessor.getFirstNativeHeader("Authorization");
-            if (!jwtUtil.isTokenValid(token)) {
-                throw new InvalidTokenException("Invalid JWT token");
+
+            if (token != null && token.startsWith("Bearer ")) {
+                long userId = jwtUtil.checkJwtAuthAndGetUserId(token); // method handles invalid tokens
+                Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                accessor.setUser(auth);
             }
         }
+
+        // behavior as of now is to allow non-authenticated connections.
+        // these will not share the same context as user specific authenticated connections.
 
         return message;
     }

@@ -23,13 +23,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker (MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "/user", "/notification");
+        config.enableSimpleBroker("/topic", "queue");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("https://contacts-5min.onrender.com/").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOriginPatterns("https://contacts-5min.onrender.com/", "*").withSockJS(); // todo: clean up later when done with testing
     }
 }
