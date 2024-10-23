@@ -25,7 +25,7 @@ const DirectMessages = () => {
                 const token = localStorage.getItem('token');
                 validateTokenWithRedirect(token);
 
-                const response = await fetch(`https://four800-webapp.onrender.com/user/info`, {
+                const response = await fetch(`/api/user/info`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -54,7 +54,7 @@ const DirectMessages = () => {
     // websocket connection and subscription
     useEffect(() => {
         if (userId && otherId) {
-            const socket = new SockJS('https://four800-webapp.onrender.com/ws');
+            const socket = new SockJS('/api/ws');
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
@@ -104,7 +104,7 @@ const DirectMessages = () => {
         if (inputUsername.trim() !== '') {
             console.log('Starting chat with:', inputUsername);
             try {
-                const response = await fetch(`https://four800-webapp.onrender.com/user/id/${inputUsername}`);
+                const response = await fetch(`/api/user/id/${inputUsername}`);
 
                 if (!response.ok) {
                     throw new Error(`Network response not ok: ${response.statusText}`);
