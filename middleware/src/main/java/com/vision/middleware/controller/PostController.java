@@ -50,4 +50,27 @@ public class PostController {
 
         return ResponseEntity.ok(postsDTO);
     }
+
+    @GetMapping("/by-user")
+    public ResponseEntity<Page<PostDTO>> getPostPageByUsername(@RequestParam(value = "username", defaultValue = "") String username, 
+                                                               @RequestParam(value = "page", defaultValue = "0") int page, 
+                                                               @RequestParam(value = "size", defaultValue = "10") int size) {
+        Page<Post> posts = postService.getAllPostsByUsername(username, page, size);
+
+        Page<PostDTO> postsDTO = posts.map(
+                post -> PostDTO.builder()
+                        .datePosted(post.getDatePosted())
+                        .dislikeCount(post.getDislikeCount())
+                        .text(post.getText())
+                        .title(post.getTitle())
+                        .postedBy(
+                                UserDTO.builder().username(post.getPostedBy().getUsername())
+                                        .userId(post.getPostedBy().getId())
+                                        .build()
+                        )
+                        .build()
+        );
+
+        return ResponseEntity.ok(postsDTO);
+    }
 }

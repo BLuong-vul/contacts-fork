@@ -46,4 +46,9 @@ public class PostService {
     public Page<Post> getAllPosts(int page, int size) {
         return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));
     }
+
+    public Page<Post> getAllPostsByUsername(String username, int page, int size) {
+        ApplicationUser user = userService.loadUserByUsername(username); 
+        return postRepository.findByPostedBy(user, PageRequest.of(page, size, Sort.by("datePosted")));
+    }
 }

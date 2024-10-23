@@ -1,15 +1,23 @@
 'use client';
 import { useEffect, useState } from "react";
+import homepagestyles from '../../social-media-homepage.module.css'; 
 import LeftMenu from '../../../../components/leftmenu/left-menu';
 import { validateToken, validateTokenWithRedirect } from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
+import { Post } from '../../Post.js';
 
 
 export default function ProfilePage({ params }) {
   const { username } = params;
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
+  const [postCount, setPostCount] = useState(666);
+  const [followersCount, setFollowersCount] = useState(888);
+  const [followingCount, setFollowingCount] = useState(777);
+
+  const [posts, setPosts] = useState([]);
+
 
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -18,11 +26,23 @@ export default function ProfilePage({ params }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // Get user page info
+        // Get basic user page info
         const res = await fetch(`/api/user/public-info?username=${username}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setProfileData(data);
+
+        // Handle posts
+        const page=0;
+        const size=10;
+        const response = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
+        if (!response.ok){
+            throw new Error('Network response not ok ' + response.statusText);
+        }
+        const pagedData = await response.json();
+        // console.log(pagedData.content);
+        const posts = pagedData.content.map(postData => new Post(postData));
+        setPosts(posts);
 
         // Check if we are logged in
         console.log("DEBUG: checking login...");
@@ -45,7 +65,7 @@ export default function ProfilePage({ params }) {
     };
     init();
   }, [username]);
-
+    
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
@@ -129,15 +149,15 @@ export default function ProfilePage({ params }) {
             {/** Display for followers*/}
             <div className="flex items-center justify-center gap-12 mb-4">
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{postCount}</span>
                 <span className="text-sm">Posts</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{followersCount}</span>
                 <span className="text-sm">Followers</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{followingCount}</span>
                 <span className="text-sm">Following</span>
               </div>
             </div>
@@ -152,6 +172,10 @@ export default function ProfilePage({ params }) {
                     </button>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
+            				{/*display posts section*/}
+				<div className={homepagestyles.postsContainer}>
+					{posts.map(post => post.render())}
+	            </div>
         </div>
       </div>
       {/*<div className="hidden lg:block w-[30%]">

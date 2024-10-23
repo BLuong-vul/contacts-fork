@@ -91,7 +91,7 @@ export default function Projects() {
 	// Track like, dislike, and comment countd for each post
 	const [likes, setLikes] = useState({});
 	const [dislikes, setDislikes] = useState({});
-	const [comments, setCOmments] = useState({});
+	const [comments, setComments] = useState({});
 	const [userLiked, setUserLiked] = useState({});
 	const [userDisliked, setUserDisliked] = useState({});
 	
