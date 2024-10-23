@@ -1,3 +1,4 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
@@ -8,6 +9,14 @@ const nextConfig = {
                 hostname: "images.pexels.com",
             },
         ],
+    },
+    async rewrites() {
+    	return [
+    		{
+    			source: '/api/:path*',
+    			destination: 'http://localhost:8080/:path*'
+    		},
+    	];
     },
 };
 
