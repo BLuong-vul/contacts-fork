@@ -43,6 +43,8 @@ public class UserController {
         return UserDTO.builder()
             .userId(userDetails.getId())
             .username(userDetails.getUsername())
+            .followerCount(userService.getFollowerCount(userDetails))
+            .followingCount(userService.getFollowingCount(userDetails))
             .build();
     }
 
@@ -53,6 +55,8 @@ public class UserController {
         return UserDTO.builder()
             .userId(userDetails.getId())
             .username(userDetails.getUsername())
+            .followerCount(userService.getFollowerCount(userDetails))
+            .followingCount(userService.getFollowingCount(userDetails))
             .build();
     }
 

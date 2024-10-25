@@ -13,9 +13,9 @@ export default function ProfilePage({ params }) {
   const { username } = params;
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
-  const [postCount, setPostCount] = useState(666);
-  const [followersCount, setFollowersCount] = useState(888);
-  const [followingCount, setFollowingCount] = useState(777);
+  const [postCount, setPostCount] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   const [posts, setPosts] = useState([]);
 
@@ -32,18 +32,24 @@ export default function ProfilePage({ params }) {
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setProfileData(data);
+        setFollowersCount(data.followerCount);
+        setFollowingCount(data.followingCount);
+        console.log("DEBUG: " + data.followerCount);
+
+
 
         // Handle posts
         const page=0;
         const size=10;
-        const response = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
-        if (!response.ok){
-            throw new Error('Network response not ok ' + response.statusText);
+        const postRes = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
+        if (!postRes.ok){
+            throw new Error('Network response not ok ' + postRes.statusText);
         }
-        const pagedData = await response.json();
+        const pagedData = await postRes.json();
         // console.log(pagedData.content);
         const posts = pagedData.content.map(postData => new Post(postData));
         setPosts(posts);
+        setPostCount(posts.length);
 
         // Check if we are logged in
         console.log("DEBUG: checking login...");
@@ -59,6 +65,7 @@ export default function ProfilePage({ params }) {
           const followedUsers = await followedRes.json();
           const followed = followedUsers.some(user => user.userId === data.userId);
           setIsFollowing(followed);
+          console.log("DEBUG: login successful");
         }
       } catch (error) {
         setError(error.message);
