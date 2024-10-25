@@ -126,7 +126,7 @@ export async function validateToken(temp){
 		return true;
 	} catch (error){
 		console.log('Login expired.');
-		localStorage.removeItem('token');
+		//localStorage.removeItem('token');
 		return false;
 	}
 }
@@ -156,8 +156,8 @@ export async function validateTokenWithRedirect(temp){
 		return true;
 	} catch (error){
 		console.error('Login expired. Redirecting to login page.');
-		localStorage.removeItem('token');
-		window.location.href = '/login';
+		//localStorage.removeItem('token');
+		//window.location.href = '/login';
 		return false;
 	}
 }
