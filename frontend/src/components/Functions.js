@@ -134,7 +134,7 @@ export async function validateToken(temp){
 // Checks for token and if it is valid
 // Deletes token if not valid
 // Redirects if not valid
-export async function validateTokenWithRedirect(){
+export async function validateTokenWithRedirect(temp){
 	const token = localStorage.getItem('token');
 	if (!token){
 		console.log('User not logged in. Redirecting to login page.');
