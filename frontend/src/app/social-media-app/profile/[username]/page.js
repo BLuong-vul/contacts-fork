@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import homepagestyles from '../../social-media-homepage.module.css'; 
 import LeftMenu from '../../../../components/leftmenu/left-menu';
+import RightMenu from '../../../../components/rightmenu/right-menu';
 import { validateToken, validateTokenWithRedirect } from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
@@ -178,9 +179,9 @@ export default function ProfilePage({ params }) {
 	            </div>
         </div>
       </div>
-      {/*<div className="hidden lg:block w-[30%]">
+      <div className="hidden lg:block w-[30%]">
         <RightMenu user={user} />
-      </div>*/}
+      </div>
     </div>
   );
 }

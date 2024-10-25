@@ -54,6 +54,10 @@ export default function Projects() {
 					<Link href="/login" className="text-blue-500 underline">
 						Login
 					</Link>
+					<br></br>
+					<a href="https://docs.google.com/document/d/1RNHzGb3442Y0YrATVcvWDxm0UJirZVpThLXKm2nUE9A/edit?tab=t.0" className="text-blue-500 underline">
+						Meeting Logs
+					</a>
 				</header>
 			</main>
 		</div></>

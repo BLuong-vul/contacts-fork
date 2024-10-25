@@ -1,6 +1,6 @@
 
-{/*import Feed from "@/components/feed/Feed";
-import RightMenu from "@/components/rightMenu";*/}
+{/*import Feed from "@/components/feed/Feed";*/}
+import RightMenu from '../../../components/rightmenu/right-menu';
 import LeftMenu from '../../../components/leftmenu/left-menu';
 import Image from "next/image";
 import Link from "next/link";
@@ -55,9 +55,11 @@ const userProfile = () => {
           *<Feed username={user.username}/>*/}
         </div>
       </div>
-      {/*<div className="hidden lg:block w-[30%]">
-        <RightMenu user={user} />
-      </div>*/}
+      <div className="hidden lg:block w-[30%]">
+        {/** <RightMenu user={user} />*/}
+        <RightMenu/>
+      </div>
+
     </div>
   );
 };
