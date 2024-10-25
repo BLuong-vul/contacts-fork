@@ -106,7 +106,7 @@ export async function getPostsByUser(username){
 // Deletes token if not valid
 // Returns true if valid, false if not
 export async function validateToken(temp){
-	const token = localStorage.getItem('token');
+	const token = temp;
 	if (!token){
 		console.log('User not logged in.');
 		return false;
@@ -135,7 +135,7 @@ export async function validateToken(temp){
 // Deletes token if not valid
 // Redirects if not valid
 export async function validateTokenWithRedirect(temp){
-	const token = localStorage.getItem('token');
+	const token = temp;
 	if (!token){
 		console.log('User not logged in. Redirecting to login page.');
 		window.location.href = '/login'; 
