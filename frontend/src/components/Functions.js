@@ -10,7 +10,7 @@ export async function validateToken(token){
 	}
 
 	try {
-		const response = await fetch('https://four800-webapp.onrender.com/auth/validate', {
+		const response = await fetch('/api/auth/validate', {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -39,7 +39,7 @@ export async function validateTokenWithRedirect(token){
 	}
 
 	try {
-		const response = await fetch('https://four800-webapp.onrender.com/auth/validate', {
+		const response = await fetch('/api/auth/validate', {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${token}`,

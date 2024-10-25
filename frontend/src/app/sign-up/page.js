@@ -36,7 +36,7 @@ export default function SignUp() {
 	    }
 
 	    try {							
-	      const response = await fetch('https://four800-webapp.onrender.com/auth/register', {
+	      const response = await fetch('/api/auth/register', {
 	        method: 'POST',
 	        headers: {
 	          'Content-Type': 'application/json',

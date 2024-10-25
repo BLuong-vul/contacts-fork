@@ -21,7 +21,7 @@ import { Post } from './Post.js';
 async function fetchPostsBeforeDate(date){
 	const page=0;
 	const size=10;
-	const response = await fetch(`https://four800-webapp.onrender.com/post/all?page=${page}&size=${size}`);
+	const response = await fetch(`/api/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
 	}
@@ -38,7 +38,7 @@ async function uploadPost(postDTO){
 	validateToken(token)
 
 	try {
-		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
+		const response = await fetch('/api/post/new', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -91,7 +91,7 @@ export default function Projects() {
 	// Track like, dislike, and comment countd for each post
 	const [likes, setLikes] = useState({});
 	const [dislikes, setDislikes] = useState({});
-	const [comments, setCOmments] = useState({});
+	const [comments, setComments] = useState({});
 	const [userLiked, setUserLiked] = useState({});
 	const [userDisliked, setUserDisliked] = useState({});
 	

@@ -1,15 +1,23 @@
 'use client';
 import { useEffect, useState } from "react";
+import homepagestyles from '../../social-media-homepage.module.css'; 
 import LeftMenu from '../../../../components/leftmenu/left-menu';
 import { validateToken, validateTokenWithRedirect } from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
+import { Post } from '../../Post.js';
 
 
 export default function ProfilePage({ params }) {
   const { username } = params;
   const [profileData, setProfileData] = useState(null);
   const [error, setError] = useState(null);
+  const [postCount, setPostCount] = useState(0);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
+  const [posts, setPosts] = useState([]);
+
 
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -18,18 +26,36 @@ export default function ProfilePage({ params }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // Get user page info
-        const res = await fetch(`https://four800-webapp.onrender.com/user/public-info?username=${username}`);
+        // Get basic user page info
+        const res = await fetch(`/api/user/public-info?username=${username}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
         setProfileData(data);
+        setFollowersCount(data.followerCount);
+        setFollowingCount(data.followingCount);
+        console.log("DEBUG: " + data.followerCount);
+
+
+
+        // Handle posts
+        const page=0;
+        const size=10;
+        const postRes = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
+        if (!postRes.ok){
+            throw new Error('Network response not ok ' + postRes.statusText);
+        }
+        const pagedData = await postRes.json();
+        // console.log(pagedData.content);
+        const posts = pagedData.content.map(postData => new Post(postData));
+        setPosts(posts);
+        setPostCount(posts.length);
 
         // Check if we are logged in
         console.log("DEBUG: checking login...");
         const token = localStorage.getItem('token');
         if (await validateToken(token)){
           //If logged in, check if already following
-          const followedRes = await fetch('https://four800-webapp.onrender.com/user/following/list', {
+          const followedRes = await fetch('/api/user/following/list', {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
@@ -38,6 +64,7 @@ export default function ProfilePage({ params }) {
           const followedUsers = await followedRes.json();
           const followed = followedUsers.some(user => user.userId === data.userId);
           setIsFollowing(followed);
+          console.log("DEBUG: login successful");
         }
       } catch (error) {
         setError(error.message);
@@ -45,14 +72,14 @@ export default function ProfilePage({ params }) {
     };
     init();
   }, [username]);
-
+    
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
     const token = localStorage.getItem('token');
     if (validateTokenWithRedirect(token)){
       //If logged in, check if already following
-      const followedRes = await fetch('https://four800-webapp.onrender.com/user/following/list', {
+      const followedRes = await fetch('/api/user/following/list', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -64,7 +91,7 @@ export default function ProfilePage({ params }) {
 
       if (!followed){
         try {
-          const res = await fetch(`https://four800-webapp.onrender.com/user/follow/${profileData.userId}`, {
+          const res = await fetch(`/api/user/follow/${profileData.userId}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -79,7 +106,7 @@ export default function ProfilePage({ params }) {
           setError(error.message);
         }
       } else {
-        const res = await fetch(`https://four800-webapp.onrender.com/user/unfollow/${profileData.userId}`, {
+        const res = await fetch(`/api/user/unfollow/${profileData.userId}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -129,15 +156,15 @@ export default function ProfilePage({ params }) {
             {/** Display for followers*/}
             <div className="flex items-center justify-center gap-12 mb-4">
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{postCount}</span>
                 <span className="text-sm">Posts</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{followersCount}</span>
                 <span className="text-sm">Followers</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="font-medium">999</span>
+                <span className="font-medium">{followingCount}</span>
                 <span className="text-sm">Following</span>
               </div>
             </div>
@@ -152,6 +179,10 @@ export default function ProfilePage({ params }) {
                     </button>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
+            				{/*display posts section*/}
+				<div className={homepagestyles.postsContainer}>
+					{posts.map(post => post.render())}
+	            </div>
         </div>
       </div>
       {/*<div className="hidden lg:block w-[30%]">

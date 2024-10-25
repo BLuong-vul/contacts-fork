@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,6 +37,17 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id).orElseThrow(
                 () -> new IdNotFoundException("id " + id + " not found")
         );
+    }
+
+    @Transactional
+    public int getFollowerCount(ApplicationUser user){
+        System.out.println("\n\n\n\n\nDEBUG: " + user.getFollowers().size());
+        return user.getFollowers().size();
+    }
+
+    @Transactional
+    public int getFollowingCount(ApplicationUser user){
+        return user.getFollowing().size();
     }
 
     private Collection<GrantedAuthority> getAuthorities(String role) {

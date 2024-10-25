@@ -1,5 +1,7 @@
 .friendsContainer {
     padding: 20px;
+    display: flex;
+    
 }
 
 .title {

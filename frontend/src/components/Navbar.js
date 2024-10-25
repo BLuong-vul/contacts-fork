@@ -38,7 +38,7 @@ const Navbar = () => {
               height={16}
               className="w-4 h-4"
             />
-            <span>Friends</span>
+            <span>Following</span>
           </Link>
         </div>
         <div className='hidden xl:flex p-2 bg-slate-100 items-center rounded-xl'>
