@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import homepagestyles from '../../social-media-homepage.module.css'; 
 import LeftMenu from '../../../../components/leftmenu/left-menu';
-import { validateToken, validateTokenWithRedirect } from '../../../../components/Functions';
+import UserInfo from '../../../../components/rightmenu/user-info';
+import * as Fetch from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
 import { Post } from '../../Post.js';
@@ -15,10 +16,7 @@ export default function ProfilePage({ params }) {
   const [postCount, setPostCount] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-
   const [posts, setPosts] = useState([]);
-
-
   const [isFollowing, setIsFollowing] = useState(false);
 
   // Fetch info for page
@@ -26,45 +24,23 @@ export default function ProfilePage({ params }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // Get basic user page info
-        const res = await fetch(`/api/user/public-info?username=${username}`);
-        if (!res.ok) throw new Error("Failed to fetch data");
-        const data = await res.json();
+        const data = await Fetch.getPublicInfo(username);
         setProfileData(data);
         setFollowersCount(data.followerCount);
         setFollowingCount(data.followingCount);
-        console.log("DEBUG: " + data.followerCount);
-
-
 
         // Handle posts
-        const page=0;
-        const size=10;
-        const postRes = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
-        if (!postRes.ok){
-            throw new Error('Network response not ok ' + postRes.statusText);
-        }
-        const pagedData = await postRes.json();
-        // console.log(pagedData.content);
-        const posts = pagedData.content.map(postData => new Post(postData));
+        const posts = await Fetch.getPostsByUser(username);
         setPosts(posts);
         setPostCount(posts.length);
 
         // Check if we are logged in
-        console.log("DEBUG: checking login...");
-        const token = localStorage.getItem('token');
-        if (await validateToken(token)){
+        // console.log("DEBUG: checking login...");
+        if (await Fetch.validateToken("THIS ARG IS FOR DEBUGGING CONVENIENCE, REMOVE IT LATER")){
+          // console.log("DEBUG: logged in");
           //If logged in, check if already following
-          const followedRes = await fetch('/api/user/following/list', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (!followedRes.ok) throw new Error("Failed to fetch followed users");
-          const followedUsers = await followedRes.json();
-          const followed = followedUsers.some(user => user.userId === data.userId);
-          setIsFollowing(followed);
-          console.log("DEBUG: login successful");
+          const isFollowing = await Fetch.isFollowing(data.username);
+          setIsFollowing(isFollowing);
         }
       } catch (error) {
         setError(error.message);
@@ -76,47 +52,21 @@ export default function ProfilePage({ params }) {
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
-    const token = localStorage.getItem('token');
-    if (validateTokenWithRedirect(token)){
+    if (Fetch.validateTokenWithRedirect("THIS ARG IS FOR DEBUGGING CONVENIENCE, REMOVE IT LATER")){
       //If logged in, check if already following
-      const followedRes = await fetch('/api/user/following/list', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!followedRes.ok) throw new Error("Failed to fetch followed users");
-      const followedUsers = await followedRes.json();
-      const followed = followedUsers.some(user => user.userId === profileData.userId);
-      setIsFollowing(followed);
+      const isFollowing = await Fetch.isFollowing(profileData.username);
+      setIsFollowing(isFollowing);
 
-      if (!followed){
-        try {
-          const res = await fetch(`/api/user/follow/${profileData.userId}`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          if (!res.ok) throw new Error('Failed to follow');
-
-          console.log("DEBUG: followed successfully");
-          setIsFollowing(true);
-        } catch (error) {
-          setError(error.message);
-        }
+      // Follow if we are not following. Unfollow if we are
+      // TODO: If following fails, Fetch.followUser returns false, maybe use that to decide if we should change isFollowing
+      if (!isFollowing){
+        Fetch.followUser(profileData.userId);
+        setIsFollowing(true);
+        setFollowersCount(followersCount+1);
       } else {
-        const res = await fetch(`/api/user/unfollow/${profileData.userId}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!res.ok) throw new Error('Failed to follow');
-
-        console.log("DEBUG: unfollowed successfully");
+        Fetch.unfollowUser(profileData.userId);
         setIsFollowing(false);
+        setFollowersCount(followersCount-1);
       }
     }
   };
@@ -172,22 +122,20 @@ export default function ProfilePage({ params }) {
           </div>
           {/** FOLLOW BUTTON **/}
           <button
-                      onClick={handleFollow}
-                      className="bg-blue-500 text-white text-xs p-2 rounded-md"
-                    >
-                      {isFollowing ? 'Unfollow' : 'Follow'}
-                    </button>
-          {/* Adjust for post updates
-          *<Feed username={user.username}/>*/}
-            				{/*display posts section*/}
+            onClick={handleFollow}
+            className="bg-blue-500 text-white text-xs p-2 rounded-md"
+          >
+            {isFollowing ? 'Unfollow' : 'Follow'}
+          </button>
+          {/* Post display section */}
 				<div className={homepagestyles.postsContainer}>
 					{posts.map(post => post.render())}
 	            </div>
         </div>
       </div>
-      {/*<div className="hidden lg:block w-[30%]">
-        <RightMenu user={user} />
-      </div>*/}
+      <div className="hidden lg:block w-[30%]">
+        <UserInfo usernameKey={username} />
+      </div>
     </div>
   );
 }
