@@ -1,8 +1,17 @@
+import { useEffect, useState } from "react";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import * as Fetch from "../Functions"
 
-const UserMedia = ({userId}:{userId:string}) => {
+const UserMedia = ({usernameKey}:{usernameKey:string}) => {
+    const [username, setUsername] = useState("");
+
+    useEffect(()=>{
+        setUsername(usernameKey);
+    })
+
+
     return (
         <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
             <div className='flex justify-between items-center font-medium'>
@@ -12,9 +21,9 @@ const UserMedia = ({userId}:{userId:string}) => {
             <div className='flex flex-col gap-4 text-gray-500'>
                 <div className='flex items-center gap-2'>
                     {/** Adjust user profile name*/}
-                    <span className="text-xl text-black">Billie Jean</span>
+                    <span className="text-xl text-black">{username}</span>
                     {/** Adjust @username */}
-                    <span className="text-sm">@billiejean</span>
+                    <span className="text-sm">@{username}</span>
                 </div>
                 {/** User Bio */}
                 <p>
@@ -43,7 +52,8 @@ const UserMedia = ({userId}:{userId:string}) => {
                         <span>Birthday</span>
                     </div>
                 </div>
-                <button className="bg-blue-500 text-white text-sm rounded-md p-2">Follow</button>
+                        {/*TODO: Make this actually work and then uncomment it*/}
+                {/*<button className="bg-blue-500 text-white text-sm rounded-md p-2">Follow</button>*/}
                 <Link href="/social-media-app/direct-messages">
                     <button className="bg-blue-500 text-white text-sm rounded-md p-2 items-center w-full">Message</button>
                 </Link>
