@@ -6,14 +6,14 @@ import com.vision.middleware.dto.NotificationDTO;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     @Autowired
@@ -23,6 +23,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     public void sendNotification(Notification notification) {
+
+        log.info("In notification service: sending notification");
 
         // save to repository to persist. Flush is a blocking method which is desired here.
         // Notifications should be saved to the repository before we send a message, as the user will
@@ -34,10 +36,12 @@ public class NotificationService {
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .notificationId(notification.getId())
                 .notificationBody(notification.getNotificationBody())
+                .notificationType(notification.getNotificationType())
+                .toUserId(notification.getAssociatedUser().getId())
                 .timeCreated(notification.getTimeCreated())
                 .build();
 
-        // send notification to user. routes to /user/queue/notifications
+        // send notification to user. sent to /user/queue/notifications
         messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/queue/notifications", notificationDTO);
     }
 

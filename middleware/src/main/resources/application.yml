@@ -1,12 +1,15 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://test-db.chs4wq8g04j6.us-west-1.rds.amazonaws.com/postgres
+    username: postgres
+    password: testpassword
+#    url: ${SPRING_DATASOURCE_URL}
+#    username: ${SPRING_DATASOURCE_USERNAME}
+#    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     database-platform: org.hibernate.dialect.PosgreSQLInnoDBDialect
     generate-ddl: true
-    show-sql: true
+    show-sql: false # changed this so manual logging is more readable
     hibernate:
       ddl-auto: update # update for final, create-drop for testing
     properties:

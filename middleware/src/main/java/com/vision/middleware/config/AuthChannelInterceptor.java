@@ -1,16 +1,11 @@
 package com.vision.middleware.config;
 
 import com.vision.middleware.events.WsNotificationConnectEvent;
-import com.vision.middleware.exceptions.InvalidTokenException;
-import com.vision.middleware.repo.UserRepository;
-import com.vision.middleware.service.NotificationService;
-import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.lang.NonNullApi;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -22,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class AuthChannelInterceptor implements ChannelInterceptor {
@@ -34,6 +30,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         assert accessor != null;
 
@@ -45,6 +42,8 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 accessor.setUser(auth);
+
+                log.info("WS Authentication set for user: {}", userId);
 
                 // if the connection is for notifications, then send all unread notifications.
                 if ("/ws/notifications".equals(accessor.getDestination())) {

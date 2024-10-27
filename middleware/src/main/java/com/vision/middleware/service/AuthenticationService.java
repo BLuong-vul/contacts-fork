@@ -85,7 +85,7 @@ public class AuthenticationService {
 
         return LoginResponseDTO.builder()
                 .username(user.getUsername())
-                .email(user.getEmail())
+                .userId(user.getId())
                 .roles(user.getAuthorities())
                 .jwt(token)
                 .build();

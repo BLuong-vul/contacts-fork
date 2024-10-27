@@ -1,9 +1,6 @@
 package com.vision.middleware.config;
 
-import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -25,17 +22,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker (MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic", "queue");
+        config.enableSimpleBroker("/topic", "/queue");
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // main endpoint
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("https://contacts-5min.onrender.com/", "*").withSockJS(); // todo: clean up later when done with testing
+        String[] allowedOrigins = {"https://contacts-5min.onrender.com/", "*"};
 
-        // notification specific endpoint
-        registry.addEndpoint("/ws/notifications").setAllowedOriginPatterns("https://contacts-5min.onrender.com/", "*").withSockJS(); // todo: clean up later when done with testing
+        // sock js
+        registry.addEndpoint("/ws", "/ws/notifications")
+                .setAllowedOriginPatterns(allowedOrigins)
+                .withSockJS(); // todo: clean up later when done with testing
+
+        // normal ws
+        registry.addEndpoint("/ws", "/ws/notifications")
+                .setAllowedOriginPatterns(allowedOrigins);
     }
 }

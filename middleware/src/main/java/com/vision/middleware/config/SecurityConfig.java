@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.RSAKeyProperties;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -51,6 +53,12 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @PostConstruct
+    public void setSecurityContextHolderStrategy() {
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_THREADLOCAL);
+        // SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -79,7 +87,10 @@ public class SecurityConfig {
                 auth.requestMatchers("/chat/**").hasAnyRole("ADMIN", "USER"); // is this being used?
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/post/all").permitAll();
-                auth.requestMatchers("/ws/**").permitAll(); // websocket
+                auth.requestMatchers("/ws/**", "/ws/notifications/**").permitAll(); // websocket
+
+                // todo: remove this after testing
+                auth.requestMatchers("/notifications/**").permitAll(); // websocket
 
                 auth.anyRequest().permitAll(); // some changes for the demo
 

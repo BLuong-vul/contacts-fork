@@ -15,4 +15,5 @@ public class NotificationDTO {
     private NotificationType notificationType;
     private String notificationBody;
     private Instant timeCreated;
+    private long toUserId;
 }
