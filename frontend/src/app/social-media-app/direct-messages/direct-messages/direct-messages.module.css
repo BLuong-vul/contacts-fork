@@ -1,0 +1,154 @@
+.container {
+	display: flex;
+	height: 100vh;
+}
+
+.chatArea {
+	flex: 1;
+	padding: 20px;
+	background-color: #fff;
+}
+
+.chatHeader {
+	font-size: 2rem;
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+
+.conversationArea {
+    height: calc(100vh - 120px); /* Adjust the height dynamically */
+    padding: 20px;
+    border: 1px solid #ccc;
+    height: 300px; /* Example height */
+    overflow-y: auto; /* Enable scrolling if the content overflows vertically */
+    word-wrap: break-word; /* Ensure long words wrap to the next line */
+    white-space: pre-wrap; /* Preserve spaces and line breaks */
+}
+
+.chatPlaceholder {
+	color: #666;
+	font-size: 1.2rem;
+}
+
+/*Message Input Bar*/
+.messageInputBar {
+	display: flex;
+	align-items: center;
+	border-top: 1px solid #ddd;
+	padding: 10px;
+	background-color: #f9f9f9;
+}
+
+.messageInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-right: 10px;
+    resize: none;
+}
+
+.sendButton {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.disabledButton {
+	background-color: #ccc; /*grey background color*/
+	cursor: not-allowed; /*show not allowed*/
+}
+
+.attachButton {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.5rem;
+	margin-right: 10px;
+}
+
+.dropDownContainer {
+	display: flex;
+	align-items: center;
+	margin-top: 20px;
+}
+
+.dropDownLabel {
+	font-weight: 600;
+	margin-right: 10px
+}
+
+.dropDownMenu {
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 1rem;
+	background-color: #f1f1f1;
+}
+
+.listContainer {
+	margin-top: 15px;
+}
+
+.listContainer ul {
+	list-style: none;
+	padding: 0;
+}
+
+.listContainer ul li {
+	padding: 8px;
+	border-bottom: 1px solid #ddd;
+}
+
+.messageBubble {
+	max-width: 70%;
+	padding: 10px 15px;
+	border-radius: 15px;
+	margin-bottom: 10px;
+	position: relative;
+	font-size: 1rem;
+	line-height: 1.4;
+	word-wrap: break-word;
+}
+
+/*sent message bubble*/
+.sentBubble {
+	background-color: #007bff; /*blue background*/
+	color: white;
+	align-self: flex-end; /*align to the right*/
+}
+
+/*add tail for sent messages*/
+.sentBubble::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: -10px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: transparent transparent transparent #007bff;
+	transform: translateY(-50%);
+}
+ /*received message bubble*/
+.receivedBubble {
+	background-color: #e5e5ea;
+	color: white;
+	align-self: flex-start; 
+	border-top-left-radius: 0;
+}
+
+.receivedBubble::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: -10px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: transparent #e5e5ea transparent transparent;
+	transform: translateY(-50%);
+}
