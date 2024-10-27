@@ -1,6 +1,5 @@
 package com.vision.middleware.config;
 
-import com.vision.middleware.events.WsNotificationConnectEvent;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,11 +43,6 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 accessor.setUser(auth);
 
                 log.info("WS Authentication set for user: {}", userId);
-
-                // if the connection is for notifications, then send all unread notifications.
-                if ("/ws/notifications".equals(accessor.getDestination())) {
-                    eventPublisher.publishEvent(new WsNotificationConnectEvent(this, userId));
-                }
             }
         }
 

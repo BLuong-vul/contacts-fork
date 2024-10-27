@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
 
@@ -33,21 +35,21 @@ public class NotificationController {
     private final UserService userService;
 
     @MessageMapping("/notifications/acknowledge")
-    public void acknowledgeNotification(long notificationId) {
-        notificationService.acknowledgeNotification(notificationId);
+    public void acknowledgeNotification(Principal principal, @Payload long notificationId) {
+        ApplicationUser user = userService.loadUserById(Long.parseLong(principal.getName()));
+
+        // does notification belong to user?
+        if (notificationService.doesNotificationBelongToUser(notificationId, user)) {
+            notificationService.acknowledgeNotification(notificationId);
+        }
     }
 
     @MessageMapping("/notifications/getUnread")
-    public void getUnreadNotifications() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info("inside getUnread");
-
-        log.info("Authentication: {}", auth);
-
-        if (auth != null) {
-            ApplicationUser user = userService.loadUserById((Long) auth.getPrincipal());
+    public void getUnreadNotifications(Principal principal) {
+        if (principal != null) {
+            ApplicationUser user = userService.loadUserById(Long.parseLong(principal.getName()));
             notificationService.sendUnreadNotifications(user);
-            log.info("unread user notifications sent to {}", user.getId());
+            log.info("Unread user notifications sent to {}", user.getId());
         }
     }
 

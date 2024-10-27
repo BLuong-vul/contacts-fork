@@ -45,6 +45,13 @@ public class NotificationService {
         messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/queue/notifications", notificationDTO);
     }
 
+    public boolean doesNotificationBelongToUser(long notificationId, ApplicationUser user) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(
+                () -> new IdNotFoundException("Notification ID %d does not exist.".formatted(notificationId))
+        );
+        return notification.getAssociatedUser().getId() == user.getId();
+    }
+
     public void acknowledgeNotification(long notificationId) {
         Notification notification = notificationRepository.findById(notificationId).orElseThrow(
                 () -> new IdNotFoundException("Notification id not found")
