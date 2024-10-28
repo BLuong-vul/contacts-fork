@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import styles from '../styles/Home.module.css';
 import Link from 'next/link';
+import * as Fetch from '../../components/Functions';
 
 const LoginForm = () => {
-
-
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -16,32 +15,12 @@ const LoginForm = () => {
         // Clear any previous error
         setError('');
 
-        const loginData = { username, password };
-
-        try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Invalid username or password');
-            }
-
-            const result = await response.json();
-
-            // Store JWT in localStorage
-            localStorage.setItem('token', result.jwt);
-            console.log(result);
-
+        if (Fetch.login(username, password)){
             window.location.href = '/social-media-app';
-        } catch (error) {
-            console.error('Login error:', error);
+        } else {
             setError('Invalid username or password');
         }
+        
     };
 
     return (
