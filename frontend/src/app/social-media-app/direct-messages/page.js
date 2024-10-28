@@ -17,6 +17,12 @@ const DirectMessages = () => {
     const [isSendDisabled, setIsSendDisabled] = useState(true);
     const [conversation, setConversation] = useState([]); // holds received messages
     const stompClient = useRef(null); // websocket client ref
+    const [selectedCategory, setSelectedCategory] = useState('mutual');
+
+    // Placeholder arrays for friends categories
+    const mutualFriends = ['Alice', 'Bob', 'Charlie'];
+    const followers = ['David', 'Eva'];
+    const following = ['Frank', 'Grace'];
 
     // Fetch User ID and username when the component mounts
     useEffect(() => {
@@ -138,6 +144,9 @@ const DirectMessages = () => {
         }
     };
     
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+    };
 
      return (
         <div className={styles.container}>
@@ -160,16 +169,70 @@ const DirectMessages = () => {
                     <button type="submit" className={styles.button}>
                         Start Chat
                     </button>
+                    
+                    <div className={styles.dropdownContainer}>
+                        <label htmlFor="friendsDropdown" className={styles.dropDownLabel}>
+                            view:
+                        </label>
+                        <select
+                            id="friendsDropdown"
+                            className={styles.dropDownMenu}
+                            value={selectedCategory}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="mutual">Mutuals </option>
+                            <option value="followers">Followers</option>
+                            <option value="following">Following</option>
+                        </select>
+                    </div>
+                    {
+                    /*
+                    *
+                    * start the display of Mutuals, Friends, Followers
+                    *
+                    */
+                    }
+                    <div className={styles.listContainer}>
+                        {selectedCategory === 'mutual' && (
+                            <ul>
+                                {mutualFriends.map((friend, index) => (
+                                <li key={index}>{friend}</li>
+                                ))}
+                            </ul>
+                        )}
+
+                        {selectedCategory === 'followers' && (
+                            <ul>
+                                {followers.map((friend, index) => (
+                                <li key={index}>{friend}</li>
+                                ))}
+                            </ul>
+                        )}
+
+                        {selectedCategory === 'following' && (
+                            <ul>
+                                {following.map((friend, index) => (
+                                <li key={index}>{friend}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
                 </form>
             </aside>
             {/* END Select user to chat */}
-
+            
+            
             {/* Chat Area */}
             <main className={styles.chatArea}>
                 <h2 className={styles.chatHeader}>Conversation with {otherId || 'No one selected'}</h2>
                 <div className={styles.conversationArea}>
                     {conversation.map((msg, index) => (
-                        <div key={index} className={styles.messageBubble}>
+                        <div 
+                            key={index} 
+                            className={`${styles.messageBubble} ${
+                                msg.senderId === userID ? styles.sentBubble : styles.receivedBubble
+                            }`} 
+                        >
                             <strong>{msg.senderId === userId ? currentUsername : inputUsername}: </strong>
                             {msg.body}
                         </div>
