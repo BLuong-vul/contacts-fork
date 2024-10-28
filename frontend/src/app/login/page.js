@@ -15,8 +15,8 @@ const LoginForm = () => {
         // Clear any previous error
         setError('');
 
-        if (Fetch.login(username, password)){
-            window.location.href = '/social-media-app';
+        if (await Fetch.login(username, password)){
+            // window.location.href = '/social-media-app';
         } else {
             setError('Invalid username or password');
         }

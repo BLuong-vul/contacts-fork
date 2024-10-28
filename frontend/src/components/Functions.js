@@ -291,8 +291,8 @@ export async function validateTokenWithRedirect(){
 		return true;
 	} catch (error){
 		console.error('Login expired. Redirecting to login page.');
-		localStorage.removeItem('token');
-		window.location.href = '/login';
+		// localStorage.removeItem('token');
+		// window.location.href = '/login';
 		return false;
 	}
 }
