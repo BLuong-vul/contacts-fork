@@ -19,6 +19,11 @@ const DirectMessages = () => {
     const stompClient = useRef(null); // websocket client ref
 	const [selectedCategory, setSelectedCategory] = useState('mutual');
 
+	// Placeholder arrays for friends categories
+	const mutualFriends = ['Alice', 'Bob', 'Charlie'];
+	const followers = ['David', 'Eva'];
+	const following = ['Frank', 'Grace'];
+
     // Fetch User ID and username when the component mounts
     useEffect(() => {
         const fetchUserId = async () => {
