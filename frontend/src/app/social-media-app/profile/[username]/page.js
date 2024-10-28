@@ -36,7 +36,7 @@ export default function ProfilePage({ params }) {
 
         // Check if we are logged in
         // console.log("DEBUG: checking login...");
-        if (await Fetch.validateToken("THIS ARG IS FOR DEBUGGING CONVENIENCE, REMOVE IT LATER")){
+        if (await Fetch.validateToken()){
           // console.log("DEBUG: logged in");
           //If logged in, check if already following
           const isFollowing = await Fetch.isFollowing(data.username);
@@ -52,7 +52,7 @@ export default function ProfilePage({ params }) {
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
-    if (Fetch.validateTokenWithRedirect("THIS ARG IS FOR DEBUGGING CONVENIENCE, REMOVE IT LATER")){
+    if (Fetch.validateTokenWithRedirect()){
       //If logged in, check if already following
       const isFollowing = await Fetch.isFollowing(profileData.username);
       setIsFollowing(isFollowing);
