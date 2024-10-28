@@ -14,7 +14,7 @@ const nextConfig = {
     	return [
     		{
     			source: '/api/:path*',
-    			destination: 'http://four800-webapp.onrender.com/:path*'
+    			destination: 'https://four800-webapp.onrender.com/:path*'
     		},
     	];
     },

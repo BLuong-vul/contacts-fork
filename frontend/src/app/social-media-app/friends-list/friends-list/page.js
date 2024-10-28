@@ -4,10 +4,11 @@ import styles from './friends-list.module.css'; // adjust the path as necessary
 import Link from 'next/link';
 import { validateTokenWithRedirect } from '../../../components/Functions';
 
-export default function FriendsListPage() {
+export default function FollowersListPage() {
     const [userId, setUserId] = useState('');
     const [currentUsername, setCurrentUsername] = useState('');
-    const [followedUsers, setFollowedUsers] = useState([]);
+    const [followingUsers, setFollowingUsers] = useState([]);
+    const [followers, setFollowers] = useState([]);
 
     // Initialize everything on mount
     useEffect(() => {
@@ -16,7 +17,7 @@ export default function FriendsListPage() {
                 const token = localStorage.getItem('token');
                 validateTokenWithRedirect(token);
 
-                const res = await fetch(`http://localhost:8080/user/info`, {
+                const res = await fetch(`/api/user/info`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -31,16 +32,28 @@ export default function FriendsListPage() {
                 setCurrentUsername(result.username);
                 console.log(result);
 
-
-                const followedRes = await fetch('http://localhost:8080/user/following/list', {
+                // Following users list
+                const followingRes = await fetch('/api/user/following/list', {
                     headers: {
                       'Authorization': `Bearer ${token}`,
                     },
                 });
 
-                if (!followedRes.ok) throw new Error('Failed to fetch followed users: ' + followedRes.statusText);
-                const followedUsersJson = await followedRes.json();
-                setFollowedUsers(followedUsersJson);
+                if (!followingRes.ok) throw new Error('Failed to fetch followed users: ' + followingRes.statusText);
+                const followingUsersJson = await followingRes.json();
+                setFollowingUsers(followingUsersJson);
+
+
+                // Followers list
+                const followersRes = await fetch('/api/user/followers/list', {
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!followersRes.ok) throw new Error('Failed to fetch followed users: ' + followersRes.statusText);
+                const followersJson = await followersRes.json();
+                setFollowers(followersJson);
             } catch (error) {
                 console.error('Error fetching ID:', error);
                 throw error;
