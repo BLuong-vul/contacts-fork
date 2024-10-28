@@ -1,13 +1,148 @@
 import Post from "./Post";
 
+const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
+
+
+// Returns JSON list of users following us
+export async function getFollowersList(){
+	const token = localStorage.getItem('token');
+	validateTokenWithRedirect();
+
+	const followerRes = await fetch(`${baseURL}/user/followers/list`, {
+	    headers: {
+	      'Authorization': `Bearer ${token}`,
+	    },
+	});
+
+	if (!followerRes.ok) throw new Error('Failed to fetch followed users: ' + followerRes.statusText);
+
+	const followersJson = await followerRes.json();
+	return followersJson;
+}
+
+// Returns JSON list of users we are following
+export async function getFollowingList(){
+	const token = localStorage.getItem('token');
+	validateTokenWithRedirect();
+
+	const followingRes = await fetch(`${baseURL}/user/following/list`, {
+	    headers: {
+	      'Authorization': `Bearer ${token}`,
+	    },
+	});
+
+	if (!followingRes.ok) throw new Error('Failed to fetch followed users: ' + followingRes.statusText);
+
+	const followingUsersJson = await followingRes.json();
+	return followingUsersJson;
+}
+
+
+// Gets info for the current logged in user, like ID and username
+export async function getCurrentUserInfo(){
+	const token = localStorage.getItem('token');
+	validateTokenWithRedirect();
+
+	const res = await fetch(`${baseURL}/user/info`, {
+	    method: 'GET',
+	    headers: {
+	        'Authorization': `Bearer ${token}`,
+	        'Content-Type': 'application/json',
+	    },
+	});
+
+	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
+
+	const result = await res.json();
+	return result;
+}
+
+
+// Uploads a post to the database
+// Post should be in this format:
+			// const newPost = {
+			// 	title: postTitle,
+			// 	text: postText
+			// };
+export async function uploadPost(postDTO){
+	const token = localStorage.getItem('token');
+	validateToken()
+
+	try {
+		const response = await fetch(`${baseURL}/post/new`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(postDTO)
+		});
+
+		if (!response.ok){
+			throw new Error('Failed to create post: ' + response.statusText);
+		}
+
+		const createdPost = await response.json();
+		console.log("Post upload successful", createdPost);
+		return createdPost;
+	} catch (error){
+		console.error('Error creating post:', error);
+		throw error;
+	}
+}
+
+
+// Tries to fetch all posts
+export async function fetchAllPosts(){
+	const page=0;
+	const size=10;
+	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
+	if (!response.ok){
+		throw new Error('Network response not ok ' + response.statusText);
+	}
+	const pagedData = await response.json();
+
+	const posts = pagedData.content.map(postData => new Post(postData));
+	return posts;
+}
+
+
+// Tries to log in
+// Returns true if successful, false otherwise
+export async function login(username, password){
+	try {
+		const loginData = { username, password };
+	    const response = await fetch(`${baseURL}/auth/login`, {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'application/json',
+	        },
+	        body: JSON.stringify(loginData),
+	    });
+
+	    if (!response.ok) {
+	        throw new Error('Invalid username or password');
+	    }
+
+	    const result = await response.json();
+
+	    // Store JWT in localStorage
+	    localStorage.setItem('token', result.jwt);
+
+	    return true;
+	} catch (error) {
+	    console.error('Login error:', error);
+	    return false;
+	}
+}
 
 // Tries to unfollow a user by ID
 // Returns true if successful, false otherwise
 export async function unfollowUser(followeeId){
 	try {
 		const token = localStorage.getItem('token');
-		const res = await fetch(`/api/user/unfollow/${followeeId}`, {
+		const res = await fetch(`${baseURL}/user/unfollow/${followeeId}`, {
 		method: 'POST',
 		headers: {
 			  'Authorization': `Bearer ${token}`,
@@ -29,7 +164,7 @@ export async function unfollowUser(followeeId){
 export async function followUser(followeeId){
 	try {
 		const token = localStorage.getItem('token');
-		const res = await fetch(`/api/user/follow/${followeeId}`, {
+		const res = await fetch(`${baseURL}/user/follow/${followeeId}`, {
 		method: 'POST',
 		headers: {
 			  'Authorization': `Bearer ${token}`,
@@ -51,7 +186,7 @@ export async function followUser(followeeId){
 export async function isFollowing(followeeUsername){
 	try{
 		const token = localStorage.getItem('token');
-		const followedRes = await fetch('/api/user/following/list', {
+		const followedRes = await fetch(`${baseURL}/user/following/list`, {
 		  headers: {
 		    'Authorization': `Bearer ${token}`,
 		  },
@@ -71,7 +206,7 @@ export async function isFollowing(followeeUsername){
 // Returns it as json
 export async function getPublicInfo(username){
 	try{
-		const res = await fetch(`/api/user/public-info?username=${username}`);
+		const res = await fetch(`${baseURL}/user/public-info?username=${username}`);
 		if (!res.ok) throw new Error("Failed to fetch data");
 		const data = await res.json();
 
@@ -90,7 +225,7 @@ export async function getPostsByUser(username){
 		const page=0;
 		const size=10;
 
-		const postRes = await fetch(`/api/post/by-user?username=${username}&page=${page}&size=${size}`);
+		const postRes = await fetch(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
 		if (!postRes.ok) throw new Error('Network response not ok ' + postRes.statusText);
 		
 		const pagedData = await postRes.json();
@@ -105,15 +240,15 @@ export async function getPostsByUser(username){
 // Checks for token and if it is valid
 // Deletes token if not valid
 // Returns true if valid, false if not
-export async function validateToken(temp){
-	const token = temp;
+export async function validateToken(){
+	const token = localStorage.getItem('token');
 	if (!token){
 		console.log('User not logged in.');
 		return false;
 	}
 
 	try {
-		const response = await fetch('/api/auth/validate', {
+		const response = await fetch(`${baseURL}/auth/validate`, {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -126,7 +261,7 @@ export async function validateToken(temp){
 		return true;
 	} catch (error){
 		console.log('Login expired.');
-		//localStorage.removeItem('token');
+		localStorage.removeItem('token');
 		return false;
 	}
 }
@@ -134,8 +269,8 @@ export async function validateToken(temp){
 // Checks for token and if it is valid
 // Deletes token if not valid
 // Redirects if not valid
-export async function validateTokenWithRedirect(temp){
-	const token = temp;
+export async function validateTokenWithRedirect(){
+	const token = localStorage.getItem('token');
 	if (!token){
 		console.log('User not logged in. Redirecting to login page.');
 		window.location.href = '/login'; 
@@ -143,7 +278,7 @@ export async function validateTokenWithRedirect(temp){
 	}
 
 	try {
-		const response = await fetch('/api/auth/validate', {
+		const response = await fetch(`${baseURL}/auth/validate`, {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${token}`,
@@ -156,8 +291,8 @@ export async function validateTokenWithRedirect(temp){
 		return true;
 	} catch (error){
 		console.error('Login expired. Redirecting to login page.');
-		//localStorage.removeItem('token');
-		//window.location.href = '/login';
+		localStorage.removeItem('token');
+		window.location.href = '/login';
 		return false;
 	}
 }

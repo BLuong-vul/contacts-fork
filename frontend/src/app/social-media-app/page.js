@@ -9,56 +9,10 @@ import Link from 'next/link';
 import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
-import { validateToken } from '../../components/Functions';
+import * as Fetch from '../../components/Functions';
 
 import { Post } from './Post.js';
 
-
-
-
-// This does not currently actually fetch posts before a current date
-// It just gets all posts.
-async function fetchPostsBeforeDate(date){
-	const page=0;
-	const size=10;
-	const response = await fetch(`/api/post/all?page=${page}&size=${size}`);
-	if (!response.ok){
-		throw new Error('Network response not ok ' + response.statusText);
-	}
-	const pagedData = await response.json();
-	// console.log(pagedData.content);
-
-	const posts = pagedData.content.map(postData => new Post(postData));
-	// console.log(posts);
-	return posts;
-}
-
-async function uploadPost(postDTO){
-	const token = localStorage.getItem('token');
-	validateToken(token)
-
-	try {
-		const response = await fetch('/api/post/new', {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(postDTO)
-		});
-
-		if (!response.ok){
-			throw new Error('Failed to create post: ' + response.statusText);
-		}
-
-		const createdPost = await response.json();
-		console.log("Post upload successful", createdPost);
-		return createdPost;
-	} catch (error){
-		console.error('Error creating post:', error);
-		throw error;
-	}
-}
 
 
 export default function Projects() {
@@ -124,8 +78,8 @@ export default function Projects() {
 				// video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
 			};
 			
-			await uploadPost(newPost);
-			const updatedPosts = await fetchPostsBeforeDate('');
+			await Fetch.uploadPost(newPost);
+			const updatedPosts = await Fetch.fetchAllPosts();
 			setPosts(updatedPosts);
 			
 			// reset form once submission is done
@@ -143,7 +97,7 @@ export default function Projects() {
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {
 	        try {
-	            const fetchedPosts = await fetchPostsBeforeDate('2025-01-30');
+	            const fetchedPosts = await Fetch.fetchAllPosts();
 	            setPosts(fetchedPosts); 
 	        } catch (error) {
 	            console.error('Error fetching posts:', error);

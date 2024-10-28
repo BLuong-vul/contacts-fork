@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import styles from './friends-list.module.css'; // adjust the path as necessary
 import Link from 'next/link';
-import { validateTokenWithRedirect } from '../../../components/Functions';
+import * as Fetch from '../../../components/Functions';
 
 export default function FollowersListPage() {
     const [userId, setUserId] = useState('');
@@ -14,46 +14,20 @@ export default function FollowersListPage() {
     useEffect(() => {
         const fetchUserId = async () => {
             try {
-                const token = localStorage.getItem('token');
-                validateTokenWithRedirect(token);
+                const currentUserInfo = await Fetch.getCurrentUserInfo();
 
-                const res = await fetch(`/api/user/info`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
-
-                const result = await res.json();
-                setUserId(result.userId);
-                setCurrentUsername(result.username);
-                console.log(result);
+                setUserId(currentUserInfo.userId);
+                setCurrentUsername(currentUserInfo.username);
+                console.log(currentUserInfo);
 
                 // Following users list
-                const followingRes = await fetch('/api/user/following/list', {
-                    headers: {
-                      'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!followingRes.ok) throw new Error('Failed to fetch followed users: ' + followingRes.statusText);
-                const followingUsersJson = await followingRes.json();
-                setFollowingUsers(followingUsersJson);
+                const followingRes = await Fetch.getFollowingList();
+                setFollowingUsers(followingRes);
 
 
                 // Followers list
-                const followersRes = await fetch('/api/user/followers/list', {
-                    headers: {
-                      'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!followersRes.ok) throw new Error('Failed to fetch followed users: ' + followersRes.statusText);
-                const followersJson = await followersRes.json();
-                setFollowers(followersJson);
+                const followersRes = await Fetch.getFollowersList();
+                setFollowers(followersRes);
             } catch (error) {
                 console.error('Error fetching ID:', error);
                 throw error;
@@ -72,13 +46,27 @@ export default function FollowersListPage() {
                 <h1 className={styles.title}>Mutuals</h1>
                 {/* Following Section*/}
             </div>
+            {/*Followers section */}
             <div className={styles.section}>
                 <h1 className={styles.title}>Followers</h1>
-                {/*Followers section */}
+                <ul className={styles.friendList}>
+                    {followers.map(user => (
+                        <li key={user.userId} className={styles.friendItem}>
+                            {user.username}
+                        </li>
+                    ))}
+                </ul>
             </div>
+            {/* Following Section*/}
             <div className={styles.section}>
                 <h1 className={styles.title}>Following</h1>
-                {/* Following Section*/}
+                <ul className={styles.friendList}>
+                    {followingUsers.map(user => (
+                        <li key={user.userId} className={styles.friendItem}>
+                            {user.username}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </div>
     );

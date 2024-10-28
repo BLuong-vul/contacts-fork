@@ -1,5 +1,4 @@
 // next.config.mjs
-/** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
     images: {
@@ -10,13 +9,10 @@ const nextConfig = {
             },
         ],
     },
-    async rewrites() {
-    	return [
-    		{
-    			source: '/api/:path*',
-    			destination: 'https://four800-webapp.onrender.com/:path*'
-    		},
-    	];
+    env: {
+        BASE_API_URL: process.env.NODE_ENV === 'production'
+            ? 'https://four800-webapp.onrender.com'
+            : 'http://localhost:8080',
     },
 };
 
