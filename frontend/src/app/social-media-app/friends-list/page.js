@@ -68,28 +68,17 @@ export default function FollowersListPage() {
 
     return (
         <div className={styles.friendsContainer}>
-
-            {/* Followed Users */}
-            <div className="mr-64">
-                <h1 className={styles.title}>Follows</h1>
-                <ul className={styles.friendList}>
-                    {followingUsers.map(user => (
-                        <li key={user.userId} className={styles.friendItem}>
-                            {user.username}
-                        </li>
-                    ))}
-                </ul>
+            <div className={styles.section}>
+                <h1 className={styles.title}>Mutuals</h1>
+                {/* Following Section*/}
             </div>
-
-            <div>
-                <h1 className={styles.title}>Your Followers</h1>
-                <ul className={styles.friendList}>
-                    {followers.map(user => (
-                        <li key={user.userId} className={styles.friendItem}>
-                            {user.username}
-                        </li>
-                    ))}
-                </ul>
+            <div className={styles.section}>
+                <h1 className={styles.title}>Followers</h1>
+                {/*Followers section */}
+            </div>
+            <div className={styles.section}>
+                <h1 className={styles.title}>Following</h1>
+                {/* Following Section*/}
             </div>
         </div>
     );
