@@ -36,7 +36,7 @@ public class ReplyService {
         Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
         Post post = postService.loadPostById(postId);
-
+        /*Design Pattern: Builder*/
         Reply newReply = Reply.builder()
         .author(postingUser)
         .post(post)
@@ -44,7 +44,7 @@ public class ReplyService {
         .text(replyDTO.getText())
         .parentReply(replyDTO.getParentReply()) // If parentReply is nullable, this can be null
         .build();
-        
+        /*Design Pattern: Builder*/
         return replyRepository.save(newReply);
     }
     
