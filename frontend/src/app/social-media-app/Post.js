@@ -14,7 +14,7 @@ export class Post {
         this.video = postData.video;
         this.likes = postData.likes || 0;
         this.dislikes = postData.dislikes || 0;
-        this.comments = postData.comments || []; //Initializes comments
+        //this.comments = postData.comments || []; //Initializes comments
     }
     renderComments(){
         return(
@@ -46,7 +46,7 @@ export class Post {
                     </video>
                 )}
                 {/* Render comments at the bottom of the post */}
-                {this.renderComments()}
+                {/*this.renderComments()*/}
             </div>
         );
     }
