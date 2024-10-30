@@ -30,13 +30,14 @@ public class NotificationService {
         notificationRepository.saveAndFlush(notification);
 
         long userId = notification.getAssociatedUser().getId();
-
+        /*Design Pattern: Builder*/
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .notificationId(notification.getId())
                 .notificationBody(notification.getNotificationBody())
                 .timeCreated(notification.getTimeCreated())
                 .build();
-
+        /*Design Pattern: Builder*/
+        
         // send notification to user.
         messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/notifications", notificationDTO);
     }

@@ -33,14 +33,14 @@ public class PostService {
 
         Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
-
+        /*Design Pattern: Builder*/
         Post newPost = Post.builder()
                 .postedBy(postingUser)
                 .datePosted(date)
                 .title(postDTO.getTitle())
                 .text(postDTO.getText())
                 .build();
-
+        /*Design Pattern: Builder*/
         return postRepository.save(newPost);
     }
 

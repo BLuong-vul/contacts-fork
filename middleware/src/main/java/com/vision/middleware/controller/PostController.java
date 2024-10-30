@@ -33,8 +33,9 @@ public class PostController {
     public ResponseEntity<Page<PostDTO>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
         Page<Post> posts = postService.getAllPosts(page, size);
-
+        
         Page<PostDTO> postsDTO = posts.map(
+                /*Design Pattern: Builder*/
                 post -> PostDTO.builder()
                         .datePosted(post.getDatePosted())
                         .dislikeCount(post.getDislikeCount())
@@ -46,6 +47,7 @@ public class PostController {
                                         .build()
                         )
                         .build()
+                /*Design Pattern: Builder*/
         );
 
         return ResponseEntity.ok(postsDTO);
