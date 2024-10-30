@@ -1,6 +1,7 @@
 import Image from "next/image";
 import styles from './social-media-homepage.module.css';
 import Link from 'next/link';
+import { comment } from "postcss";
 
 
 export class Post {
@@ -13,8 +14,20 @@ export class Post {
         this.video = postData.video;
         this.likes = postData.likes || 0;
         this.dislikes = postData.dislikes || 0;
+        this.comments = postData.comments || []; //Initializes comments
     }
-
+    renderComments(){
+        return(
+            <div className={styles.commentsContainer}>
+                {this.comments.map((comment, index) => (
+                    <div key={index} className={styles.comment}>
+                        <span className={styles.commentAuthor}>{commentAuthor}</span>
+                        <p className={styles.commentText}>{comment.text}</p>
+                    </div>
+                ))}
+            </div>
+        );
+    }
     render() {
         return (
             <div key={this.id} className={styles.post}>
@@ -32,8 +45,8 @@ export class Post {
                         Your browser does not support the video tag.
                     </video>
                 )}
-
-
+                {/* Render comments at the bottom of the post */}
+                {this.renderComments()}
             </div>
         );
     }
