@@ -9,12 +9,11 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Getter
-@Setter
 @Component
 public class RSAKeyProperties {
 
-    private RSAPublicKey publicKey;
-    private RSAPrivateKey privateKey;
+    private final RSAPublicKey publicKey;
+    private final RSAPrivateKey privateKey;
 
     public RSAKeyProperties() {
         KeyPair pair = KeyGeneratorUtility.generateRsaKey();
