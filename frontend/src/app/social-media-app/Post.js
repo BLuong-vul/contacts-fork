@@ -21,7 +21,7 @@ export class Post {
             <div className={styles.commentsContainer}>
                 {this.comments.map((comment, index) => (
                     <div key={index} className={styles.comment}>
-                        <span className={styles.commentAuthor}>{commentAuthor}</span>
+                        <span className={styles.commentAuthor}>{comment.author}</span>
                         <p className={styles.commentText}>{comment.text}</p>
                     </div>
                 ))}
