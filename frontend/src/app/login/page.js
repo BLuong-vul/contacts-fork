@@ -24,7 +24,7 @@ const LoginForm = () => {
     };
 
     return (
-        <main>
+        <div>
             <div className={styles.container}>
                 <aside className="bg-white w-full max-w-md rounded-xl bg-opacity-20 shadow-lg shadow-black">
                     <h1 className="text-center text-black font-light text-4xl bg-navy rounded-t-xl m-0 py-4">Sign In</h1>
@@ -51,7 +51,7 @@ const LoginForm = () => {
                     </form>
                 </aside>
             </div>
-        </main>
+        </div>
     );
 };
 
