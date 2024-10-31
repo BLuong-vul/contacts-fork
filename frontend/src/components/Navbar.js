@@ -13,11 +13,11 @@ const Navbar = () => {
   const [username, setUsername] = useState("Login"); 
   useEffect(() => {
     const init = async() => {
-      const info = await Fetch.tryGetCurrentUserInfo();
-      if (info == null){
+      if(!Fetch.validateToken()){
         return;
+      } else {
+        setUsername("Account");
       }
-      setUsername(info.username);
     }
     init();
   }, []); 
