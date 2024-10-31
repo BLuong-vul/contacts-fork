@@ -1,18 +1,32 @@
 /** Need to import -> npm install @mui/material @emotion/react @emotion/styled @mui/icons-material */
 'use client'
+import { useState, useEffect } from 'react';
 import * as React from "react";
 import '../app/styles/app.layout.css'
 import Link from "next/link";
 import Image from "next/image";
 import MobileMenu from "../app//styles/mobile.menu";
+import * as Fetch from "./Functions";
 
 
 const Navbar = () => {
+  const [username, setUsername] = useState("Login"); 
+  useEffect(() => {
+    const init = async() => {
+      const info = await Fetch.tryGetCurrentUserInfo();
+      if (info == null){
+        return;
+      }
+      setUsername(info.username);
+    }
+    init();
+  }, []); 
+
   return (
     <div className="h-24 flex items-center justify-between">
       {/* LEFT */}
       <div className="md:hidden lg:block w-[20%]">
-        <Link href="/" className="font-bold text-xl text-blue-600">
+        <Link href="/social-media-app" className="font-bold text-xl text-blue-600">
           CONT@CTS
         </Link>
       </div>
@@ -47,7 +61,7 @@ const Navbar = () => {
         </div>
       </div>
       {/* RIGHT */}
-      <div className="w-[30%] flex items-center gap-4 xl:gap-8 justify-end">
+      <div className="w-[30%] flex items-center gap-4 xl:gap-8 mr-8 justify-end">
             <div className="cursor-pointer">
               <Image src="/people.png" alt="" width={24} height={24} />
             </div>
@@ -59,7 +73,7 @@ const Navbar = () => {
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Image src="/login.png" alt="" width={20} height={20} />
-              <Link href="/sign-up">Login/Register</Link>
+              <Link href="/login">{username}</Link>
             </div>
             <MobileMenu/>
       </div>

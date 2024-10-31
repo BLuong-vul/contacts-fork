@@ -40,9 +40,32 @@ export async function getFollowingList(){
 
 
 // Gets info for the current logged in user, like ID and username
+// Redirects to login page if unsuccessful
 export async function getCurrentUserInfo(){
 	const token = localStorage.getItem('token');
 	validateTokenWithRedirect();
+
+	const res = await fetch(`${baseURL}/user/info`, {
+	    method: 'GET',
+	    headers: {
+	        'Authorization': `Bearer ${token}`,
+	        'Content-Type': 'application/json',
+	    },
+	});
+
+	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
+
+	const result = await res.json();
+	return result;
+}
+
+// Gets info for the current logged in user, like ID and username
+// Returns null if not logged in
+export async function tryGetCurrentUserInfo(){
+	const token = localStorage.getItem('token');
+	if (!validateToken()){
+		return null;
+	}
 
 	const res = await fetch(`${baseURL}/user/info`, {
 	    method: 'GET',
