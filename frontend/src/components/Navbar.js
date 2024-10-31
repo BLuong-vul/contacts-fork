@@ -11,12 +11,15 @@ import * as Fetch from "./Functions";
 
 const Navbar = () => {
   const [username, setUsername] = useState("Login"); 
+  const [accountUrl, setAccountUrl] = useState("/login");
   useEffect(() => {
     const init = async() => {
-      if(!Fetch.validateToken()){
-        return;
+      if(!(await Fetch.validateToken())){
+        setUsername("Login");
+        setAccountUrl("/login");
       } else {
         setUsername("Account");
+        setAccountUrl("/social-media-app/account");
       }
     }
     init();
@@ -73,7 +76,7 @@ const Navbar = () => {
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Image src="/login.png" alt="" width={20} height={20} />
-              <Link href="/login">{username}</Link>
+              <Link href={accountUrl}>{username}</Link>
             </div>
             <MobileMenu/>
       </div>

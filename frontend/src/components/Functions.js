@@ -2,6 +2,9 @@ import Post from "./Post";
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
+export async function logout(){
+	localStorage.removeItem('token');
+}
 
 
 // Returns JSON list of users following us
