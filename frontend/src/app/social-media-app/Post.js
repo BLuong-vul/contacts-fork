@@ -1,7 +1,11 @@
+/*import Image from "next/image";
+import styles from './social-media-homepage.module.css';
+import Link from 'next/link';
+import { comment } from "postcss";*/
+import React, { useState } from "react";
 import Image from "next/image";
 import styles from './social-media-homepage.module.css';
 import Link from 'next/link';
-import { comment } from "postcss";
 
 
 export class Post {
@@ -28,12 +32,20 @@ export class Post {
             </div>
         );
     }
+    handleComment(commentText) {
+        if (commentText.trim() !== "") {
+            // Assuming the comment's author is the logged-in user.
+            this.comments.push({ author: "LoggedUser", text: commentText });
+            this.setState({ commentText: "" });
+        }
+    }
     render() {
+        const [commentText, setCommentText] = useState("");
         return (
             <div key={this.id} className={styles.post}>
                 <Link href={`/social-media-app/profile/${this.author}`} className={styles.postAuthor}>
-                                    {this.author}
-                                </Link>
+                    {this.author}
+                </Link>
                 <h3 className={styles.postTitle}>{this.title}</h3>
                 <p className={styles.postText}>{this.text}</p>
                 {this.image && (
@@ -45,6 +57,26 @@ export class Post {
                         Your browser does not support the video tag.
                     </video>
                 )}
+
+                <div className={styles.postButtons}>
+                    <button onClick={() => this.like()}>{`Like (${this.likes})`}</button>
+                    <button onClick={() => this.dislike()}>{`Dislike (${this.dislikes})`}</button>
+                </div>
+
+                {/* Create Comment Section */}
+                <div className={styles.createComment}>
+                    <input
+                        type="text"
+                        placeholder="Write a comment..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        className={styles.commentInput}
+                    />
+                    <button onClick={() => this.handleComment(commentText)} className={styles.createCommentButton}>
+                        Create Comment
+                    </button>
+                </div>
+
                 {/* Render comments at the bottom of the post */}
                 {this.renderComments()}
             </div>
