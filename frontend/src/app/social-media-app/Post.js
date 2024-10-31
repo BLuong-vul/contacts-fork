@@ -32,15 +32,41 @@ export class Post {
             </div>
         );
     }
-    handleComment(commentText) {
-        if (commentText.trim() !== "") {
-            // Assuming the comment's author is the logged-in user.
-            this.comments.push({ author: "LoggedUser", text: commentText });
-            this.setState({ commentText: "" });
-        }
-    }
     render() {
         const [commentText, setCommentText] = useState("");
+        const [userRating, setUserRating] = useState(null); // Track user's rating
+        const handleLike = () => {
+            if (userRating === "like") {
+                this.likes -= 1;  // Remove like
+                setUserRating(null);  // Reset rating
+            } else {
+                if (userRating === "dislike") {
+                    this.dislikes -= 1;  // Remove dislike
+                }
+                this.likes += 1;  // Add like
+                setUserRating("like");  // Update rating to like
+            }
+        };
+
+        const handleDislike = () => {
+            if (userRating === "dislike") {
+                this.dislikes -= 1;  // Remove dislike
+                setUserRating(null);  // Reset rating
+            } else {
+                if (userRating === "like") {
+                    this.likes -= 1;  // Remove like
+                }
+                this.dislikes += 1;  // Add dislike
+                setUserRating("dislike");  // Update rating to dislike
+            }
+        };
+
+        const handleComment = (text) => {
+            if (text.trim() !== "") {
+                this.comments.push({ author: "LoggedUser", text });
+                setCommentText("");
+            }
+        };
         return (
             <div key={this.id} className={styles.post}>
                 <Link href={`/social-media-app/profile/${this.author}`} className={styles.postAuthor}>
@@ -59,8 +85,14 @@ export class Post {
                 )}
 
                 <div className={styles.postButtons}>
-                    <button onClick={() => this.like()}>{`Like (${this.likes})`}</button>
-                    <button onClick={() => this.dislike()}>{`Dislike (${this.dislikes})`}</button>
+                    <button
+                        onClick={handleLike}
+                        className={userRating === "like" ? styles.activeButton : ""}
+                    >{`Like (${this.likes})`}</button>
+                    <button
+                        onClick={handleDislike}
+                        className={userRating === "dislike" ? styles.activeButton : ""}
+                    >{`Dislike (${this.dislikes})`}</button>
                 </div>
 
                 {/* Create Comment Section */}
@@ -72,7 +104,7 @@ export class Post {
                         onChange={(e) => setCommentText(e.target.value)}
                         className={styles.commentInput}
                     />
-                    <button onClick={() => this.handleComment(commentText)} className={styles.createCommentButton}>
+                    <button onClick={() => handleComment(commentText)} className={styles.createCommentButton}>
                         Create Comment
                     </button>
                 </div>
@@ -89,11 +121,11 @@ export class Post {
     //     <button>{`Dislike (${this.dislikes})`}</button>
     // </div>
 
-    like() {
+    /*like() {
         this.likes += 1;
     }
 
     dislike() {
         this.dislikes += 1;
-    }
+    }*/
 }

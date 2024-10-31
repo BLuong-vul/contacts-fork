@@ -129,7 +129,7 @@
   font-size: 0.75rem;
 }
 
-/* Begin like, dislike, and comment buttons */
+/* Begin like, dislike buttons */
 .postButtons {
 	display: flex;
 	gap: 10px;
@@ -150,7 +150,22 @@
 .postButtons button:hover {
 	background-color: #0056b3;
 }
-/* End like, dislike, and comment buttons */
+
+.activeButton {
+    background-color: #28a745; /* Change to green for active state */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.activeButton:hover {
+    background-color: #218838;
+}
+
+/* End like, dislike buttons */
 
 /* Begin comments */
 /* Container for the Create Comment input and button */
