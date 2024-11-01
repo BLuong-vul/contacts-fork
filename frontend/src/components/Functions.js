@@ -86,15 +86,17 @@ export async function tryGetCurrentUserInfo(){
 
 
 // Uploads a post to the database
-// Post should be in this format:
+// postDTO should be in this format:
 			// const newPost = {
 			// 	title: postTitle,
 			// 	text: postText
 			// };
 export async function uploadPost(postDTO){
+	if (!(await validateToken())){
+		return false;
+	}
 	const token = localStorage.getItem('token');
-	validateToken()
-
+	
 	try {
 		const response = await fetch(`${baseURL}/post/new`, {
 			method: 'POST',
@@ -108,13 +110,12 @@ export async function uploadPost(postDTO){
 		if (!response.ok){
 			throw new Error('Failed to create post: ' + response.statusText);
 		}
-
-		const createdPost = await response.json();
-		console.log("Post upload successful", createdPost);
-		return createdPost;
+		console.log("Post upload successful");
+		return true;
 	} catch (error){
 		console.error('Error creating post:', error);
 		throw error;
+		return false;
 	}
 }
 

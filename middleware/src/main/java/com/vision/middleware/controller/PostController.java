@@ -23,10 +23,12 @@ public class PostController {
     @Autowired
     private final PostService postService;
 
+    // This used to return a Post and has been changed to just return an OK response entity. Oct 31 
     @PostMapping("/new")
-    public Post createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
+    public ResponseEntity<Void> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
-        return postService.createPost(postDTO, id);
+        Post createdPost = postService.createPost(postDTO, id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/all")

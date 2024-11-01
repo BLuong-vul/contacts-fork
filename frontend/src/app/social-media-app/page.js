@@ -11,7 +11,7 @@ import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
 
-import { Post } from './Post.js';
+import Post from '../../components/Post.js';
 
 
 
@@ -57,16 +57,13 @@ export default function Projects() {
 	const [postVideo, setPostVideo] = useState(null);
 	const [error, setError] = useState('');
 	
-	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
+	const toggleCreatePost = async () => {
+		if (await Fetch.validateTokenWithRedirect()){
+			setIsCreatingPost(!isCreatingPost)
+		}
+	};
 	
 	const handleCreatePost = async () => {
-		const token = localStorage.getItem('token');
-		if (!token) {
-		    console.error('User not authenticated. Redirecting to login page.');
-		    window.location.href = '/login'; 
-		    return;
-		}
-
 		if (!postText && !postImage && !postVideo) {
 			setError('Must enter text, or upload an image or video.')
 		}
