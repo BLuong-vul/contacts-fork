@@ -2,10 +2,45 @@ import Post from "./Post";
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
+
+export async function createAccount(userData){
+	const { confirmPassword, ...userPayload } = userData;
+
+	// Check if password and confirm password match
+	if (userData.password !== confirmPassword) {
+	  alert('Passwords do not match');
+	  return;
+	}
+
+	try {							
+	  const response = await fetch(`${baseURL}/auth/register`, {
+	    method: 'POST',
+	    headers: {
+	      'Content-Type': 'application/json',
+	    },
+	    body: JSON.stringify(userPayload),
+	  });
+
+	  if (!response.ok) {
+	    throw new Error(`Error: ${response.status}`);
+	  }
+
+	  const result = await response.json();
+	  console.log('User created successfully:', result);
+	  alert('Account creation successful!')
+
+	  window.location.href = '/login';
+	} catch (error) {
+	  console.error('Error:', error);
+	  alert('Account creation error')
+	}
+}
+
+
+// !!! TODO: Make this actually log out the user in the backend too by blacklisting the token
 export async function logout(){
 	localStorage.removeItem('token');
 }
-
 
 // Returns JSON list of users following us
 export async function getFollowersList(){

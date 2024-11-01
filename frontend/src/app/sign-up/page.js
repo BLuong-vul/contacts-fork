@@ -3,6 +3,7 @@
 import styles from '../styles/Home.module.css';
 import Link from 'next/link';
 import { useState } from 'react';
+import * as Fetch from '../../components/Functions';
 
 export default function SignUp() {
 	const [userData, setUserData] = useState({
@@ -27,36 +28,7 @@ export default function SignUp() {
 	};
 
 	const createUser = async () => {
-	    const { confirmPassword, ...userPayload } = userData;
-
-	    // Check if password and confirm password match
-	    if (userData.password !== confirmPassword) {
-	      alert('Passwords do not match');
-	      return;
-	    }
-
-	    try {							
-	      const response = await fetch('/api/auth/register', {
-	        method: 'POST',
-	        headers: {
-	          'Content-Type': 'application/json',
-	        },
-	        body: JSON.stringify(userPayload),
-	      });
-
-	      if (!response.ok) {
-	        throw new Error(`Error: ${response.status}`);
-	      }
-
-	      const result = await response.json();
-	      console.log('User created successfully:', result);
-	      alert('Account creation successful!')
-
-	      window.location.href = '/login';
-	    } catch (error) {
-	      console.error('Error:', error);
-	      alert('Account creation error')
-	    }
+	    Fetch.createAccount(userData);
 	};
 
     return(
