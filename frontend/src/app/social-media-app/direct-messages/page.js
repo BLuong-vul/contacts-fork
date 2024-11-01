@@ -4,8 +4,10 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
 
-import { validateTokenWithRedirect } from '../../../components/Functions';
+import * as Fetch from '../../../components/Functions';
 
+
+const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 
 const DirectMessages = () => {
@@ -27,30 +29,9 @@ const DirectMessages = () => {
     // Fetch User ID and username when the component mounts
     useEffect(() => {
         const fetchUserId = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                validateTokenWithRedirect(token);
-
-                const response = await fetch(`/api/user/info`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch ID: ' + response.statusText);
-                }
-
-                const result = await response.json();
-                console.log("Current user ID: " + result.userId);
-                setUserId(result.userId);
-                setCurrentUsername(result.username);
-            } catch (error) {
-                console.error('Error fetching ID:', error);
-                throw error;
-            }
+            const result = await Fetch.getCurrentUserInfo();
+            setUserId(result.userId);
+            setCurrentUsername(result.username);
         };
 
         fetchUserId();
@@ -60,7 +41,7 @@ const DirectMessages = () => {
     // websocket connection and subscription
     useEffect(() => {
         if (userId && otherId) {
-            const socket = new SockJS('/api/ws');
+            const socket = new SockJS(`${baseURL}/ws`);
             stompClient.current = Stomp.over(socket);
 
             stompClient.current.connect({}, () => {
@@ -110,7 +91,7 @@ const DirectMessages = () => {
         if (inputUsername.trim() !== '') {
             console.log('Starting chat with:', inputUsername);
             try {
-                const response = await fetch(`/api/user/id/${inputUsername}`);
+                const response = await fetch(`${baseURL}/user/id/${inputUsername}`);
 
                 if (!response.ok) {
                     throw new Error(`Network response not ok: ${response.statusText}`);
@@ -230,7 +211,7 @@ const DirectMessages = () => {
                         <div 
                             key={index} 
                             className={`${styles.messageBubble} ${
-                                msg.senderId === userID ? styles.sentBubble : styles.receivedBubble
+                                msg.senderId === userId ? styles.sentBubble : styles.receivedBubble
                             }`} 
                         >
                             <strong>{msg.senderId === userId ? currentUsername : inputUsername}: </strong>

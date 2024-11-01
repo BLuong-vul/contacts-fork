@@ -11,7 +11,7 @@ import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
 
-import { Post } from './Post.js';
+import Post from '../../components/Post.js';
 
 
 
@@ -57,16 +57,17 @@ export default function Projects() {
 	const [postVideo, setPostVideo] = useState(null);
 	const [error, setError] = useState('');
 	
-	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
+	const [posts, setPosts] = useState([]);
+	const [numPosts, setNumPosts] = useState(10)
+	
+
+	const toggleCreatePost = async () => {
+		if (await Fetch.validateTokenWithRedirect()){
+			setIsCreatingPost(!isCreatingPost)
+		}
+	};
 	
 	const handleCreatePost = async () => {
-		const token = localStorage.getItem('token');
-		if (!token) {
-		    console.error('User not authenticated. Redirecting to login page.');
-		    window.location.href = '/login'; 
-		    return;
-		}
-
 		if (!postText && !postImage && !postVideo) {
 			setError('Must enter text, or upload an image or video.')
 		}
@@ -91,8 +92,17 @@ export default function Projects() {
 		}
 	};
 
+	// If reach bottom of page, fetch some more posts
+	window.addEventListener('scroll', async () => {
+	    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+	        const fetchedPosts = await Fetch.fetchAllPosts(0, numPosts+5);
+	        setNumPosts(numPosts+5);
+	        setPosts(fetchedPosts);
+	    }
+	});
 
-	const [posts, setPosts] = useState([]);
+
+	
 	// Fetches posts from database and saves to "posts"
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {

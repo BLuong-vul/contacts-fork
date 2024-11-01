@@ -3,6 +3,44 @@ import Post from "./Post";
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 
+export async function createAccount(userData){
+	const { confirmPassword, ...userPayload } = userData;
+
+	// Check if password and confirm password match
+	if (userData.password !== confirmPassword) {
+	  alert('Passwords do not match');
+	  return;
+	}
+
+	try {							
+	  const response = await fetch(`${baseURL}/auth/register`, {
+	    method: 'POST',
+	    headers: {
+	      'Content-Type': 'application/json',
+	    },
+	    body: JSON.stringify(userPayload),
+	  });
+
+	  if (!response.ok) {
+	    throw new Error(`Error: ${response.status}`);
+	  }
+
+	  const result = await response.json();
+	  console.log('User created successfully:', result);
+	  alert('Account creation successful!')
+
+	  window.location.href = '/login';
+	} catch (error) {
+	  console.error('Error:', error);
+	  alert('Account creation error')
+	}
+}
+
+
+// !!! TODO: Make this actually log out the user in the backend too by blacklisting the token
+export async function logout(){
+	localStorage.removeItem('token');
+}
 
 // Returns JSON list of users following us
 export async function getFollowersList(){
@@ -40,6 +78,7 @@ export async function getFollowingList(){
 
 
 // Gets info for the current logged in user, like ID and username
+// Redirects to login page if unsuccessful
 export async function getCurrentUserInfo(){
 	const token = localStorage.getItem('token');
 	validateTokenWithRedirect();
@@ -58,17 +97,41 @@ export async function getCurrentUserInfo(){
 	return result;
 }
 
+// Gets info for the current logged in user, like ID and username
+// Returns null if not logged in
+export async function tryGetCurrentUserInfo(){
+	const token = localStorage.getItem('token');
+	if (!validateToken()){
+		return null;
+	}
+
+	const res = await fetch(`${baseURL}/user/info`, {
+	    method: 'GET',
+	    headers: {
+	        'Authorization': `Bearer ${token}`,
+	        'Content-Type': 'application/json',
+	    },
+	});
+
+	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
+
+	const result = await res.json();
+	return result;
+}
+
 
 // Uploads a post to the database
-// Post should be in this format:
+// postDTO should be in this format:
 			// const newPost = {
 			// 	title: postTitle,
 			// 	text: postText
 			// };
 export async function uploadPost(postDTO){
+	if (!(await validateToken())){
+		return false;
+	}
 	const token = localStorage.getItem('token');
-	validateToken()
-
+	
 	try {
 		const response = await fetch(`${baseURL}/post/new`, {
 			method: 'POST',
@@ -82,21 +145,18 @@ export async function uploadPost(postDTO){
 		if (!response.ok){
 			throw new Error('Failed to create post: ' + response.statusText);
 		}
-
-		const createdPost = await response.json();
-		console.log("Post upload successful", createdPost);
-		return createdPost;
+		console.log("Post upload successful");
+		return true;
 	} catch (error){
 		console.error('Error creating post:', error);
 		throw error;
+		return false;
 	}
 }
 
 
 // Tries to fetch all posts
-export async function fetchAllPosts(){
-	const page=0;
-	const size=10;
+export async function fetchAllPosts(page=0, size=10){
 	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
