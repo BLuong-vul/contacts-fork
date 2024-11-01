@@ -57,6 +57,10 @@ export default function Projects() {
 	const [postVideo, setPostVideo] = useState(null);
 	const [error, setError] = useState('');
 	
+	const [posts, setPosts] = useState([]);
+	const [numPosts, setNumPosts] = useState(10)
+	
+
 	const toggleCreatePost = async () => {
 		if (await Fetch.validateTokenWithRedirect()){
 			setIsCreatingPost(!isCreatingPost)
@@ -88,8 +92,17 @@ export default function Projects() {
 		}
 	};
 
+	// If reach bottom of page, fetch some more posts
+	window.addEventListener('scroll', async () => {
+	    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+	        const fetchedPosts = await Fetch.fetchAllPosts(0, numPosts+5);
+	        setNumPosts(numPosts+5);
+	        setPosts(fetchedPosts);
+	    }
+	});
 
-	const [posts, setPosts] = useState([]);
+
+	
 	// Fetches posts from database and saves to "posts"
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {

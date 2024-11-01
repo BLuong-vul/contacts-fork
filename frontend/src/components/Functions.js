@@ -121,9 +121,7 @@ export async function uploadPost(postDTO){
 
 
 // Tries to fetch all posts
-export async function fetchAllPosts(){
-	const page=0;
-	const size=10;
+export async function fetchAllPosts(page=0, size=10){
 	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
 		throw new Error('Network response not ok ' + response.statusText);
