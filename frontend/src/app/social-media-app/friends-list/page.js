@@ -9,6 +9,7 @@ export default function FollowersListPage() {
     const [currentUsername, setCurrentUsername] = useState('');
     const [followingUsers, setFollowingUsers] = useState([]);
     const [followers, setFollowers] = useState([]);
+    const [mutuals, setMutuals] = useState([]);
 
     // Initialize everything on mount
     useEffect(() => {
@@ -24,10 +25,13 @@ export default function FollowersListPage() {
                 const followingRes = await Fetch.getFollowingList();
                 setFollowingUsers(followingRes);
 
-
                 // Followers list
                 const followersRes = await Fetch.getFollowersList();
                 setFollowers(followersRes);
+
+                // Mutuals list
+                const mutualsFilter = followingRes.filter(user => followersRes.some(follower => follower.userId===user.userId));
+                setMutuals(mutualsFilter);
             } catch (error) {
                 console.error('Error fetching ID:', error);
                 throw error;
@@ -42,9 +46,18 @@ export default function FollowersListPage() {
 
     return (
         <div className={styles.friendsContainer}>
+            {/*Mutuals section */}
             <div className={styles.section}>
                 <h1 className={styles.title}>Mutuals</h1>
-                {/* Following Section*/}
+                <ul className={styles.friendList}>
+                    {mutuals.map(user => (
+                        <li key={user.userId} className={styles.friendItem}>
+                            <a href={`./profile/${user.username}`}>
+                                {user.username}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
             </div>
             {/*Followers section */}
             <div className={styles.section}>
@@ -52,7 +65,9 @@ export default function FollowersListPage() {
                 <ul className={styles.friendList}>
                     {followers.map(user => (
                         <li key={user.userId} className={styles.friendItem}>
-                            {user.username}
+                            <a href={`./profile/${user.username}`}>
+                                {user.username}
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -63,7 +78,9 @@ export default function FollowersListPage() {
                 <ul className={styles.friendList}>
                     {followingUsers.map(user => (
                         <li key={user.userId} className={styles.friendItem}>
-                            {user.username}
+                            <a href={`./profile/${user.username}`}>
+                                {user.username}
+                            </a>
                         </li>
                     ))}
                 </ul>
