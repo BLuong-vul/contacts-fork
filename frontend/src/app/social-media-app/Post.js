@@ -27,6 +27,12 @@ export class Post {
                     <div key={index} className={styles.comment}>
                         <span className={styles.commentAuthor}>{comment.author}</span>
                         <p className={styles.commentText}>{comment.text}</p>
+                        
+                        {/* Still working on it*/}
+                        {/* Render child replies recursively with increased indentation */}
+                        {/*comment.childReplies && comment.childReplies.length > 0 && (
+                            this.renderComments(comment.childReplies, level + 1)
+                        )*/}
                     </div>
                 ))}
             </div>
