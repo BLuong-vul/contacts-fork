@@ -26,7 +26,7 @@ const Navbar = () => {
   }, []); 
 
   return (
-    <div className="h-24 flex items-center justify-between">
+    <div className="h-24 flex items-center justify-between bg-[#223344]">
       {/* LEFT */}
       <div className="md:hidden lg:block w-[20%]">
         <Link href="/social-media-app" className="font-bold text-xl text-blue-600">
