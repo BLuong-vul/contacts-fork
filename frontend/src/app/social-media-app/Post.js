@@ -20,19 +20,20 @@ export class Post {
         this.dislikes = postData.dislikes || 0;
         this.comments = postData.comments || []; //Initializes comments
     }
-    renderComments(){
+    renderComments(level = 0){
         return(
             <div className={styles.commentsContainer}>
                 {this.comments.map((comment, index) => (
                     <div key={index} className={styles.comment}>
                         <span className={styles.commentAuthor}>{comment.author}</span>
                         <p className={styles.commentText}>{comment.text}</p>
-                        
-                        {/* Still working on it*/}
+
+                        {/*Reply button*/}
+                        <ReplySection comment={comment} level={level} />
                         {/* Render child replies recursively with increased indentation */}
-                        {/*comment.childReplies && comment.childReplies.length > 0 && (
+                        {comment.childReplies && comment.childReplies.length > 0 && (
                             this.renderComments(comment.childReplies, level + 1)
-                        )*/}
+                        )}
                     </div>
                 ))}
             </div>
@@ -120,18 +121,41 @@ export class Post {
             </div>
         );
     }
+}
 
-    // !!! This is for like/dislike buttons. They don't work yet, add them above later
-    // <div className="postButtons">
-    //     <button className={styles.postButtons}>{`Like (${this.likes})`}</button>
-    //     <button>{`Dislike (${this.dislikes})`}</button>
-    // </div>
+// Reply Section component
+function ReplySection({ comment, level }) {
+    const [replyText, setReplyText] = useState("");
+    const [showReplyInput, setShowReplyInput] = useState(false);
 
-    /*like() {
-        this.likes += 1;
-    }
+    const handleReply = () => {
+        if (replyText.trim() !== "") {
+            comment.childReplies = comment.childReplies || [];
+            comment.childReplies.push({ author: "LoggedUser", text: replyText, childReplies: [] });
+            setReplyText("");
+            setShowReplyInput(false);
+        }
+    };
 
-    dislike() {
-        this.dislikes += 1;
-    }*/
+    return (
+        <div className={styles.replySection}>
+            <button className={styles.replyButton} onClick={() => setShowReplyInput(!showReplyInput)}>
+                Reply
+            </button>
+            {showReplyInput && (
+                <div className={styles.replyInputContainer} style={{ marginLeft: `${(level + 1) * 20}px` }}>
+                    <input
+                        type="text"
+                        placeholder="Write a reply..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        className={styles.replyInput}
+                    />
+                    <button onClick={handleReply} className={styles.submitReplyButton}>
+                        Submit Reply
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 }
