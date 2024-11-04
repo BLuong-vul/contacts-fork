@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 
@@ -59,6 +59,7 @@ export default function Projects() {
 	
 	const [posts, setPosts] = useState([]);
 	const [numPosts, setNumPosts] = useState(10)
+	const numPostsRef = useRef(numPosts);
 	
 
 	const toggleCreatePost = async () => {
@@ -93,13 +94,23 @@ export default function Projects() {
 	};
 
 	// If reach bottom of page, fetch some more posts
-	window.addEventListener('scroll', async () => {
-	    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-	        const fetchedPosts = await Fetch.fetchAllPosts(0, numPosts+5);
-	        setNumPosts(numPosts+5);
-	        setPosts(fetchedPosts);
-	    }
-	});
+	useEffect(()=> {
+		numPostsRef.current = numPosts;
+	}, [numPosts]);
+	useEffect(() => {
+		console.log("USEEFFECT");
+	  	const handleScroll = async () => {
+		    if (window.innerHeight + window.scrollY + 30 >= document.body.offsetHeight) {
+		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 5);
+		      setNumPosts(numPostsRef.current + 5);
+		      setPosts(fetchedPosts);
+		    }
+  		};
+		// Add scroll listener
+		window.addEventListener('scroll', handleScroll);
+		// Clean up listener on unmount
+		return () => { window.removeEventListener('scroll', handleScroll); };
+	}, []);
 
 
 	
@@ -186,9 +197,11 @@ export default function Projects() {
 	            </div>
 			</div>
 			</main>
-			<div className="hidden lg:block w-[30%]">
+
+			{/*<div className="hidden lg:block w-[30%]">
 				<RightMenu/>
-			</div>
+			</div>*/}
+
 		</div>
 		</>
 	);
