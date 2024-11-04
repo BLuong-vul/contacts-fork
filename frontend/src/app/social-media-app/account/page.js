@@ -20,19 +20,9 @@ export default function Account() {
 	      return null;
 	  }
 	};
-
-	const handleLogout = () => {
-        Fetch.logout();
-        window.location.href = '/social-media-app';
-    };
 	
 	return (
 		<>
-		{/* temp. figure out where to move this later */}
-		<div className="mt-5">
-		  <button onClick={handleLogout}>Log Out</button>
-		</div>
-
 		<div style={{ display: 'flex', minHeight: '100vh' }}>
 		  {/* navigation sidebar */}
 		  <div style={{ width: '200px', padding: '20px', backgroundColor: '#223344' }}>
@@ -71,6 +61,11 @@ function GeneralContent() {
     const [showEducation, setShowEducation] = useState(false);
     const [showWorkplace, setShowWorkplace] = useState(false);
     const [showBirthday, setShowBirthday] = useState(false);
+
+	const handleLogout = () => {
+        Fetch.logout();
+        window.location.href = '/social-media-app';
+    };
 
     return (
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -170,6 +165,10 @@ function GeneralContent() {
         <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
           <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Picture</button>
           <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Banner</button>
+        </div>
+
+        <div className="mt-5">
+          <button onClick={handleLogout}>Log Out</button>
         </div>
       </div>
     );
