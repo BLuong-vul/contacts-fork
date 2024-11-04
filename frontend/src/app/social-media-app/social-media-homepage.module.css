@@ -152,6 +152,35 @@
 }
 /* End like, dislike, and comment buttons */
 
+/* Begin comments */
+/* Comments container at the bottom of each post */
+.commentsContainer {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+}
+
+/* Styling for individual comments */
+.comment {
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #1e2a38;
+    border-radius: 4px;
+}
+
+.commentAuthor {
+    font-weight: bold;
+    color: #a1abc3;
+    font-size: 0.85rem;
+}
+
+.commentText {
+    color: #a1abc3;
+    font-size: 0.9rem;
+    margin-top: 3px;
+}
+/* End comments */
+
 .createPostContainer {
 	display: flex;
 	justify-content: flex-end; /*adjust to the right*/
