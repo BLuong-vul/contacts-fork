@@ -28,7 +28,7 @@ const ProfileCard = () => {
         <div className="h-20 flex flex-col gap-2 items-center">
           <span className="font-semibold">{username}</span>
           <span className="text-xs text-gray-500">{followerCount} Followers</span>
-          <Link href="/social-media-app/user-profile" className="bg-blue-500 text-white text-xs p-2 rounded-md">My Profile</Link>
+          <Link href={`/social-media-app/profile/${username}`} className="bg-blue-500 text-white text-xs p-2 rounded-md">My Profile</Link>
         </div>
     </div>
   );
