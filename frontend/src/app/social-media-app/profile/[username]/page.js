@@ -6,7 +6,7 @@ import UserInfo from '../../../../components/rightmenu/user-info';
 import * as Fetch from '../../../../components/Functions';
 import Image from "next/image";
 import Link from "next/link";
-import { Post } from '../../Post.js';
+import Post from '../../../../components/Post';
 
 
 export default function ProfilePage({ params }) {
@@ -128,9 +128,9 @@ export default function ProfilePage({ params }) {
             {isFollowing ? 'Unfollow' : 'Follow'}
           </button>
           {/* Post display section */}
-				<div className={homepagestyles.postsContainer}>
-					{posts.map(post => post.render())}
-	            </div>
+				  <div className={homepagestyles.postsContainer}>
+					   {posts.map(post => <Post key={post.postId} postData={post} />)}
+          </div>
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">

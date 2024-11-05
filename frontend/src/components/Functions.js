@@ -169,6 +169,26 @@ export async function fetchAllPosts(page=0, size=10){
 }
 
 
+// Fetches all posts made by a certain user
+// Returns a list of Posts (see Post.js)
+export async function getPostsByUser(username){
+	try{
+		const page=0;
+		const size=10;
+
+		const postRes = await fetch(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
+		if (!postRes.ok) throw new Error('Network response not ok ' + postRes.statusText);
+		
+		const pagedData = await postRes.json();
+		// const posts = pagedData.content.map(postData => new Post(postData));
+		return pagedData.content;
+	} catch (error){
+		console.error("Error fetching posts");
+		throw error;
+	}
+}
+
+
 // Tries to log in
 // Returns true if successful, false otherwise
 export async function login(username, password){
@@ -275,25 +295,6 @@ export async function getPublicInfo(username){
 		return data;
 	} catch (error){
 		console.error("Error fetching public info");
-		throw error;
-	}
-}
-
-// Fetches all posts made by a certain user
-// Returns a list of Posts (see Post.js)
-export async function getPostsByUser(username){
-	try{
-		const page=0;
-		const size=10;
-
-		const postRes = await fetch(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
-		if (!postRes.ok) throw new Error('Network response not ok ' + postRes.statusText);
-		
-		const pagedData = await postRes.json();
-		const posts = pagedData.content.map(postData => new Post(postData));
-		return posts;
-	} catch (error){
-		console.error("Error fetching posts");
 		throw error;
 	}
 }

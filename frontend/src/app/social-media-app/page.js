@@ -11,7 +11,7 @@ import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
 
-import Post from '../../components/Post.js';
+import Post from '../../components/Post';
 
 
 
