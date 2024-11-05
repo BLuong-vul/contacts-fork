@@ -39,6 +39,7 @@ public class PostController {
         Page<PostDTO> postsDTO = posts.map(
                 /*Design Pattern: Builder*/
                 post -> PostDTO.builder()
+                        .postId(post.getPostId())
                         .datePosted(post.getDatePosted())
                         .dislikeCount(post.getDislikeCount())
                         .text(post.getText())
@@ -63,6 +64,7 @@ public class PostController {
 
         Page<PostDTO> postsDTO = posts.map(
                 post -> PostDTO.builder()
+                        .postId(post.getPostId())
                         .datePosted(post.getDatePosted())
                         .dislikeCount(post.getDislikeCount())
                         .text(post.getText())

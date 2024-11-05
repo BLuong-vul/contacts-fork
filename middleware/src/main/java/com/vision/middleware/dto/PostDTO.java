@@ -11,6 +11,7 @@ import java.util.Date;
 @Builder
 public class PostDTO {
     // note: we shouldn't need any more information than this: will be figured out when making the post.
+    private long postId;
     private UserDTO postedBy;
     private String title;
     private String text;

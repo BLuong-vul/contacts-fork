@@ -192,7 +192,7 @@ export default function Projects() {
 
 				{/*display posts section*/}
 				<div className={homepagestyles.postsContainer}>
-					{posts.map(post => <Post key={post.id} postData={post} />)}
+					{posts.map(post => <Post key={post.postId} postData={post} />)}
 	            </div>
 			</div>
 			</main>

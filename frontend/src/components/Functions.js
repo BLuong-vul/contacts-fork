@@ -164,7 +164,7 @@ export async function fetchAllPosts(page=0, size=10){
 	}
 	const pagedData = await response.json();
 
-	// const posts = pagedData.content.map(postData => <Post key={postData.id} postData={postData} />);
+	// const posts = pagedData.content.map( ??? );
 	return pagedData.content;
 }
 
