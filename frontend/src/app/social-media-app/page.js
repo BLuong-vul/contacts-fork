@@ -98,7 +98,6 @@ export default function Projects() {
 		numPostsRef.current = numPosts;
 	}, [numPosts]);
 	useEffect(() => {
-		console.log("USEEFFECT");
 	  	const handleScroll = async () => {
 		    if (window.innerHeight + window.scrollY + 30 >= document.body.offsetHeight) {
 		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 5);
