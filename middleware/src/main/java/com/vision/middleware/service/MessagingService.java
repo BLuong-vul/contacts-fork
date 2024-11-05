@@ -27,14 +27,14 @@ public class MessagingService {
 
 
     public void sendMessage(long senderId, MessageDTO messageDTO) {
-
+        /*Design Pattern: Builder*/
         Message message = Message.builder()
                 .messageBody(messageDTO.getBody())
                 .sendingUserId(senderId)
                 .receivingUserId(messageDTO.getRecipientId())
                 .dateSent(new Date())
                 .build();
-
+        /*Design Pattern: Builder*/
         messageRepository.save(message);
     }
 

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 
@@ -57,16 +57,18 @@ export default function Projects() {
 	const [postVideo, setPostVideo] = useState(null);
 	const [error, setError] = useState('');
 	
-	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
+	const [posts, setPosts] = useState([]);
+	const [numPosts, setNumPosts] = useState(10)
+	const numPostsRef = useRef(numPosts);
+	
+
+	const toggleCreatePost = async () => {
+		if (await Fetch.validateTokenWithRedirect()){
+			setIsCreatingPost(!isCreatingPost)
+		}
+	};
 	
 	const handleCreatePost = async () => {
-		const token = localStorage.getItem('token');
-		if (!token) {
-		    console.error('User not authenticated. Redirecting to login page.');
-		    window.location.href = '/login'; 
-		    return;
-		}
-
 		if (!postText && !postImage && !postVideo) {
 			setError('Must enter text, or upload an image or video.')
 		}
@@ -91,8 +93,27 @@ export default function Projects() {
 		}
 	};
 
+	// If reach bottom of page, fetch some more posts
+	useEffect(()=> {
+		numPostsRef.current = numPosts;
+	}, [numPosts]);
+	useEffect(() => {
+		console.log("USEEFFECT");
+	  	const handleScroll = async () => {
+		    if (window.innerHeight + window.scrollY + 30 >= document.body.offsetHeight) {
+		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 5);
+		      setNumPosts(numPostsRef.current + 5);
+		      setPosts(fetchedPosts);
+		    }
+  		};
+		// Add scroll listener
+		window.addEventListener('scroll', handleScroll);
+		// Clean up listener on unmount
+		return () => { window.removeEventListener('scroll', handleScroll); };
+	}, []);
 
-	const [posts, setPosts] = useState([]);
+
+	
 	// Fetches posts from database and saves to "posts"
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {
@@ -176,9 +197,11 @@ export default function Projects() {
 	            </div>
 			</div>
 			</main>
-			<div className="hidden lg:block w-[30%]">
+
+			{/*<div className="hidden lg:block w-[30%]">
 				<RightMenu/>
-			</div>
+			</div>*/}
+
 		</div>
 		</>
 	);

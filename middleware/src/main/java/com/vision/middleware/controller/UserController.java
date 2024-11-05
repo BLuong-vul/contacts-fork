@@ -40,24 +40,27 @@ public class UserController {
     public UserDTO getUserInfo(@RequestHeader("Authorization") String token) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
         ApplicationUser userDetails = userService.loadUserById(id);
+        /*Design Pattern: Builder*/
         return UserDTO.builder()
             .userId(userDetails.getId())
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
             .build();
+        /*Design Pattern: Builder*/
     }
 
     @GetMapping("/public-info")
     public UserDTO getPublicInfoByUsername(@RequestParam("username") String username) {
         ApplicationUser userDetails = userService.loadUserByUsername(username);
-
+        /*Design Pattern: Builder*/
         return UserDTO.builder()
             .userId(userDetails.getId())
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
             .build();
+        /*Design Pattern: Builder*/
     }
 
     @GetMapping("/id/{username}")
@@ -72,10 +75,12 @@ public class UserController {
         List<UserFollows> userFollowsList = followerService.getByFollowingUser(id);
 
         return userFollowsList.stream().map(UserFollows::getFollowee).map(
+                /*Design Pattern: Builder*/
                 user -> UserDTO.builder()
                         .userId(user.getId())
                         .username(user.getUsername())
                         .build()
+                /*Design Pattern: Builder*/
         ).toList();
     }
 
@@ -86,10 +91,12 @@ public class UserController {
         List<UserFollows> userFollowersRelation = followerService.getByFolloweeUser(id);
 
         return userFollowersRelation.stream().map(UserFollows::getFollower).map(
+                /*Design Pattern: Builder*/
                 user -> UserDTO.builder()
                         .userId(user.getId())
                         .username(user.getUsername())
                         .build()
+                /*Design Pattern: Builder*/
         ).toList();
     }
 

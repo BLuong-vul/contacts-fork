@@ -37,11 +37,12 @@ public class FollowerService {
         }
 
         // create entity that states relationship
+        /*Design Pattern: Builder*/
         UserFollows follow = UserFollows.builder()
                 .follower(follower)
                 .followee(followee)
                 .build();
-
+        /*Design Pattern: Builder*/
         // persist the relationship
         followsRepository.save(follow);
     }
