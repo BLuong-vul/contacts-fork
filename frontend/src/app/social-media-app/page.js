@@ -11,7 +11,7 @@ import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
 
-import { Post } from './Post.js';
+import Post from '../../components/Post.js';
 
 
 
@@ -172,7 +172,7 @@ export default function Projects() {
 
 				{/*display posts section*/}
 				<div className={homepagestyles.postsContainer}>
-					{posts.map(post => post.render())}
+					{posts.map(post => <Post key={post.id} postData={post} />)}
 	            </div>
 			</div>
 			</main>
