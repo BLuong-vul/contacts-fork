@@ -156,6 +156,7 @@ export async function uploadPost(postDTO){
 
 
 // Tries to fetch all posts
+// 4 November: This now only returns the data and not actual post components.
 export async function fetchAllPosts(page=0, size=10){
 	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
 	if (!response.ok){
@@ -163,8 +164,8 @@ export async function fetchAllPosts(page=0, size=10){
 	}
 	const pagedData = await response.json();
 
-	const posts = pagedData.content.map(postData => new Post(postData));
-	return posts;
+	// const posts = pagedData.content.map(postData => <Post key={postData.id} postData={postData} />);
+	return pagedData.content;
 }
 
 

@@ -49,9 +49,12 @@ public class ReplyService {
     }
     
     public List<Reply> getReplyTree(Long postId) {
+        //Old version
+        //List<Reply> rootReplies = replyRepository.findByReplyId(postId);
 
-        List<Reply> rootReplies = replyRepository.findByReplyId(postId); // todo: does this return all posts and not just root posts?
-
+        // Retrieve only the root replies for the specified post
+        List<Reply> rootReplies = replyRepository.findByReplyIdAndParentReplyReplyIdIsNull(postId);
+        
         for (Reply reply : rootReplies) {
             populateChildReplies(reply);
         }

@@ -129,12 +129,12 @@
   font-size: 0.75rem;
 }
 
-/* Begin like, dislike, and comment buttons */
+/* Begin like, dislike buttons */
 .postButtons {
 	display: flex;
 	gap: 10px;
 	margin-top: 10px;
-  color: black;
+    color: black;
 }
 
 .postButtons button{
@@ -150,22 +150,81 @@
 .postButtons button:hover {
 	background-color: #0056b3;
 }
-/* End like, dislike, and comment buttons */
+
+.activeButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.activeButton:hover {
+    background-color: #218838;
+}
+
+/* End like, dislike buttons */
 
 /* Begin comments */
+/* Container for the Create Comment input and button */
+.createComment {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.commentInput {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.createCommentButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.createCommentButton:hover {
+    background-color: #0056b3;
+}
+
 /* Comments container at the bottom of each post */
 .commentsContainer {
-    margin-top: 15px;
+    margin-top: 20px;
     padding-top: 10px;
     border-top: 1px solid #444;
 }
 
+/*Nested comment indention*/
+.commentContainer{
+    margin-left: 20px;
+}
+
 /* Styling for individual comments */
 .comment {
-    margin-top: 10px;
+    /*old version
+    /*margin-top: 10px;
     padding: 5px;
     background-color: #1e2a38;
-    border-radius: 4px;
+    border-radius: 4px;*/
+
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #1c2a39;
+    border-left: 2px solid #a1abc3;
+    border-radius: 8px;
+    position: relative;
 }
 
 .commentAuthor {
@@ -179,7 +238,47 @@
     font-size: 0.9rem;
     margin-top: 3px;
 }
+
+.replyButton{
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    transition: background-color 0.3s ease;
+}
+.replyButton:hover{
+    background-color: #0056b3;
+}
+.replyInputContainer{
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.replyInput{
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+.submitReplyButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.submitReplyButton:hover {
+    background-color: #218838;
+}
 /* End comments */
+
 
 .createPostContainer {
 	display: flex;
