@@ -25,21 +25,26 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "username", unique = true)
     private String username;
 
+    @Column(length = 64)
     private String password;
     private String fullName;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 128)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 15)
     private String phoneNumber;
 
+    @Column(unique = true, length = 256)
     private String address;
     private String city;
     private String state;
     private String zipCode;
     private String country;
     private long followerCount;
+
+    @Column(length = 200)
+    private String bio;
 
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> followers;

@@ -49,18 +49,18 @@ export default function Account() {
 }
 
 function GeneralContent() {
-  // Temporary state holders
-    const [displayName, setDisplayName] = useState('');
-    const [bio, setBio] = useState('');
-    const [location, setLocation] = useState('');
-    const [education, setEducation] = useState('');
-    const [workplace, setWorkplace] = useState('');
-    
-    // State for checkboxes
-    const [showLocation, setShowLocation] = useState(false);
-    const [showEducation, setShowEducation] = useState(false);
-    const [showWorkplace, setShowWorkplace] = useState(false);
-    const [showBirthday, setShowBirthday] = useState(false);
+  // temporary state holders
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [location, setLocation] = useState('');
+  const [education, setEducation] = useState('');
+  const [workplace, setWorkplace] = useState('');
+  
+  // state for checkboxes
+  const [showLocation, setShowLocation] = useState(false);
+  const [showEducation, setShowEducation] = useState(false);
+  const [showWorkplace, setShowWorkplace] = useState(false);
+  const [showBirthday, setShowBirthday] = useState(false);
 
 	const handleLogout = () => {
         Fetch.logout();
@@ -175,7 +175,84 @@ function GeneralContent() {
 }
 
 function PrivacyContent() {
-  return <div><h3>Privacy Settings</h3><p>Privacy Preferences</p></div>;
+      // state for buttons/checkbox
+      const [messagesOption, setMessagesOption] = useState('');
+      const [requestsOption, setRequestsOption] = useState(false);
+      
+      const handleChange = (event) => {
+        setMessagesOption(event.target.value);
+      };
+
+
+      return (
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h3>Privacy Settings</h3>
+
+          <div style={{ marginTop: '15px', marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginTop: '5px' }}>
+              <input
+                type="radio"
+                value="option1"
+                checked={messagesOption === 'option1'}
+                onChange={handleChange}
+                style={{marginRight: '8px'}}
+              />
+              Allow messages from anyone
+            </label>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginTop: '5px' }}>
+              <input
+                type="radio"
+                value="option2"
+                checked={messagesOption === 'option2'}
+                onChange={handleChange}
+                style={{marginRight: '8px'}}
+              />
+              Allow messages from mutuals only
+            </label>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginTop: '5px' }}>
+              <input
+                type="radio"
+                value="option3"
+                checked={messagesOption === 'option3'}
+                onChange={handleChange}
+                style={{marginRight: '8px'}}
+              />
+              Allow messages from followers only
+            </label>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginTop: '5px' }}>
+              <input
+                type="radio"
+                value="option4"
+                checked={messagesOption === 'option4'}
+                onChange={handleChange}
+                style={{marginRight: '8px'}}
+              />
+              Disable messages
+            </label>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block' }}>
+              <input
+                type="checkbox"
+                checked={requestsOption}
+                onChange={() => setRequestsOption(!requestsOption)}
+                style={{marginRight: '8px'}}
+              />
+              Blocked messages become requests
+            </label>
+          </div>
+        </div>
+      );
 }
 
 function SettingsContent() {
