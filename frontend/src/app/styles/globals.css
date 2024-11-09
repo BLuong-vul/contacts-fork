@@ -26,15 +26,20 @@ body {
   left: 0;
   width: 10px;
   height: 10px;
-  background-color: white; /* White color for star visibility */
+  background-color: white;
   border-radius: 50%;
-  box-shadow: -15px 15px 30px rgba(255, 255, 255, 0.8), 
-              -40px 40px 80px rgba(255, 255, 255, 0.6),
-              -60px 60px 120px rgba(255, 255, 255, 0.3),
-              -80px 80px 160px rgba(255, 255, 255, 0.1);
   opacity: 0;
   z-index: 0;
   pointer-events: none; /* Prevent interaction */
+
+  /* Enhanced bright, long tail effect */
+  box-shadow: 
+    -10px 10px 20px rgba(255, 255, 255, 1),        /* Very bright, close to the star */
+    -30px 30px 50px rgba(255, 255, 255, 0.8),      /* Still bright, near the star */
+    -60px 60px 100px rgba(255, 255, 255, 0.6),     /* Starting to fade but still visible */
+    -100px 100px 150px rgba(255, 255, 255, 0.4),   /* Fading more for smooth gradient */
+    -140px 140px 200px rgba(255, 255, 255, 0.3),   /* Longer, softer glow */
+    -180px 180px 3000px rgba(255, 255, 255, 0.2);   /* Faint end for natural taper */
 }
 
 @layer utilities {
