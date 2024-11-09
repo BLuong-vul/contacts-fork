@@ -22,31 +22,41 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "user_id")
     private long id;
 
+    @NonNull
     @Column(name = "username", unique = true)
     private String username;
 
+    @NonNull
     private String password;
+
+    @NonNull
     private String fullName;
 
+    @NonNull
     @Column(unique = true)
     private String email;
 
+    @NonNull
     @Column(unique = true)
     private String phoneNumber;
 
-    private String address;
-    private String city;
-    private String state;
-    private String zipCode;
-    private String country;
-    private long followerCount;
+    @NonNull private String address;
+    @NonNull private String city;
+    @NonNull private String state;
+    @NonNull private String zipCode;
+    @NonNull private String country;
+    private long followerCount; // TODO: decide to remove this or not?
 
+    private String profilePictureFileName;
+
+    // Follower relations
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> followers;
 
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> following;
 
+    // Role relations
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(
         name = "user_role_junction",
@@ -55,6 +65,7 @@ public class ApplicationUser implements UserDetails {
     )
     private Set<Role> authorities;
 
+    // Post relations
     @OneToMany(fetch = FetchType.LAZY)
     private Set<Post> posts;
 

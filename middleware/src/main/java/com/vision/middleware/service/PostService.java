@@ -19,9 +19,6 @@ import java.util.Date;
 @Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
 public class PostService {
 
-    // todo: decide on whether it is okay to access repositories directly through services, or if
-    // services should expose functionality of the repositories...does it matter? maybe not.
-
     @Autowired
     private final PostRepository postRepository;
 

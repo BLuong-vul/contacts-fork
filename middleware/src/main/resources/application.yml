@@ -32,3 +32,15 @@ server:
     path: /user/error
     whitelabel:
       enabled: false
+
+# TODO: fill this out when set up.
+aws:
+  access:
+    key:
+      id: your_access_key
+  secret:
+    access:
+      key: your_secret_key
+  s3:
+    region: your_region
+    bucket: your_bucket_name

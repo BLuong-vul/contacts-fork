@@ -38,7 +38,7 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    private Collection<GrantedAuthority> getAuthorities(String role) {
+    public Collection<GrantedAuthority> getAuthorities(String role) {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(role));
         return authorities;
