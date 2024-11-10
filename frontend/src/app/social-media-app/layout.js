@@ -1,78 +1,52 @@
 'use client';
 import React, { useEffect } from 'react';
-import anime from 'animejs/lib/anime.es.js';
 import Image from "next/image";
 import Navbar from "../../components/Navbar";
 import homestyles from './social-media-homepage.module.css';
 import styles from '../styles/app.layout.css';
-import style from '../styles/globals.css';
 import Link from 'next/link';
 
 export default function RootLayout({ children }) {
   useEffect(() => {
-    let interval;
+    const container = document.createElement('div');
+    container.className = 'shooting-stars-container';
+    document.body.appendChild(container);
 
-    const createShootingStar = () => {
-        const star = document.createElement('div');
-        star.className = 'shooting-star';
-        document.body.appendChild(star);
+    // Create and append each shooting star
+    for (let i = 1; i <= 10; i++) {
+      const star = document.createElement('div');
+      star.className = 'shooting-star';
+      
+      // Randomize position within the viewport
+      const randomTop = 'vh';
+      const randomRight = Math.random() * 100 + 'vw';
+      star.style.top = randomTop;
+      star.style.right = randomRight;
 
-        // Randomize the starting position from the left half of the screen
-        const startX = -50;
-        const startY = Math.random() * (window.innerHeight / 2);
-
-        // Calculate midpoints for the curve
-        const midX = window.innerWidth * (0.4 + Math.random() * 0.2);
-        const midY = window.innerHeight * 0.5;
-
-        // Randomize the end position toward the bottom right
-        const endX = window.innerWidth * Math.random();
-        const endY = window.innerHeight + Math.random() * 100;
-
-        anime({
-            targets: star,
-            keyframes: [
-                { translateX: startX, translateY: startY, opacity: 1, duration: 0 },
-                { translateX: endX, translateY: endY, opacity: 0, duration: 2000, easing: 'cubicBezier(0.25, 0.25, 0.75, 1)' }
-            ],
-            complete: () => {
-                star.remove();
-            }
-        });
-    };
-
-    const startInterval = () => {
-        interval = setInterval(() => {
-            for (let i = 0; i < 3; i++) { // Controls the number of stars created per cycle
-                setTimeout(createShootingStar, Math.random() * 1000); // Random delay for each star
-            }
-        }, 2000); // Controls the frequency of star bursts
-    };
-
-    const stopInterval = () => {
-        clearInterval(interval);
-    };
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            stopInterval();
-        } else {
-            startInterval();
-        }
-    });
-
-    startInterval(); // Start the animation loop initially
-
+      // Add random animation delay and duration
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      star.style.animationDuration = `${1 + Math.random() * 2}s`;
+      
+      container.appendChild(star);
+    }
+    // Cleanup on unmount
     return () => {
-        stopInterval();
-        document.removeEventListener('visibilitychange', stopInterval);
+      container.remove();
     };
-	}, []);
-  
+  }, []);
   return (
     <>
       <Navbar/>
-      <div>
+      <div
+      	className="min-h-screen flex flex-col"
+        style={{
+          backgroundImage: 'url(/background.png)',        // Path to your background image in the public folder
+          backgroundSize: 'cover',                         // Ensures the background image covers the entire screen
+          backgroundPosition: 'center',                    // Centers the background image
+          backgroundAttachment: 'fixed',                   // Keeps the background fixed while scrolling
+        }}
+      >
+      	
         <div className="ps-10 flex-grow">{children}</div>
       </div>
     </>

@@ -3,10 +3,22 @@
 	height: 100vh;
 }
 
+.asideContainer {
+	color: white;
+}
+
+.input {
+	background: transparent;
+	color: white;
+	border: 1px solid white;
+}
+
 .chatArea {
 	flex: 1;
 	padding: 20px;
-	background-color: #fff;
+	border: 1px solid white;
+	color: white;
+	background-color: transparent;
 }
 
 .chatHeader {
@@ -18,7 +30,7 @@
 .conversationArea {
     height: calc(100vh - 120px); /* Adjust the height dynamically */
     padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid white;
     height: 300px; /* Example height */
     overflow-y: auto; /* Enable scrolling if the content overflows vertically */
     word-wrap: break-word; /* Ensure long words wrap to the next line */
@@ -26,7 +38,7 @@
 }
 
 .chatPlaceholder {
-	color: #666;
+	color: white;
 	font-size: 1.2rem;
 }
 
@@ -36,7 +48,7 @@
 	align-items: center;
 	border-top: 1px solid #ddd;
 	padding: 10px;
-	background-color: #f9f9f9;
+	background-color: #223344;
 }
 
 .messageInput {
@@ -47,6 +59,8 @@
     font-size: 1rem;
     margin-right: 10px;
     resize: none;
+    background: #223344;
+    color: white;
 }
 
 .sendButton {
@@ -80,19 +94,20 @@
 
 .dropDownLabel {
 	font-weight: 600;
-	margin-right: 10px
+	margin-right: 10px;
 }
 
 .dropDownMenu {
 	padding: 8px;
-	border: 1px solid #ccc;
 	border-radius: 4px;
 	font-size: 1rem;
-	background-color: #f1f1f1;
+	background-color: #223344;
 }
 
 .listContainer {
 	margin-top: 15px;
+	color: white;
+	background: #223344;
 }
 
 .listContainer ul {

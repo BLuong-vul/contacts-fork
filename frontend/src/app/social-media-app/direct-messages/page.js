@@ -132,7 +132,7 @@ const DirectMessages = () => {
      return (
         <div className={styles.container}>
             {/* Select user to chat */}
-            <aside className={styles.container}>
+            <aside className={styles.asideContainer}>
                 <form className={styles.form} onSubmit={handleUsernameSubmit}>
                     <label htmlFor="inputUsername" className={styles.label}>
                         Enter username:
