@@ -91,6 +91,7 @@ function GeneralContent() {
             padding: '8px',
             marginTop: '5px',
             backgroundColor: isEditingDisplayName ? '#fff' : '#a0a0a0',
+            color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
@@ -112,6 +113,7 @@ function GeneralContent() {
             marginTop: '5px',
             minHeight: '80px',
             backgroundColor: isEditingBio ? '#fff' : '#a0a0a0',
+            color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
@@ -133,6 +135,7 @@ function GeneralContent() {
             padding: '8px',
             marginTop: '5px',
             backgroundColor: isEditingLocation ? '#fff' : '#a0a0a0',
+            color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
@@ -162,6 +165,7 @@ function GeneralContent() {
             padding: '8px',
             marginTop: '5px',
             backgroundColor: isEditingEducation ? '#fff' : '#a0a0a0',
+            color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
@@ -191,6 +195,7 @@ function GeneralContent() {
             padding: '8px',
             marginTop: '5px',
             backgroundColor: isEditingWorkplace ? '#fff' : '#a0a0a0',
+            color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
