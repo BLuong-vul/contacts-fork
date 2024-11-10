@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import * as Fetch from '../../../components/Functions';
+import { FaEdit, FaCheck } from 'react-icons/fa'; 
 
 
 
@@ -48,131 +49,191 @@ export default function Account() {
 	);
 }
 
+
+
 function GeneralContent() {
-  // temporary state holders
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
   const [education, setEducation] = useState('');
   const [workplace, setWorkplace] = useState('');
-  
-  // state for checkboxes
+
+  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isEditingEducation, setIsEditingEducation] = useState(false);
+  const [isEditingWorkplace, setIsEditingWorkplace] = useState(false);
+
   const [showLocation, setShowLocation] = useState(false);
   const [showEducation, setShowEducation] = useState(false);
   const [showWorkplace, setShowWorkplace] = useState(false);
   const [showBirthday, setShowBirthday] = useState(false);
 
-	const handleLogout = () => {
-        Fetch.logout();
-        window.location.href = '/social-media-app';
-    };
+  const handleLogout = () => {
+    Fetch.logout();
+    window.location.href = '/social-media-app';
+  };
 
-    return (
-      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <h3>General Settings</h3>
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <h3>General Settings</h3>
 
-        {/* display name */}
-        <div style={{ marginBottom: '15px' }}>
-          <label>Display Name:</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-        </div>
-
-        {/* bio */}
-        <div style={{ marginBottom: '15px' }}>
-          <label>Bio:</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px', minHeight: '80px' }}
-          />
-        </div>
-
-        {/* optional fields */}
-        <h4>Optional Information</h4>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Location:</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          <label style={{ display: 'block', marginTop: '5px' }}>
-            <input
-              type="checkbox"
-              checked={showLocation}
-              onChange={() => setShowLocation(!showLocation)}
-            />
-            Display on profile
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Education:</label>
-          <input
-            type="text"
-            value={education}
-            onChange={(e) => setEducation(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          <label style={{ display: 'block', marginTop: '5px' }}>
-            <input
-              type="checkbox"
-              checked={showEducation}
-              onChange={() => setShowEducation(!showEducation)}
-            />
-            Display on profile
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label>Workplace:</label>
-          <input
-            type="text"
-            value={workplace}
-            onChange={(e) => setWorkplace(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
-          />
-          <label style={{ display: 'block', marginTop: '5px' }}>
-            <input
-              type="checkbox"
-              checked={showWorkplace}
-              onChange={() => setShowWorkplace(!showWorkplace)}
-            />
-            Display on profile
-          </label>
-        </div>
-
-        {/* birthday display checkbox */}
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block' }}>
-            <input
-              type="checkbox"
-              checked={showBirthday}
-              onChange={() => setShowBirthday(!showBirthday)}
-            />
-            Display birthday on profile
-          </label>
-        </div>
-
-        {/* profile picture / profile banner */}
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-          <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Picture</button>
-          <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Banner</button>
-        </div>
-
-        <div className="mt-5">
-          <button onClick={handleLogout}>Log Out</button>
-        </div>
+      {/* Display Name */}
+      <label style={{ flex: 1 }}>Display Name:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+        <input
+          type="text"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          readOnly={!isEditingDisplayName}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingDisplayName ? '#fff' : '#a0a0a0',
+            cursor: isEditingDisplayName ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingDisplayName(!isEditingDisplayName)} style={{ marginLeft: '10px' }}>
+          {isEditingDisplayName ? <FaCheck /> : <FaEdit />}
+        </button>
       </div>
-    );
+
+      {/* Bio */}
+      <label style={{ flex: 1 }}>Bio:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+        <textarea
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          readOnly={!isEditingBio}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            minHeight: '80px',
+            backgroundColor: isEditingBio ? '#fff' : '#a0a0a0',
+            cursor: isEditingDisplayName ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingBio(!isEditingBio)} style={{ marginLeft: '10px' }}>
+          {isEditingBio ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+
+      {/* Location */}
+      <label style={{ flex: 1 }}>Location:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          readOnly={!isEditingLocation}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingLocation ? '#fff' : '#a0a0a0',
+            cursor: isEditingDisplayName ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingLocation(!isEditingLocation)} style={{ marginLeft: '10px' }}>
+          {isEditingLocation ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+      <label style={{ display: 'block', marginTop: '0px', marginBottom: '15px' }}>
+          <input
+            type="checkbox"
+            checked={showLocation}
+            onChange={() => setShowLocation(!showLocation)}
+          />
+          Display on profile
+      </label>
+
+      {/* Education */}
+      <label style={{ flex: 1 }}>Education:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+        <input
+          type="text"
+          value={education}
+          onChange={(e) => setEducation(e.target.value)}
+          readOnly={!isEditingEducation}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingEducation ? '#fff' : '#a0a0a0',
+            cursor: isEditingDisplayName ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingEducation(!isEditingEducation)} style={{ marginLeft: '10px' }}>
+          {isEditingEducation ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+      <label style={{ display: 'block', marginBottom: '15px' }}>
+          <input
+            type="checkbox"
+            checked={showEducation}
+            onChange={() => setShowEducation(!showEducation)}
+          />
+          Display on profile
+      </label>
+
+      {/* Workplace */}
+      <label style={{ flex: 1 }}>Workplace:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+        <input
+          type="text"
+          value={workplace}
+          onChange={(e) => setWorkplace(e.target.value)}
+          readOnly={!isEditingWorkplace}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingWorkplace ? '#fff' : '#a0a0a0',
+            cursor: isEditingDisplayName ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingWorkplace(!isEditingWorkplace)} style={{ marginLeft: '10px' }}>
+          {isEditingWorkplace ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+      <label style={{ display: 'block', marginBottom: '15px' }}>
+        <input
+          type="checkbox"
+          checked={showWorkplace}
+          onChange={() => setShowWorkplace(!showWorkplace)}
+        />
+        Display on profile
+      </label>
+
+      {/* Birthday display checkbox */}
+      <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+        <label style={{ display: 'block' }}>
+          <input
+            type="checkbox"
+            checked={showBirthday}
+            onChange={() => setShowBirthday(!showBirthday)}
+          />
+          Display birthday on profile
+        </label>
+      </div>
+
+      {/* Profile picture / banner */}
+      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
+        <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Picture</button>
+        <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Banner</button>
+      </div>
+
+      {/* Logout button */}
+      <div className="mt-5">
+        <button onClick={handleLogout}>Log Out</button>
+      </div>
+    </div>
+  );
 }
+
+
 
 function PrivacyContent() {
       // state for buttons/checkbox
