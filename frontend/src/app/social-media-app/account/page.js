@@ -4,9 +4,10 @@ import * as Fetch from '../../../components/Functions';
 import { FaEdit, FaCheck } from 'react-icons/fa'; 
 
 
-
 export default function Account() {
 	const [activeSection, setActiveSection] = useState('General');
+
+
 
 	// Function to render content based on active section
 	const renderContent = () => {
@@ -55,19 +56,44 @@ function GeneralContent() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
-  const [education, setEducation] = useState('');
-  const [workplace, setWorkplace] = useState('');
+  const [qualifications, setQualifications] = useState('');
+  const [occupation, setOccupation] = useState('');
 
   const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
-  const [isEditingEducation, setIsEditingEducation] = useState(false);
-  const [isEditingWorkplace, setIsEditingWorkplace] = useState(false);
+  const [isEditingQualifications, setIsEditingQualifications] = useState(false);
+  const [isEditingOccupation, setIsEditingOccupation] = useState(false);
 
   const [showLocation, setShowLocation] = useState(false);
-  const [showEducation, setShowEducation] = useState(false);
-  const [showWorkplace, setShowWorkplace] = useState(false);
+  const [showQualifications, setShowQualifications] = useState(false);
+  const [showOccupation, setShowOccupation] = useState(false);
   const [showBirthday, setShowBirthday] = useState(false);
+
+  // const [bio, setBio] = useState('');
+
+  // Initialize everything on mount
+  useEffect(() => {
+      const fetchUserId = async () => {
+          try {
+              const currentUserInfo = await Fetch.getCurrentUserInfo();
+              setBio(currentUserInfo.bio);
+              console.log(currentUserInfo);
+          } catch (error) {
+              console.error('Error fetching ID:', error);
+              throw error;
+          }
+      };
+
+      fetchUserId();
+  }, []);
+
+  const handleBioSubmit = async () => {
+    if (isEditingBio){
+      await Fetch.updateBio(bio);
+    }
+    setIsEditingBio(!isEditingBio);
+  }
 
   const handleLogout = () => {
     Fetch.logout();
@@ -117,7 +143,7 @@ function GeneralContent() {
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingBio(!isEditingBio)} style={{ marginLeft: '10px' }}>
+        <button onClick={handleBioSubmit} style={{ marginLeft: '10px' }}>
           {isEditingBio ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
@@ -152,62 +178,62 @@ function GeneralContent() {
           Display on profile
       </label>
 
-      {/* Education */}
-      <label style={{ flex: 1 }}>Education:</label>
+      {/* Qualifications */}
+      <label style={{ flex: 1 }}>Qualifications:</label>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
         <input
           type="text"
-          value={education}
-          onChange={(e) => setEducation(e.target.value)}
-          readOnly={!isEditingEducation}
+          value={qualifications}
+          onChange={(e) => setQualifications(e.target.value)}
+          readOnly={!isEditingQualifications}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
-            backgroundColor: isEditingEducation ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditingQualifications ? '#fff' : '#a0a0a0',
             color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingEducation(!isEditingEducation)} style={{ marginLeft: '10px' }}>
-          {isEditingEducation ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => setIsEditingQualifications(!isEditingQualifications)} style={{ marginLeft: '10px' }}>
+          {isEditingQualifications ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
       <label style={{ display: 'block', marginBottom: '15px' }}>
           <input
             type="checkbox"
-            checked={showEducation}
-            onChange={() => setShowEducation(!showEducation)}
+            checked={showQualifications}
+            onChange={() => setShowQualifications(!showQualifications)}
           />
           Display on profile
       </label>
 
-      {/* Workplace */}
-      <label style={{ flex: 1 }}>Workplace:</label>
+      {/* Occupation */}
+      <label style={{ flex: 1 }}>Occupation:</label>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
         <input
           type="text"
-          value={workplace}
-          onChange={(e) => setWorkplace(e.target.value)}
-          readOnly={!isEditingWorkplace}
+          value={occupation}
+          onChange={(e) => setOccupation(e.target.value)}
+          readOnly={!isEditingOccupation}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
-            backgroundColor: isEditingWorkplace ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditingOccupation ? '#fff' : '#a0a0a0',
             color: 'black',
             cursor: isEditingDisplayName ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingWorkplace(!isEditingWorkplace)} style={{ marginLeft: '10px' }}>
-          {isEditingWorkplace ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => setIsEditingOccupation(!isEditingOccupation)} style={{ marginLeft: '10px' }}>
+          {isEditingOccupation ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
       <label style={{ display: 'block', marginBottom: '15px' }}>
         <input
           type="checkbox"
-          checked={showWorkplace}
-          onChange={() => setShowWorkplace(!showWorkplace)}
+          checked={showOccupation}
+          onChange={() => setShowOccupation(!showOccupation)}
         />
         Display on profile
       </label>
@@ -252,8 +278,6 @@ function PrivacyContent() {
 
       return (
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <h3>Privacy Settings</h3>
-
           <div style={{ marginTop: '15px', marginBottom: '15px' }}>
             <label style={{ display: 'block', marginTop: '5px' }}>
               <input
@@ -322,5 +346,69 @@ function PrivacyContent() {
 }
 
 function SettingsContent() {
-  return <div><h3>Account Settings</h3><p>Account settings.</p></div>;
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+
+  const handleDelete = () => {
+    
+  };
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+
+      {/* Username */}
+      <label style={{ flex: 1 }}>Username:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          readOnly={!isEditingUsername}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingUsername ? '#fff' : '#a0a0a0',
+            color: 'black',
+            cursor: isEditingUsername ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingUsername(!isEditingUsername)} style={{ marginLeft: '10px' }}>
+          {isEditingUsername ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+
+    {/* Password */}
+      <label style={{ flex: 1 }}>Password:</label>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+        <input
+          type="text"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          readOnly={!isEditingPassword}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginTop: '5px',
+            backgroundColor: isEditingPassword ? '#fff' : '#a0a0a0',
+            color: 'black',
+            cursor: isEditingPassword ? 'text' : 'default',
+          }}
+        />
+        <button onClick={() => setIsEditingUPassword(!isEditingPassword)} style={{ marginLeft: '10px' }}>
+          {isEditingPassword ? <FaCheck /> : <FaEdit />}
+        </button>
+      </div>
+
+
+
+      {/* Delete Account */}
+      <div className="mt-5">
+        <button onClick={handleDelete}>Delete Account</button>
+      </div>
+    </div>
+  );
 }

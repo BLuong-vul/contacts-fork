@@ -45,6 +45,8 @@ public class ApplicationUser implements UserDetails {
 
     @Column(length = 200)
     private String bio;
+    private String qualifications;
+    private String occupation;
 
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> followers;

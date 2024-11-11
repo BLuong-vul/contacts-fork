@@ -41,13 +41,18 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public int getFollowerCount(ApplicationUser user){
-        System.out.println("\n\n\n\n\nDEBUG: " + user.getFollowers().size());
+        // System.out.println("DEBUG: " + user.getFollowers().size());
         return user.getFollowers().size();
     }
 
     @Transactional
     public int getFollowingCount(ApplicationUser user){
         return user.getFollowing().size();
+    }
+
+    public void updateBioById(Long id, String bio){
+        userRepository.updateBioById(id, bio);
+        return;
     }
 
     private Collection<GrantedAuthority> getAuthorities(String role) {

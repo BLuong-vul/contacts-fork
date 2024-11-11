@@ -46,6 +46,7 @@ public class UserController {
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
+            .bio(userDetails.getBio())
             .build();
         /*Design Pattern: Builder*/
     }
@@ -59,6 +60,7 @@ public class UserController {
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
+            .bio(userDetails.getBio())
             .build();
         /*Design Pattern: Builder*/
     }
@@ -114,5 +116,12 @@ public class UserController {
         followerService.unfollowUser(followerId, followeeId);
 
         return String.format("User %s unfollowed", followeeId);
+    }
+
+    @PostMapping("/account/bio")
+    public void updateBioById(@RequestHeader("Authorization") String token, @RequestParam(value = "bio", defaultValue = "") String bio) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateBioById(id, bio);
+        return;
     }
 }

@@ -19,4 +19,5 @@ public class UserDTO {
     private String country;
     private long followerCount;
     private long followingCount;
+    private String bio;
 }

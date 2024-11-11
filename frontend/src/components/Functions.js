@@ -2,6 +2,27 @@ import Post from "./Post";
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
+export async function updateBio(bio){
+	validateTokenWithRedirect();
+	const token = localStorage.getItem('token');
+
+	try {
+		const updateRes = await fetch(`${baseURL}/user/account/bio?bio=${bio}`, {
+			method: 'POST',
+		    headers: {
+		      'Authorization': `Bearer ${token}`,
+		    },
+		});
+
+		if (!updateRes.ok) throw new Error('Failed to update bio: ' + updateRes.statusText);
+
+		return true;
+	} catch (error){
+		console.error('Error:', error);
+		return false;
+	}
+}
+
 
 export async function createAccount(userData){
 	const { confirmPassword, ...userPayload } = userData;
