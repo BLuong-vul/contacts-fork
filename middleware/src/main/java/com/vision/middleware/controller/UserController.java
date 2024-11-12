@@ -60,7 +60,12 @@ public class UserController {
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
+            .displayName(userDetails.getDisplayName())
             .bio(userDetails.getBio())
+            .occupation(userDetails.getOccupation())
+            .location(userDetails.getLocation())
+            .birthdate(userDetails.getBirthdate())
+            .joinDate(userDetails.getJoinDate())
             .build();
         /*Design Pattern: Builder*/
     }

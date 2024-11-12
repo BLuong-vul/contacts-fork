@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Date;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,26 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
 
     @Modifying
     @Transactional
+    @Query("UPDATE ApplicationUser u SET u.displayName = :displayName WHERE u.id = :id")
+    void updateDisplayNameById(Long id, String displayName);
+
+    @Modifying
+    @Transactional
     @Query("UPDATE ApplicationUser u SET u.bio = :bio WHERE u.id = :id")
     void updateBioById(Long id, String bio);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ApplicationUser u SET u.occupation = :occupation WHERE u.id = :id")
+    void updateOccupationById(Long id, String occupation);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ApplicationUser u SET u.location = :location WHERE u.id = :id")
+    void updateLocationById(Long id, String location);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ApplicationUser u SET u.birthdate = :birthdate WHERE u.id = :id")
+    void updateBirthdateById(Long id, Date birthdate);
 }
