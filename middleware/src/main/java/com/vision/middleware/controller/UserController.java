@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/user")
@@ -46,7 +47,12 @@ public class UserController {
             .username(userDetails.getUsername())
             .followerCount(userService.getFollowerCount(userDetails))
             .followingCount(userService.getFollowingCount(userDetails))
+            .displayName(userDetails.getDisplayName())
             .bio(userDetails.getBio())
+            .occupation(userDetails.getOccupation())
+            .location(userDetails.getLocation())
+            .birthdate(userDetails.getBirthdate())
+            .joinDate(userDetails.getJoinDate())
             .build();
         /*Design Pattern: Builder*/
     }
@@ -123,10 +129,39 @@ public class UserController {
         return String.format("User %s unfollowed", followeeId);
     }
 
+    // Profile customization updates
+    @PostMapping("/account/displayName")
+    public void updateDisplayNameById(@RequestHeader("Authorization") String token, 
+                                       @RequestParam(value = "displayName", defaultValue = "") String displayName) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateDisplayNameById(id, displayName);
+    }
+
     @PostMapping("/account/bio")
     public void updateBioById(@RequestHeader("Authorization") String token, @RequestParam(value = "bio", defaultValue = "") String bio) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
         userService.updateBioById(id, bio);
         return;
+    }
+
+    @PostMapping("/account/occupation")
+    public void updateOccupationById(@RequestHeader("Authorization") String token, 
+                                      @RequestParam(value = "occupation", defaultValue = "") String occupation) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateOccupationById(id, occupation);
+    }
+
+    @PostMapping("/account/location")
+    public void updateLocationById(@RequestHeader("Authorization") String token, 
+                                    @RequestParam(value = "location", defaultValue = "") String location) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateLocationById(id, location);
+    }
+
+    @PostMapping("/account/birthdate")
+    public void updateBirthdateById(@RequestHeader("Authorization") String token, 
+                                     @RequestParam(value = "birthdate", defaultValue = "") Date birthdate) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateBirthdateById(id, birthdate);
     }
 }

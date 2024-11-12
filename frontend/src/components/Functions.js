@@ -2,6 +2,30 @@ import Post from "./Post";
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
+
+/* ===== PROFILE CUSTOMIZATION UPDATES ===== */
+
+export async function updateDisplayName(displayName) {
+    validateTokenWithRedirect();
+    const token = localStorage.getItem('token');
+
+    try {
+        const updateRes = await fetch(`${baseURL}/user/account/displayName?displayName=${displayName}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!updateRes.ok) throw new Error('Failed to update display name: ' + updateRes.statusText);
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
+
 export async function updateBio(bio){
 	validateTokenWithRedirect();
 	const token = localStorage.getItem('token');
@@ -22,6 +46,72 @@ export async function updateBio(bio){
 		return false;
 	}
 }
+
+
+export async function updateOccupation(occupation) {
+    validateTokenWithRedirect();
+    const token = localStorage.getItem('token');
+
+    try {
+        const updateRes = await fetch(`${baseURL}/user/account/occupation?occupation=${occupation}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!updateRes.ok) throw new Error('Failed to update occupation: ' + updateRes.statusText);
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
+
+export async function updateLocation(location) {
+    validateTokenWithRedirect();
+    const token = localStorage.getItem('token');
+
+    try {
+        const updateRes = await fetch(`${baseURL}/user/account/location?location=${location}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!updateRes.ok) throw new Error('Failed to update location: ' + updateRes.statusText);
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
+
+export async function updateBirthdate(birthdate) {
+    validateTokenWithRedirect();
+    const token = localStorage.getItem('token');
+
+    try {
+        const updateRes = await fetch(`${baseURL}/user/account/birthdate?birthdate=${birthdate}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!updateRes.ok) throw new Error('Failed to update birthdate: ' + updateRes.statusText);
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}
+
+/* ===== ACCOUNT MANAGEMENT ===== */
 
 
 export async function createAccount(userData){
@@ -61,6 +151,36 @@ export async function createAccount(userData){
 // !!! TODO: Make this actually log out the user in the backend too by blacklisting the token
 export async function logout(){
 	localStorage.removeItem('token');
+}
+
+
+// Tries to log in
+// Returns true if successful, false otherwise
+export async function login(username, password){
+	try {
+		const loginData = { username, password };
+	    const response = await fetch(`${baseURL}/auth/login`, {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'application/json',
+	        },
+	        body: JSON.stringify(loginData),
+	    });
+
+	    if (!response.ok) {
+	        throw new Error('Invalid username or password');
+	    }
+
+	    const result = await response.json();
+
+	    // Store JWT in localStorage
+	    localStorage.setItem('token', result.jwt);
+
+	    return true;
+	} catch (error) {
+	    console.error('Login error:', error);
+	    return false;
+	}
 }
 
 // Returns JSON list of users following us
@@ -140,6 +260,25 @@ export async function tryGetCurrentUserInfo(){
 	return result;
 }
 
+// Search for a user's public info based on username
+// Returns it as json
+export async function getPublicInfo(username){
+	try{
+		const res = await fetch(`${baseURL}/user/public-info?username=${username}`);
+		if (!res.ok) throw new Error("Failed to fetch data");
+		const data = await res.json();
+
+		// console.log("DEBUG: " + data.followerCount);
+		return data;
+	} catch (error){
+		console.error("Error fetching public info");
+		throw error;
+	}
+}
+
+
+/* ===== POSTS ===== */
+
 
 // Uploads a post to the database
 // postDTO should be in this format:
@@ -210,34 +349,8 @@ export async function getPostsByUser(username){
 }
 
 
-// Tries to log in
-// Returns true if successful, false otherwise
-export async function login(username, password){
-	try {
-		const loginData = { username, password };
-	    const response = await fetch(`${baseURL}/auth/login`, {
-	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	        },
-	        body: JSON.stringify(loginData),
-	    });
+/* ===== FOLLOWER / FOLLOWING ===== */
 
-	    if (!response.ok) {
-	        throw new Error('Invalid username or password');
-	    }
-
-	    const result = await response.json();
-
-	    // Store JWT in localStorage
-	    localStorage.setItem('token', result.jwt);
-
-	    return true;
-	} catch (error) {
-	    console.error('Login error:', error);
-	    return false;
-	}
-}
 
 // Tries to unfollow a user by ID
 // Returns true if successful, false otherwise
@@ -304,21 +417,9 @@ export async function isFollowing(followeeUsername){
 }
 
 
-// Search for a user's public info based on username
-// Returns it as json
-export async function getPublicInfo(username){
-	try{
-		const res = await fetch(`${baseURL}/user/public-info?username=${username}`);
-		if (!res.ok) throw new Error("Failed to fetch data");
-		const data = await res.json();
 
-		// console.log("DEBUG: " + data.followerCount);
-		return data;
-	} catch (error){
-		console.error("Error fetching public info");
-		throw error;
-	}
-}
+
+/* ===== VALIDATION ===== */
 
 // Checks for token and if it is valid
 // Deletes token if not valid
