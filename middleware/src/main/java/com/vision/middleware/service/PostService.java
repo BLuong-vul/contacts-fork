@@ -5,7 +5,6 @@ import com.vision.middleware.domain.MediaPost;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
-import com.vision.middleware.exceptions.DuplicateVoteException;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.PostRepository;
 import jakarta.transaction.Transactional;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -64,7 +62,7 @@ public class PostService {
     }
 
     public void userVoteOnPost(long postId, long userId, UserVote.VoteType voteType) {
-        Post post = postRepository.findByPostId(postId).orElseThrow(
+        Post post = postRepository.findById(postId).orElseThrow(
                 () -> new IdNotFoundException("Post id " + postId + " not found.")
         );
         ApplicationUser user = userService.loadUserById(userId);

@@ -24,24 +24,24 @@ public class ReplyService {
 
     public List<Reply> getReplyTree(Long postId) {
 
-        List<Reply> rootReplies = replyRepository.findByReplyId(postId); // todo: does this return all posts and not just root posts?
-
-        for (Reply reply : rootReplies) {
-            populateChildReplies(reply);
-        }
-
-        return rootReplies;
+//        List<Reply> rootReplies = replyRepository.findById(postId); // todo: does this return all posts and not just root posts?
+//        for (Reply reply : rootReplies) {
+//            populateChildReplies(reply);
+//        }
+//
+//        return rootReplies;
+        return null;
     }
 
     // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
     private void populateChildReplies(Reply reply) {
-        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
-
-        reply.setChildReplies(childReplies);
-
-        for (Reply child : childReplies) {
-            populateChildReplies(child); // recurse
-        }
+//        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
+//
+//        reply.setChildReplies(childReplies);
+//
+//        for (Reply child : childReplies) {
+//            populateChildReplies(child); // recurse
+//        }
     }
 
 }

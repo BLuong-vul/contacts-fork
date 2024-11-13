@@ -34,9 +34,18 @@ public class Application {
 			Set<Role> roles = new HashSet<>();
 			roles.add(adminRole);
 
+			// todo: factor out the password to probably an env var.
 			ApplicationUser admin = ApplicationUser.builder()
 					.id(1)
 					.username("admin")
+					.fullName("Admin")
+					.email("N/A")
+					.phoneNumber("N/A")
+					.address("N/A")
+					.city("N/A")
+					.state("N/A")
+					.zipCode("N/A")
+					.country("N/A")
 					.password(passwordEncoder.encode("password"))
 					.authorities(roles)
 					.build();
