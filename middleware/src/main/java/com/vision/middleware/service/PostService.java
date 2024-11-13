@@ -28,10 +28,10 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Autowired
-    private final VoteRepository voteRepository;
+    private final UserService userService;
 
     @Autowired
-    private final UserService userService;
+    private final VotingService votingService;
 
     public Post createPost(PostDTO postDTO, long userId) {
 
@@ -69,29 +69,7 @@ public class PostService {
         );
         ApplicationUser user = userService.loadUserById(userId);
 
-        Optional<UserVote> optionalVote = voteRepository.findByUserAndPost(user, post);
-        optionalVote.ifPresentOrElse(
-                vote -> updateVote(vote, voteType),
-                () -> createVote(post, user, voteType)
-        );
-    }
-
-    private void updateVote(UserVote vote, UserVote.VoteType voteType) {
-        if (vote.getVoteType() != voteType) {
-            vote.setVoteType(voteType);
-            voteRepository.save(vote);
-        } else {
-            throw new DuplicateVoteException("User vote for post already exists.");
-        }
-    }
-
-    private void createVote(Post post, ApplicationUser user, UserVote.VoteType voteType) {
-        UserVote vote = UserVote.builder()
-                .votable(post)
-                .user(user)
-                .voteType(voteType)
-                .build();
-        voteRepository.save(vote);
+        votingService.voteOnVotable(user, post, voteType);
     }
 
     public Page<Post> getAllPosts(int page, int size) {
