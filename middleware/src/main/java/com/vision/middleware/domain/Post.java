@@ -2,6 +2,7 @@ package com.vision.middleware.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
@@ -9,7 +10,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Entity(name = "posts")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)

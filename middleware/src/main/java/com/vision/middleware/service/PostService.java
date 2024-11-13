@@ -1,6 +1,7 @@
 package com.vision.middleware.service;
 
 import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.MediaPost;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.repo.PostRepository;
@@ -29,13 +30,28 @@ public class PostService {
 
         Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
+        Post newPost;
 
-        Post newPost = Post.builder()
-                .postedBy(postingUser)
-                .datePosted(date)
-                .title(postDTO.getTitle())
-                .text(postDTO.getText())
-                .build();
+        if (postDTO.getMediaFileName() == null) {
+            // text post
+            newPost = Post.builder()
+                    .postedBy(postingUser)
+                    .datePosted(date)
+                    .title(postDTO.getTitle())
+                    .text(postDTO.getText())
+                    .build();
+        } else {
+            // image post
+            // todo: check if media exists in the s3 bucket
+
+            newPost = MediaPost.builder()
+                    .postedBy(postingUser)
+                    .datePosted(date)
+                    .title(postDTO.getTitle())
+                    .text(postDTO.getText())
+                    .mediaFileName(postDTO.getMediaFileName())
+                    .build();
+        }
 
         return postRepository.save(newPost);
     }

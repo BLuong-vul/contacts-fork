@@ -90,6 +90,9 @@ public class SecurityConfig {
                 auth.requestMatchers("/post/all").permitAll();
                 auth.requestMatchers("/ws/**", "/ws/notifications/**").permitAll(); // websocket
 
+                auth.requestMatchers("/media/upload").hasAnyRole("ADMIN", "USER");
+                auth.requestMatchers("/media/**").permitAll();
+
                 // todo: remove this after testing
                 auth.requestMatchers("/notifications/**").permitAll(); // websocket
 

@@ -33,14 +33,15 @@ server:
     whitelabel:
       enabled: false
 
-# TODO: fill this out when set up.
+# TODO: bad idea to commit access keys to version control, but we gotta cut some corners lol
+# TODO: just remember to revoke and refresh this once we find a better solution. We just need this for testing rn.
 aws:
   access:
     key:
-      id: your_access_key
+      id: AKIAQXPZC3TY6AR4FWMJ
   secret:
     access:
-      key: your_secret_key
+      key: p1fIL8tj0YH/HERr9J/DliiYGLtofBUNUm18KvxX
   s3:
-    region: your_region
-    bucket: your_bucket_name
+    region: us-west-1
+    bucket: visionbucket
