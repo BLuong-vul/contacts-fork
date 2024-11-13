@@ -35,6 +35,8 @@ public class Reply implements Votable {
 
   private Date datePosted;
   private String text;
+  private long likeCount;
+  private long dislikeCount;
 
   // replies can have a parent: the reply that they are replying to.
   @ManyToOne(fetch = FetchType.LAZY)

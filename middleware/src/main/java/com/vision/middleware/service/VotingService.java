@@ -7,6 +7,8 @@ import com.vision.middleware.domain.enums.VotableType;
 import com.vision.middleware.domain.interfaces.Votable;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.exceptions.DuplicateVoteException;
+import com.vision.middleware.repo.PostRepository;
+import com.vision.middleware.repo.ReplyRepository;
 import com.vision.middleware.repo.UserVoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,18 @@ public class VotingService {
     @Autowired
     private UserVoteRepository userVoteRepository;
 
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private ReplyRepository replyRepository;
+
     @Transactional
     public void voteOnVotable(ApplicationUser user, Votable votable, UserVote.VoteType voteType) {
         VotableType votableType = getVotableType(votable);
         Optional<UserVote> optionalVote = userVoteRepository.findByUserAndVotableAndVotableType(user, votable, votableType);
         optionalVote.ifPresentOrElse(
-                vote -> updateVote(vote, voteType),
+                vote -> updateVote(vote, voteType, votable),
                 () -> createVote(user, votable, votableType, voteType)
         );
     }
@@ -40,8 +48,9 @@ public class VotingService {
         }
     }
 
-    private void updateVote(UserVote vote, UserVote.VoteType voteType) {
+    private void updateVote(UserVote vote, UserVote.VoteType voteType, Votable votable) {
         if (vote.getVoteType() != voteType) {
+            updateVotableCounts(votable, vote.getVoteType(), voteType);
             vote.setVoteType(voteType);
             userVoteRepository.save(vote);
         } else {
@@ -50,6 +59,7 @@ public class VotingService {
     }
 
     private void createVote(ApplicationUser user, Votable votable, VotableType votableType, UserVote.VoteType voteType) {
+        updateVotableCounts(votable, null, voteType);
         UserVote vote = UserVote.builder()
                 .user(user)
                 .votable(votable)
@@ -57,5 +67,31 @@ public class VotingService {
                 .voteType(voteType)
                 .build();
         userVoteRepository.save(vote);
+    }
+
+    private void updateVotableCounts(Votable votable, UserVote.VoteType oldVoteType, UserVote.VoteType newVoteType) {
+        if (votable instanceof Post post) {
+            updateCounts(post, oldVoteType, newVoteType);
+            postRepository.save(post);
+        } else if (votable instanceof Reply reply) {
+            updateCounts(reply, oldVoteType, newVoteType);
+            replyRepository.save(reply);
+        }
+    }
+
+    private void updateCounts(Votable votable, UserVote.VoteType oldVoteType, UserVote.VoteType newVoteType) {
+        if (oldVoteType != null) {
+            if (oldVoteType == UserVote.VoteType.LIKE) {
+                votable.setLikeCount(votable.getLikeCount() - 1);
+            } else if (oldVoteType == UserVote.VoteType.DISLIKE) {
+                votable.setDislikeCount(votable.getDislikeCount() - 1);
+            }
+        }
+
+        if (newVoteType == UserVote.VoteType.LIKE) {
+            votable.setLikeCount(votable.getLikeCount() + 1);
+        } else if (newVoteType == UserVote.VoteType.DISLIKE) {
+            votable.setDislikeCount(votable.getDislikeCount() + 1);
+        }
     }
 }
