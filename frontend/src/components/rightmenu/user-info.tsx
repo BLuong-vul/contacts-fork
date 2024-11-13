@@ -5,12 +5,24 @@ import Link from "next/link";
 import Image from "next/image";
 import * as Fetch from "../Functions"
 
-const UserMedia = ({usernameKey}:{usernameKey:string}) => {
-    const [username, setUsername] = useState("");
+const UserMedia = ({userData}:{userData:Record<string,any>}) => {
+    // const [displayName, setDisplayName] = useState("");
+    // const [username, setUsername] = useState("");
+    // const [bio, setBio] = useState("");
+    // const [occupation, setOccupation] = useState("");
+    // const [location, setLocation] = useState("");
+    // const [birthdate, setBirthdate] = useState("");
+    // const [joinDate, setJoinDate] = useState("");
 
-    useEffect(()=>{
-        setUsername(usernameKey);
-    })
+    // useEffect(()=>{
+    //     setDisplayName(userData.displayName);
+    //     setUsername(userData.username);
+    //     setBio(userData.bio);
+    //     setLocation(userData.location);
+    //     setOccupation(userData.occupation);
+    // })
+
+    console.log(userData);
 
 
     return (
@@ -22,26 +34,25 @@ const UserMedia = ({usernameKey}:{usernameKey:string}) => {
             <div className='flex flex-col gap-4 text-gray-500'>
                 <div className='flex items-center gap-2'>
                     {/** Adjust user profile name*/}
-                    <span className="text-xl text-black">{username}</span>
+                    <span className="text-xl text-black">{userData.displayName}</span>
                     {/** Adjust @username */}
-                    <span className="text-sm">@{username}</span>
+                    <span className="text-sm">@{userData.username}</span>
                 </div>
                 {/** User Bio */}
                 <p>
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facilis, 
-                    provident? At distinctio facere aliquam unde placeat. 
+                    {userData.bio}
                 </p>
                 <div className='flex items items-center gap-2'>
                     <Image src="/map.png" alt="" width={16} height={16}/>
-                    <span>Living in <b>California</b></span>
-                </div>
-                <div className='flex items items-center gap-2'>
-                    <Image src="/school.png" alt="" width={16} height={16}/>
-                    <span>Went to <b>School of School</b></span>
+                    <span><b>{userData.location}</b></span>
                 </div>
                 <div className='flex items items-center gap-2'>
                     <Image src="/work.png" alt="" width={16} height={16}/>
-                    <span>Works at <b>Vision</b></span>
+                    <span><b>{userData.occupation}</b></span>
+                </div>
+                <div className='flex items items-center gap-2'>
+                    <Image src="/school.png" alt="" width={16} height={16}/>
+                    <span><b>School of School</b></span>
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="flex gap-1 items-center">

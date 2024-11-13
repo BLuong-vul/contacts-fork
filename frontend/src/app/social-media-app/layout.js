@@ -39,14 +39,7 @@ export default function RootLayout({ children }) {
       <Navbar/>
       <div
       	className="min-h-screen flex flex-col"
-        // style={{
-        //   backgroundImage: 'url(/background.png)',        // Path to your background image in the public folder
-        //   backgroundSize: 'cover',                         // Ensures the background image covers the entire screen
-        //   backgroundPosition: 'center',                    // Centers the background image
-        //   backgroundAttachment: 'fixed',                   // Keeps the background fixed while scrolling
-        // }}
       >
-      	
         <div className="ps-10 flex-grow">{children}</div>
       </div>
     </>

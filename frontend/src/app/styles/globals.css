@@ -27,7 +27,7 @@ body {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 0; /* Behind all other content */
+  z-index: -100; /* Behind all other content */
 }
 
 .shooting-star {
@@ -38,7 +38,7 @@ body {
   height: 8px;
   background-color: white;
   border-radius: 50%;
-  z-index: -5;
+  z-index: -100;
   pointer-events: none; /* Prevent interaction */
   /* Enhanced bright, long tail effect */
   box-shadow: 

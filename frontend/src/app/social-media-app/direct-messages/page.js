@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
+import Tooltip from '@mui/material/Tooltip';
 
 import * as Fetch from '../../../components/Functions';
 
@@ -151,7 +152,8 @@ const DirectMessages = () => {
                         Start Chat
                     </button>
                     
-                    <div className={styles.dropdownContainer}>
+                    <Tooltip title="Choose Type" arrow>
+                    	<div className={styles.dropdownContainer}>
                         <label htmlFor="friendsDropdown" className={styles.dropDownLabel}>
                             view:
                         </label>
@@ -166,6 +168,7 @@ const DirectMessages = () => {
                             <option value="following">Following</option>
                         </select>
                     </div>
+                    </Tooltip>
                     {
                     /*
                     *

@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,37 +23,61 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "user_id")
     private long id;
 
-    @Column(name = "username", unique = true)
+    // Essential info
+    @Column(name = "username", unique = true, nullable=false)
     private String username;
 
-    @Column(length = 64)
+    @Column(length = 64, nullable=false)
     private String password;
-    private String fullName;
+    private String fullName; // TODO: DELETE
 
-    @Column(unique = true, length = 128)
+    @Column(unique = true, length = 127, nullable=false)
     private String email;
 
     @Column(unique = true, length = 15)
     private String phoneNumber;
 
-    @Column(unique = true, length = 256)
-    private String address;
-    private String city;
-    private String state;
-    private String zipCode;
-    private String country;
-    private long followerCount;
+    @Column(unique = true, length = 255)
+    private String address; // TODO: DELETE
+    private String city; // TODO: DELETE
+    private String state; // TODO: DELETE
+    private String zipCode; // TODO: DELETE
+    private String country; // TODO: DELETE
 
-    @Column(length = 200)
+    // Customization (Visible on Bio)
+    @Column(length = 18)
+    private String displayName; 
+
+    @Column(length = 255)
     private String bio;
-    private String qualifications;
+
+    @Column(length = 32)
     private String occupation;
+
+    @Column(length = 32)
+    private String location;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date birthdate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date joinDate = new Date();
+
+    // Followers / Following
+    @Column(nullable=false)
+    private long followerCount = 0;
+    @Column(nullable=false)
+    private long followingCount = 0;
 
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> followers;
 
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> following;
+
+    // Miscellaneous
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Post> posts;
 
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(
@@ -61,9 +86,6 @@ public class ApplicationUser implements UserDetails {
         inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> authorities;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    private Set<Post> posts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

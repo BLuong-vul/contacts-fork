@@ -48,7 +48,8 @@
 	align-items: center;
 	border-top: 1px solid #ddd;
 	padding: 10px;
-	background-color: #223344;
+	background-color: transparent;
+	border: 1px solid white;
 }
 
 .messageInput {
@@ -101,13 +102,14 @@
 	padding: 8px;
 	border-radius: 4px;
 	font-size: 1rem;
-	background-color: #223344;
+	background-color: #222333;
+	border: 2px solid white;
 }
 
 .listContainer {
 	margin-top: 15px;
 	color: white;
-	background: #223344;
+
 }
 
 .listContainer ul {

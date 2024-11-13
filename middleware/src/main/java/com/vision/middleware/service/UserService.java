@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Date;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -50,10 +51,32 @@ public class UserService implements UserDetailsService {
         return user.getFollowing().size();
     }
 
+    // Editing profile
+    public void updateDisplayNameById(Long id, String displayName){
+        userRepository.updateDisplayNameById(id, displayName);
+        return;
+    }
+
     public void updateBioById(Long id, String bio){
         userRepository.updateBioById(id, bio);
         return;
     }
+
+    public void updateOccupationById(Long id, String occupation){
+        userRepository.updateOccupationById(id, occupation);
+        return;
+    }
+
+    public void updateLocationById(Long id, String location){
+        userRepository.updateLocationById(id, location);
+        return;
+    }
+
+    public void updateBirthdateById(long id, Date birthdate){
+        userRepository.updateBirthdateById(id, birthdate);
+        return;
+    }
+
 
     private Collection<GrantedAuthority> getAuthorities(String role) {
         List<GrantedAuthority> authorities = new ArrayList<>();

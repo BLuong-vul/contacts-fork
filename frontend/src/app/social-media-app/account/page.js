@@ -53,47 +53,83 @@ export default function Account() {
 
 
 function GeneralContent() {
-  const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
-  const [location, setLocation] = useState('');
-  const [qualifications, setQualifications] = useState('');
-  const [occupation, setOccupation] = useState('');
-
-  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
-  const [isEditingQualifications, setIsEditingQualifications] = useState(false);
-  const [isEditingOccupation, setIsEditingOccupation] = useState(false);
-
-  const [showLocation, setShowLocation] = useState(false);
-  const [showQualifications, setShowQualifications] = useState(false);
-  const [showOccupation, setShowOccupation] = useState(false);
-  const [showBirthday, setShowBirthday] = useState(false);
-
+  const [userInfo, setUserInfo] = useState({
+    displayName: '',
+    bio: '',
+    location: '',
+    qualifications: '',
+    occupation: '',
+  })
+  // const [displayName, setDisplayName] = useState('');
   // const [bio, setBio] = useState('');
+  // const [location, setLocation] = useState('');
+  // const [qualifications, setQualifications] = useState('');
+  // const [occupation, setOccupation] = useState('');
+  const [isEditing, setIsEditing] = useState({
+    displayName: false,
+    bio: false,
+    location: false,
+    qualifications: false,
+    occupation: false
+  });
+  // const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+  // const [isEditingBio, setIsEditingBio] = useState(false);
+  // const [isEditingLocation, setIsEditingLocation] = useState(false);
+  // const [isEditingQualifications, setIsEditingQualifications] = useState(false);
+  // const [isEditingOccupation, setIsEditingOccupation] = useState(false);
+  const [show, setShow] = useState({
+    location: false,
+    qualifications: false,
+    occupation: false,
+    birthdate: false
+  });
+  // const [showLocation, setShowLocation] = useState(false);
+  // const [showQualifications, setShowQualifications] = useState(false);
+  // const [showOccupation, setShowOccupation] = useState(false);
+  // const [showBirthday, setShowBirthday] = useState(false);
 
-  // Initialize everything on mount
+
+  // Fetch user data on mount
   useEffect(() => {
       const fetchUserId = async () => {
           try {
               const currentUserInfo = await Fetch.getCurrentUserInfo();
-              setBio(currentUserInfo.bio);
+              setUserInfo(currentUserInfo);
               console.log(currentUserInfo);
           } catch (error) {
               console.error('Error fetching ID:', error);
               throw error;
           }
       };
-
       fetchUserId();
   }, []);
 
-  const handleBioSubmit = async () => {
-    if (isEditingBio){
-      await Fetch.updateBio(bio);
+  // On submit any text field
+  const handleFieldSubmit = async (field) => {
+    if (isEditing[field]){
+      await Fetch[`update${field.charAt(0).toUpperCase() + field.slice(1)}`](userInfo[field]);
     }
-    setIsEditingBio(!isEditingBio);
+    setIsEditing(prevState => ({
+          ...prevState,
+          [field]: !prevState[field]
+    }));
   }
+
+  // On change to any text field
+  const handleChange = (e, field) => {
+    setUserInfo(prevState => ({
+      ...prevState,
+      [field]: e.target.value
+    }));
+  };
+
+  // Toggle for checkboxes
+  const toggleShow = (field) => {
+    setShow(prevState => ({
+      ...prevState,
+      [field]: !prevState[field]
+    }));
+  };
 
   const handleLogout = () => {
     Fetch.logout();
@@ -102,27 +138,25 @@ function GeneralContent() {
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <h3>General Settings</h3>
-
       {/* Display Name */}
       <label style={{ flex: 1 }}>Display Name:</label>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
         <input
           type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          readOnly={!isEditingDisplayName}
+          value={userInfo.displayName}
+          onChange={(e) => handleChange(e, 'displayName')}
+          readOnly={!isEditing.displayName}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
-            backgroundColor: isEditingDisplayName ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditing.displayName ? '#fff' : '#a0a0a0',
             color: 'black',
-            cursor: isEditingDisplayName ? 'text' : 'default',
+            cursor: isEditing.displayName ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingDisplayName(!isEditingDisplayName)} style={{ marginLeft: '10px' }}>
-          {isEditingDisplayName ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => handleFieldSubmit('displayName')} style={{ marginLeft: '10px' }}>
+          {isEditing.displayName ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
 
@@ -130,21 +164,21 @@ function GeneralContent() {
       <label style={{ flex: 1 }}>Bio:</label>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
         <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          readOnly={!isEditingBio}
+          value={userInfo.bio}
+          onChange={(e) => handleChange(e, 'displayName')}
+          readOnly={!isEditing.bio}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
             minHeight: '80px',
-            backgroundColor: isEditingBio ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditing.bio ? '#fff' : '#a0a0a0',
             color: 'black',
-            cursor: isEditingDisplayName ? 'text' : 'default',
+            cursor: isEditing.bio ? 'text' : 'default',
           }}
         />
-        <button onClick={handleBioSubmit} style={{ marginLeft: '10px' }}>
-          {isEditingBio ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => handleFieldSubmit('bio')} style={{ marginLeft: '10px' }}>
+          {isEditing.bio ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
 
@@ -153,57 +187,27 @@ function GeneralContent() {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
         <input
           type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          readOnly={!isEditingLocation}
+          value={userInfo.location}
+          onChange={(e) => handleChange(e, 'location')}
+          readOnly={!isEditing.location}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
-            backgroundColor: isEditingLocation ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditing.location ? '#fff' : '#a0a0a0',
             color: 'black',
-            cursor: isEditingDisplayName ? 'text' : 'default',
+            cursor: isEditing.location ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingLocation(!isEditingLocation)} style={{ marginLeft: '10px' }}>
-          {isEditingLocation ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => handleFieldSubmit('location')} style={{ marginLeft: '10px' }}>
+          {isEditing.location ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
       <label style={{ display: 'block', marginTop: '0px', marginBottom: '15px' }}>
           <input
             type="checkbox"
-            checked={showLocation}
-            onChange={() => setShowLocation(!showLocation)}
-          />
-          Display on profile
-      </label>
-
-      {/* Qualifications */}
-      <label style={{ flex: 1 }}>Qualifications:</label>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-        <input
-          type="text"
-          value={qualifications}
-          onChange={(e) => setQualifications(e.target.value)}
-          readOnly={!isEditingQualifications}
-          style={{
-            width: '100%',
-            padding: '8px',
-            marginTop: '5px',
-            backgroundColor: isEditingQualifications ? '#fff' : '#a0a0a0',
-            color: 'black',
-            cursor: isEditingDisplayName ? 'text' : 'default',
-          }}
-        />
-        <button onClick={() => setIsEditingQualifications(!isEditingQualifications)} style={{ marginLeft: '10px' }}>
-          {isEditingQualifications ? <FaCheck /> : <FaEdit />}
-        </button>
-      </div>
-      <label style={{ display: 'block', marginBottom: '15px' }}>
-          <input
-            type="checkbox"
-            checked={showQualifications}
-            onChange={() => setShowQualifications(!showQualifications)}
+            checked={show.location}
+            onChange={() => toggleShow('location')}
           />
           Display on profile
       </label>
@@ -213,27 +217,27 @@ function GeneralContent() {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
         <input
           type="text"
-          value={occupation}
-          onChange={(e) => setOccupation(e.target.value)}
-          readOnly={!isEditingOccupation}
+          value={userInfo.occupation}
+          onChange={(e) => handleChange(e, 'occupation')}
+          readOnly={!isEditing.occupation}
           style={{
             width: '100%',
             padding: '8px',
             marginTop: '5px',
-            backgroundColor: isEditingOccupation ? '#fff' : '#a0a0a0',
+            backgroundColor: isEditing.occupation ? '#fff' : '#a0a0a0',
             color: 'black',
-            cursor: isEditingDisplayName ? 'text' : 'default',
+            cursor: isEditing.occupation ? 'text' : 'default',
           }}
         />
-        <button onClick={() => setIsEditingOccupation(!isEditingOccupation)} style={{ marginLeft: '10px' }}>
-          {isEditingOccupation ? <FaCheck /> : <FaEdit />}
+        <button onClick={() => handleFieldSubmit('occupation')} style={{ marginLeft: '10px' }}>
+          {isEditing.occupation ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
       <label style={{ display: 'block', marginBottom: '15px' }}>
         <input
           type="checkbox"
-          checked={showOccupation}
-          onChange={() => setShowOccupation(!showOccupation)}
+          checked={show.occupation}
+          onChange={() => toggleShow('occupation')}
         />
         Display on profile
       </label>
@@ -243,10 +247,10 @@ function GeneralContent() {
         <label style={{ display: 'block' }}>
           <input
             type="checkbox"
-            checked={showBirthday}
-            onChange={() => setShowBirthday(!showBirthday)}
+            checked={show.birthdate}
+            onChange={() => toggleShow('birthdate')}
           />
-          Display birthday on profile
+          Display birthdate on profile
         </label>
       </div>
 
@@ -279,7 +283,8 @@ function PrivacyContent() {
       return (
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{ marginTop: '15px', marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginTop: '5px' }}>
+            <label style={{ flex: 1 }}>Messages</label>
+            <label style={{ display: 'block', marginTop: '10px' }}>
               <input
                 type="radio"
                 value="option1"

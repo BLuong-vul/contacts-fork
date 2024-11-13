@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import MobileMenu from "../app//styles/mobile.menu";
 import * as Fetch from "./Functions";
+import Tooltip from '@mui/material/Tooltip';
 
 
 const Navbar = () => {
@@ -37,7 +38,8 @@ const Navbar = () => {
       <div className="hidden md:flex w-[50%] text-sm items-center justify-between">
         {/* LINKS */}
         <div className="flex gap-6 text-gray-600">
-          <Link href="/social-media-app" className="flex items-center gap-2">
+          <Tooltip title="Home" arrow>
+          	<Link href="/social-media-app" className="flex items-center gap-2">
             <Image
               src="/home.png"
               alt="Homepage"
@@ -47,7 +49,9 @@ const Navbar = () => {
             />
             <span>Home</span>
           </Link>
-          <Link href="/social-media-app/friends-list" className="flex items-center gap-2">
+          </Tooltip>
+          <Tooltip title="Followers/Following" arrow>
+          	<Link href="/social-media-app/friends-list" className="flex items-center gap-2">
             <Image
               src="/friends.png"
               alt="Friends"
@@ -57,6 +61,7 @@ const Navbar = () => {
             />
             <span>Following</span>
           </Link>
+          </Tooltip>
         </div>
         <div className='hidden xl:flex p-2 bg-slate-100 items-center rounded-xl'>
           <input type="text" placeholder="search..." className="bg-transparent outline-none"/>
@@ -66,14 +71,20 @@ const Navbar = () => {
       {/* RIGHT */}
       <div className="w-[30%] flex items-center gap-4 xl:gap-8 mr-8 justify-end">
             <div className="cursor-pointer">
-              <Image src="/people.png" alt="" width={24} height={24} />
+              <Tooltip title="Follower/Following" arrow>
+              	<Image src="/people.png" alt="" width={24} height={24} />
+              </Tooltip>
             </div>
-            <Link href="/social-media-app/direct-messages">
-              <Image src="/messages.png" alt="" width={20} height={20} />
+			<Tooltip title="Messages" arrow>
+				<Link href="/social-media-app/direct-messages">
+              	<Image src="/messages.png" alt="" width={20} height={20} />
             </Link>
-            <div className="cursor-pointer">
-              <Image src="/notifications.png" alt="" width={20} height={20} />
+			</Tooltip>
+			<Tooltip title="Notifications" arrow>
+				<div className="cursor-pointer">
+              	<Image src="/notifications.png" alt="" width={20} height={20} />
             </div>
+			</Tooltip>
             <div className="flex items-center gap-2 text-sm">
               <Image src="/login.png" alt="" width={20} height={20} />
               <Link href={accountUrl}>{username}</Link>
