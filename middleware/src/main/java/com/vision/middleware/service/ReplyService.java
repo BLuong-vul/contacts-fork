@@ -35,7 +35,7 @@ public class ReplyService {
 
     // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
     private void populateChildReplies(Reply reply) {
-        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getReplyId()));
+        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
 
         reply.setChildReplies(childReplies);
 

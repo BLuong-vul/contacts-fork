@@ -1,11 +1,12 @@
 package com.vision.middleware.domain;
 
-import com.vision.middleware.domain.interfaces.Votable;
+import com.vision.middleware.domain.baseEntities.VotableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 import java.util.Set;
@@ -14,13 +15,10 @@ import java.util.Set;
 @Table(name = "reply")
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reply implements Votable {
-  @Id
-  @Column(name = "reply_id", unique = true, updatable = true)
-  private long id;
-
+public class Reply extends VotableEntity {
   // Replies can be grouped by a post: the only place for a reply
   // to appear would be a post.
   @ManyToOne(fetch = FetchType.LAZY)
@@ -35,8 +33,6 @@ public class Reply implements Votable {
 
   private Date datePosted;
   private String text;
-  private long likeCount;
-  private long dislikeCount;
 
   // replies can have a parent: the reply that they are replying to.
   @ManyToOne(fetch = FetchType.LAZY)

@@ -1,5 +1,6 @@
 package com.vision.middleware.domain;
 
+import com.vision.middleware.domain.baseEntities.VotableEntity;
 import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,20 +17,13 @@ import java.util.Date;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("TEXT")
-public class Post implements Votable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
-    private long id;
-
+public class Post extends VotableEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", nullable = false)
     private ApplicationUser postedBy;
 
     private String title;
     private String text;
-    private long likeCount;
-    private long dislikeCount;
 
     private Date datePosted;
 }

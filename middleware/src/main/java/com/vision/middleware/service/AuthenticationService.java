@@ -64,6 +64,7 @@ public class AuthenticationService {
                 .state(user.getState())
                 .zipCode(user.getZipCode())
                 .country(user.getCountry())
+                .fullName(user.getFullName())
                 .followerCount(0)
                 .build();
 
