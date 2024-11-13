@@ -101,7 +101,7 @@ export default function ProfilePage({ params }) {
             </div>
             {/** Name of user*/}
             <h1 className="mt-20 mb-4 text-2xl font-medium">
-              {username}
+              {profileData.displayName}
             </h1>
             {/** Display for followers*/}
             <div className="flex items-center justify-center gap-12 mb-4">
@@ -134,7 +134,7 @@ export default function ProfilePage({ params }) {
         </div>
       </div>
       <div className="hidden lg:block w-[30%]">
-        <UserInfo usernameKey={username} />
+        <UserInfo userData={profileData} />
       </div>
     </div>
   );
