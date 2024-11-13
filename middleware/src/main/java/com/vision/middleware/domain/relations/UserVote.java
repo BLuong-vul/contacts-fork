@@ -2,6 +2,8 @@ package com.vision.middleware.domain.relations;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.enums.VotableType;
+import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +14,7 @@ import lombok.*;
 @Setter
 @Builder
 @Table(name = "user_votes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "post_id"})
+        @UniqueConstraint(columnNames = {"user_id", "votable_id", "votable_type"})
 })
 public class UserVote {
     @Id
@@ -25,8 +27,12 @@ public class UserVote {
     private ApplicationUser user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @JoinColumn(name = "votable_id", nullable = false)
+    private Votable votable;
+
+    @Column(name = "votable_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private VotableType votableType;
 
     @Column(name = "vote_type", nullable = false)
     @Enumerated(EnumType.STRING)

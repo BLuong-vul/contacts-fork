@@ -1,5 +1,6 @@
 package com.vision.middleware.domain;
 
+import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,10 +16,10 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reply {
+public class Reply implements Votable {
   @Id
   @Column(name = "reply_id", unique = true, updatable = true)
-  private long replyId;
+  private long id;
 
   // Replies can be grouped by a post: the only place for a reply
   // to appear would be a post.
