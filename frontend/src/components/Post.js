@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import styles from '../app/social-media-app/social-media-homepage.module.css';
+// import styles from '../app/social-media-app/social-media-homepage.module.css';
 import Link from 'next/link';
 
 export default function Post({ postData }) {

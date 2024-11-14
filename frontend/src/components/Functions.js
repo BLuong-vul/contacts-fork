@@ -271,7 +271,7 @@ export async function getPublicInfo(username){
 		// console.log("DEBUG: " + data.followerCount);
 		return data;
 	} catch (error){
-		console.error("Error fetching public info");
+		console.error(error);
 		throw error;
 	}
 }
