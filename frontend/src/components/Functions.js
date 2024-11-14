@@ -3,6 +3,25 @@ import Post from "./Post";
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 
+/* ===== HELPER ===== */
+async function fetchFromApi(endpoint, params){
+	try{
+		const response = await fetch(endpoint, { 
+			method: 'GET', body: params 
+		});
+		if (!response.ok) throw new Error("Failed to fetch data");
+		const data = await response.json();
+		return data;
+	} catch (error){
+		console.error(error);
+		throw error;
+	}
+}
+
+async function postToApi(endpoint, params){
+
+}
+
 /* ===== PROFILE CUSTOMIZATION UPDATES ===== */
 
 export async function updateDisplayName(displayName) {
@@ -262,13 +281,13 @@ export async function tryGetCurrentUserInfo(){
 
 // Search for a user's public info based on username
 // Returns it as json
-export async function getPublicInfo(username){
+export async function getPublicInfo(targetUsername){
+
+	// return await fetchFromApi(`${baseURL}/user/public-info`, { username: targetUsername });
 	try{
 		const res = await fetch(`${baseURL}/user/public-info?username=${username}`);
 		if (!res.ok) throw new Error("Failed to fetch data");
 		const data = await res.json();
-
-		// console.log("DEBUG: " + data.followerCount);
 		return data;
 	} catch (error){
 		console.error(error);
@@ -325,6 +344,7 @@ export async function fetchAllPosts(page=0, size=10){
 	const pagedData = await response.json();
 
 	// const posts = pagedData.content.map( ??? );
+	console.log(pagedData.content);
 	return pagedData.content;
 }
 
