@@ -3,44 +3,80 @@ import Post from "./Post";
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 
-/* ===== HELPER ===== */
-async function fetchFromApi(endpoint, params){
-	try{
-		const response = await fetch(endpoint, { 
-			method: 'GET', body: params 
-		});
-		if (!response.ok) throw new Error("Failed to fetch data");
-		const data = await response.json();
-		return data;
+/* ===== FETCH HELPERS ===== */
+
+// Use for fetches that do not require authentication
+// Only returns the response. Remember to do .json() or .text() or whatever on the return value
+async function fetchFromApi(endpoint){
+	const response = await fetch(endpoint);
+	if (!response.ok) throw new Error("Failed to fetch");
+	return await response;
+}
+
+// Use for fetches that require authentication
+// Only returns the response. Remember to do .json() or .text() or whatever on the return value
+async function authFetchFromApi(endpoint, methodArg='GET', body=null) {
+    const token = localStorage.getItem('token');
+    const response = await fetch(endpoint, {
+    	method: methodArg,
+    	headers: {
+    	    'Authorization': `Bearer ${token}`,
+    	    'Content-Type': 'application/json',
+    	},
+    	body: body ? JSON.stringify(body) : null,
+    });
+    if (!response.ok) throw new Error("Failed authenticated fetch", response.statusText);
+    return response;
+}
+
+
+/* ===== VALIDATION =====*/
+// The purpose of separating validateToken() and validateTokenWithRedirect() 
+// instead of just using validationHelper() is for clarity.
+// If you see validationHelper(true) somewhere else, it's unclear what the "true" arg is doing.
+// If you see "validateTokenWithRedirect" then it's obvious what's happening
+
+// Checks for token validity
+// Deletes token if not valid
+// Returns true/false or redirects based on argument
+async function validationHelper(redirect=false){
+	const token = localStorage.getItem('token');
+	if (!token){
+		console.log('User not logged in.');
+		if (redirect) window.location.href = '/login';
+		return false;
+	}
+
+	try {
+		await authFetchFromApi(`${baseURL}/auth/validate`);
+		return true;
 	} catch (error){
-		console.error(error);
-		throw error;
+		console.log('Login expired.');
+		localStorage.removeItem('token');
+		if (redirect) window.location.href = '/login';
+		return false;
 	}
 }
 
-async function postToApi(endpoint, params){
-
+export async function validateToken(){
+	return validationHelper();
 }
+
+export async function validateTokenWithRedirect(){
+	return validationHelper(true);
+}
+
 
 /* ===== PROFILE CUSTOMIZATION UPDATES ===== */
 
+// TODO:  Merge all of the update functions into one updateProfileInfo function. 
 export async function updateDisplayName(displayName) {
-    validateTokenWithRedirect();
-    const token = localStorage.getItem('token');
-
+    if (await validateTokenWithRedirect()) return false;
     try {
-        const updateRes = await fetch(`${baseURL}/user/account/displayName?displayName=${displayName}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!updateRes.ok) throw new Error('Failed to update display name: ' + updateRes.statusText);
-
+    	const res = await authFetchFromApi(`${baseURL}/user/account/displayName?displayName=${displayName}`, 'POST');
         return true;
     } catch (error) {
-        console.error('Error:', error);
+        throw new Error('Error during profile update:', error);
         return false;
     }
 }
@@ -281,18 +317,8 @@ export async function tryGetCurrentUserInfo(){
 
 // Search for a user's public info based on username
 // Returns it as json
-export async function getPublicInfo(targetUsername){
-
-	// return await fetchFromApi(`${baseURL}/user/public-info`, { username: targetUsername });
-	try{
-		const res = await fetch(`${baseURL}/user/public-info?username=${targetUsername}`);
-		if (!res.ok) throw new Error("Failed to fetch data");
-		const data = await res.json();
-		return data;
-	} catch (error){
-		console.error(error);
-		throw error;
-	}
+export async function getPublicInfo(username){
+	return await fetchFromApi(`${baseURL}/user/public-info?username=${username}`);
 }
 
 
@@ -438,65 +464,3 @@ export async function isFollowing(followeeUsername){
 
 
 
-
-/* ===== VALIDATION ===== */
-
-// Checks for token and if it is valid
-// Deletes token if not valid
-// Returns true if valid, false if not
-export async function validateToken(){
-	const token = localStorage.getItem('token');
-	if (!token){
-		console.log('User not logged in.');
-		return false;
-	}
-
-	try {
-		const response = await fetch(`${baseURL}/auth/validate`, {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-			},
-		});
-
-		if (!response.ok){
-			throw new Error('Invalid token');
-		}
-		return true;
-	} catch (error){
-		console.log('Login expired.');
-		localStorage.removeItem('token');
-		return false;
-	}
-}
-
-// Checks for token and if it is valid
-// Deletes token if not valid
-// Redirects if not valid
-export async function validateTokenWithRedirect(){
-	const token = localStorage.getItem('token');
-	if (!token){
-		console.log('User not logged in. Redirecting to login page.');
-		window.location.href = '/login'; 
-		return false;
-	}
-
-	try {
-		const response = await fetch(`${baseURL}/auth/validate`, {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-			},
-		});
-
-		if (!response.ok){
-			throw new Error('Invalid token');
-		}
-		return true;
-	} catch (error){
-		console.error('Login expired. Redirecting to login page.');
-		localStorage.removeItem('token');
-		window.location.href = '/login';
-		return false;
-	}
-}
