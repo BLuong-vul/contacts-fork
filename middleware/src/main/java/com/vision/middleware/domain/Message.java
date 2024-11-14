@@ -18,13 +18,8 @@ public class Message {
     @Column(name = "message_id")
     private long messageID;
 
-    @ManyToOne
-    @JoinColumn(name = "sending_user_id")
-    private ApplicationUser sendingUser;
-
-    @ManyToOne
-    @JoinColumn(name = "receiving_user_id")
-    private ApplicationUser receivingUser;
+    private long sendingUserId;
+    private long receivingUserId;
 
     private String messageBody;
 

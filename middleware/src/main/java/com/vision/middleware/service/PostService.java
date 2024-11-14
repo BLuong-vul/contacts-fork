@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Service
@@ -57,7 +58,6 @@ public class PostService {
                     .mediaFileName(postDTO.getMediaFileName())
                     .build();
         }
-
         return postRepository.save(newPost);
     }
 
@@ -72,5 +72,15 @@ public class PostService {
 
     public Page<Post> getAllPosts(int page, int size) {
         return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));
+    }
+
+    public Page<Post> getAllPostsByUsername(String username, int page, int size) {
+        ApplicationUser user = userService.loadUserByUsername(username); 
+        return postRepository.findByPostedBy(user, PageRequest.of(page, size, Sort.by("datePosted")));
+    }
+
+    public Post loadPostById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Post with ID " + postId + " not found."));
     }
 }

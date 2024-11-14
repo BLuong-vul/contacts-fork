@@ -3,11 +3,14 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Message;
 import com.vision.middleware.dto.MessageDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.MessageRepository;
+import com.vision.middleware.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -22,18 +25,16 @@ public class MessagingService {
     @Autowired
     private final UserService userService;
 
+
     public void sendMessage(long senderId, MessageDTO messageDTO) {
-
-         ApplicationUser sender = userService.loadUserById(senderId);
-         ApplicationUser receiver = userService.loadUserById(messageDTO.getRecipientId());
-
-         Message message = Message.builder()
-                 .messageBody(messageDTO.getBody())
-                 .sendingUser(sender)
-                 .receivingUser(receiver)
-                 .dateSent(new Date())
-                 .build();
-
+        /*Design Pattern: Builder*/
+        Message message = Message.builder()
+                .messageBody(messageDTO.getBody())
+                .sendingUserId(senderId)
+                .receivingUserId(messageDTO.getRecipientId())
+                .dateSent(new Date())
+                .build();
+        /*Design Pattern: Builder*/
         messageRepository.save(message);
     }
 
@@ -42,8 +43,8 @@ public class MessagingService {
         ApplicationUser user1 = userService.loadUserById(user1Id);
         ApplicationUser user2 = userService.loadUserById(user2Id);
 
-        List<Message> chat = messageRepository.findBySendingUserAndReceivingUser(user1, user2);
-        List<Message> u2SentTou1 = messageRepository.findBySendingUserAndReceivingUser(user2, user1);
+        List<Message> chat = messageRepository.findBySendingUserIdAndReceivingUserId(user1, user2);
+        List<Message> u2SentTou1 = messageRepository.findBySendingUserIdAndReceivingUserId(user2, user1);
 
         chat.addAll(u2SentTou1); // join two lists together: whole chat history
 

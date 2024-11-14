@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 @Slf4j
 @RestController
@@ -53,6 +54,14 @@ public class AuthenticationController {
             log.error("Failed to login user: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed.");
         }
+    }
+
+    // Lazy validation.
+    @GetMapping("/validate")
+    public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String token) {
+        // This is only reached if the token is valid
+        // because in SecurityConfig this endpoint only accepts USER or ADMIN
+        return ResponseEntity.ok("Token is valid");
     }
 
 }

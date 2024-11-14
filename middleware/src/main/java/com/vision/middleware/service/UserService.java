@@ -10,11 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Date;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -38,7 +40,45 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public Collection<GrantedAuthority> getAuthorities(String role) {
+    @Transactional
+    public int getFollowerCount(ApplicationUser user){
+        // System.out.println("DEBUG: " + user.getFollowers().size());
+        return user.getFollowers().size();
+    }
+
+    @Transactional
+    public int getFollowingCount(ApplicationUser user){
+        return user.getFollowing().size();
+    }
+
+    // Editing profile
+    public void updateDisplayNameById(Long id, String displayName){
+        userRepository.updateDisplayNameById(id, displayName);
+        return;
+    }
+
+    public void updateBioById(Long id, String bio){
+        userRepository.updateBioById(id, bio);
+        return;
+    }
+
+    public void updateOccupationById(Long id, String occupation){
+        userRepository.updateOccupationById(id, occupation);
+        return;
+    }
+
+    public void updateLocationById(Long id, String location){
+        userRepository.updateLocationById(id, location);
+        return;
+    }
+
+    public void updateBirthdateById(long id, Date birthdate){
+        userRepository.updateBirthdateById(id, birthdate);
+        return;
+    }
+
+
+    private Collection<GrantedAuthority> getAuthorities(String role) {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(role));
         return authorities;

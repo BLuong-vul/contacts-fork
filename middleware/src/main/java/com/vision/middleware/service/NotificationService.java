@@ -32,7 +32,7 @@ public class NotificationService {
         notificationRepository.saveAndFlush(notification);
 
         long userId = notification.getAssociatedUser().getId();
-
+        /*Design Pattern: Builder*/
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .notificationId(notification.getId())
                 .notificationBody(notification.getNotificationBody())
