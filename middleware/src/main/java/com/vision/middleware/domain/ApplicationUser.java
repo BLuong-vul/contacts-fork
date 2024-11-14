@@ -42,11 +42,11 @@ public class ApplicationUser implements UserDetails {
     @Column(unique = true, length = 15)
     private String phoneNumber;
   
-    @NonNull private String address; // TODO: DELETE
-    @NonNull private String city; // TODO: DELETE
-    @NonNull private String state; // TODO: DELETE
-    @NonNull private String zipCode; // TODO: DELETE
-    @NonNull private String country; // TODO: DELETE
+    private String address; // TODO: DELETE
+    private String city; // TODO: DELETE
+    private String state; // TODO: DELETE
+    private String zipCode; // TODO: DELETE
+    private String country; // TODO: DELETE
 
     // Customization (Visible on Bio)
     @Column(length = 18)
