@@ -285,7 +285,7 @@ export async function getPublicInfo(targetUsername){
 
 	// return await fetchFromApi(`${baseURL}/user/public-info`, { username: targetUsername });
 	try{
-		const res = await fetch(`${baseURL}/user/public-info?username=${username}`);
+		const res = await fetch(`${baseURL}/user/public-info?username=${targetUsername}`);
 		if (!res.ok) throw new Error("Failed to fetch data");
 		const data = await res.json();
 		return data;
