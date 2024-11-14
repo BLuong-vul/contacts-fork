@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
-    List<Reply> findByReplyId(long postId);
-    List<Reply> findByReplyIdAndParentReplyReplyIdIsNull(long postId);
-    List<Reply> findByParentReplyReplyId(long parentId);
+    List<Reply> findById(long postId);
+    List<Reply> findByIdAndParentReplyIsNull(long replyId);
+    List<Reply> findByParentReply(Reply parent);
 }

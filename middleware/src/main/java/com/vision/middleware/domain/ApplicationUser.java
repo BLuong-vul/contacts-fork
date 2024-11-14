@@ -23,26 +23,30 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "user_id")
     private long id;
 
+    private String profilePictureFileName;
     // Essential info
     @Column(name = "username", unique = true, nullable=false)
     private String username;
 
+    @NonNull
     @Column(length = 64, nullable=false)
     private String password;
+    @NonNull
     private String fullName; // TODO: DELETE
 
+    @NonNull
     @Column(unique = true, length = 127, nullable=false)
     private String email;
 
+    @NonNull
     @Column(unique = true, length = 15)
     private String phoneNumber;
-
-    @Column(unique = true, length = 255)
-    private String address; // TODO: DELETE
-    private String city; // TODO: DELETE
-    private String state; // TODO: DELETE
-    private String zipCode; // TODO: DELETE
-    private String country; // TODO: DELETE
+  
+    @NonNull private String address; // TODO: DELETE
+    @NonNull private String city; // TODO: DELETE
+    @NonNull private String state; // TODO: DELETE
+    @NonNull private String zipCode; // TODO: DELETE
+    @NonNull private String country; // TODO: DELETE
 
     // Customization (Visible on Bio)
     @Column(length = 18)
@@ -69,16 +73,14 @@ public class ApplicationUser implements UserDetails {
     @Column(nullable=false)
     private long followingCount = 0;
 
+    // Follower relations
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> followers;
 
     @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<UserFollows> following;
 
-    // Miscellaneous
-    @OneToMany(fetch = FetchType.LAZY)
-    private Set<Post> posts;
-
+    // Role relations
     @ManyToMany(fetch = FetchType.EAGER) // many users can have many roles. Eager because there shouldn't be too many roles.
     @JoinTable(
         name = "user_role_junction",
@@ -86,6 +88,10 @@ public class ApplicationUser implements UserDetails {
         inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> authorities;
+
+    // Post relations
+    @OneToMany(fetch = FetchType.LAZY)
+    private Set<Post> posts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

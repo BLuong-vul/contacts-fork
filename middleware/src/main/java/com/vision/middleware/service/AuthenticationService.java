@@ -11,6 +11,8 @@ import com.vision.middleware.repo.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +25,7 @@ import javax.management.relation.RoleNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
@@ -34,11 +37,10 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
 
-    // todo: you do not want to be sending over a password ike this
-    public ApplicationUser registerUser(RegistrationDTO user) {
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
+    public ApplicationUser registerUser(RegistrationDTO user) throws ConstraintViolationException {
+        final String encodedPassword = passwordEncoder.encode(user.getPassword());
 
-        Role userRole;
+        final Role userRole;
         try {
             userRole = roleRepository.findByAuthority("USER").orElseThrow(
                     () -> new RoleNotFoundException("USER role not found (should not happen)")
@@ -48,10 +50,10 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
 
-        Set<Role> authorities = new HashSet<>();
+        final Set<Role> authorities = new HashSet<>();
         authorities.add(userRole);
 
-        ApplicationUser newUser = ApplicationUser.builder()
+        final ApplicationUser newUser = ApplicationUser.builder()
                 .username(user.getUsername())
                 .password(encodedPassword)
                 .authorities(authorities)
@@ -62,40 +64,31 @@ public class AuthenticationService {
                 .state(user.getState())
                 .zipCode(user.getZipCode())
                 .country(user.getCountry())
+                .fullName(user.getFullName())
                 .followerCount(0)
                 .build();
 
+        // we have our constraints for unique properties defined in ApplicationUser:
+        // should they ever be violated, this will throw a ConstraintViolationException.
         return userRepository.save(newUser);
     }
 
-    public LoginResponseDTO loginUser(LoginDTO credentials) {
+    public LoginResponseDTO loginUser(String username, String password) throws AuthenticationException {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
 
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword())
-            );
+        ApplicationUser user =  userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-            long userId = userRepository.findByUsername(credentials.getUsername()).orElseThrow(
-                    () -> new IdNotFoundException("username does not pair with a known id in database")
-            ).getId();
-            String token = tokenService.generateJwt(auth, userId);
+        long userId = user.getId();
+        String token = tokenService.generateJwt(auth, userId);
 
-            ApplicationUser user =  userRepository.findByUsername(credentials.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-
-            return LoginResponseDTO.builder()
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .roles(user.getAuthorities())
-                    .jwt(token)
-                    .build();
-
-        } catch (AuthenticationException e) {
-            //temporary
-            System.out.println("Authentication error: " + e.getMessage());
-            // todo: throw custom exception here, make sure response is a 401
-            return new LoginResponseDTO();
-        }
-
+        return LoginResponseDTO.builder()
+                .username(user.getUsername())
+                .userId(user.getId())
+                .roles(user.getAuthorities())
+                .jwt(token)
+                .build();
     }
 }

@@ -52,25 +52,27 @@ public class ReplyService {
         //Old version
         //List<Reply> rootReplies = replyRepository.findByReplyId(postId);
 
-        // Retrieve only the root replies for the specified post
-        List<Reply> rootReplies = replyRepository.findByReplyIdAndParentReplyReplyIdIsNull(postId);
-        
-        for (Reply reply : rootReplies) {
-            populateChildReplies(reply);
-        }
-
-        return rootReplies;
+//        List<Reply> rootReplies = replyRepository.findById(postId); // todo: does this return all posts and not just root posts?
+//        for (Reply reply : rootReplies) {
+//            populateChildReplies(reply);
+//        }
+//
+//        return rootReplies;
+        return null;
+      
+        // old line of code. I am leaving it here while merging because this section seems unfinished. 13 Nov, BL
+        // List<Reply> rootReplies = replyRepository.findByReplyIdAndParentReplyReplyIdIsNull(postId);
     }
 
     // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
     private void populateChildReplies(Reply reply) {
-        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getReplyId()));
-
-        reply.setChildReplies(childReplies);
-
-        for (Reply child : childReplies) {
-            populateChildReplies(child); // recurse
-        }
+//        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
+//
+//        reply.setChildReplies(childReplies);
+//
+//        for (Reply child : childReplies) {
+//            populateChildReplies(child); // recurse
+//        }
     }
 
 }

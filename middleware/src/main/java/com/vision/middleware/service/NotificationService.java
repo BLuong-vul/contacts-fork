@@ -6,14 +6,14 @@ import com.vision.middleware.dto.NotificationDTO;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
     @Autowired
@@ -23,6 +23,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     public void sendNotification(Notification notification) {
+
+        log.info("In notification service: sending notification");
 
         // save to repository to persist. Flush is a blocking method which is desired here.
         // Notifications should be saved to the repository before we send a message, as the user will
@@ -34,12 +36,20 @@ public class NotificationService {
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .notificationId(notification.getId())
                 .notificationBody(notification.getNotificationBody())
+                .notificationType(notification.getNotificationType())
+                .toUserId(notification.getAssociatedUser().getId())
                 .timeCreated(notification.getTimeCreated())
                 .build();
-        /*Design Pattern: Builder*/
-        
-        // send notification to user.
-        messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/notifications", notificationDTO);
+
+        // send notification to user. sent to /user/queue/notifications
+        messagingTemplate.convertAndSendToUser(String.valueOf(userId), "/queue/notifications", notificationDTO);
+    }
+
+    public boolean doesNotificationBelongToUser(long notificationId, ApplicationUser user) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(
+                () -> new IdNotFoundException("Notification ID %d does not exist.".formatted(notificationId))
+        );
+        return notification.getAssociatedUser().getId() == user.getId();
     }
 
     public void acknowledgeNotification(long notificationId) {
@@ -51,7 +61,16 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<Notification> getUnreadNotifications(ApplicationUser user) {
-        return notificationRepository.findByAssociatedUserAndAcknowledgedFalse(user);
+    public void sendUnreadNotifications(ApplicationUser user) {
+        notificationRepository.findByAssociatedUserAndAcknowledgedFalse(user).stream().map(
+                notification -> NotificationDTO.builder()
+                        .notificationType(notification.getNotificationType())
+                        .notificationBody(notification.getNotificationBody())
+                        .notificationId(notification.getId())
+                        .timeCreated(notification.getTimeCreated())
+                        .build()
+        ).forEach(
+                dto -> messagingTemplate.convertAndSendToUser(String.valueOf(user.getId()), "/queue/notifications", dto)
+        );
     }
 }

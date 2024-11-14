@@ -4,7 +4,9 @@ package com.vision.middleware.utils;
 import com.vision.middleware.config.Consts;
 import com.vision.middleware.exceptions.InvalidTokenException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -71,27 +73,34 @@ public class JwtUtil {
         return !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
+    public boolean isTokenExpired(String token) {
+        try {
+            return extractClaims(token).getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     public long extractId(String token) {
         String subject = extractClaims(token).getSubject();
-        if (subject == null) {
-            throw new InvalidTokenException("Token subject is invalid");
-        }
         return Long.parseLong(subject);
     }
 
     public long checkJwtAuthAndGetUserId(String jwt) {
 
-        if (jwt != null && jwt.startsWith("Bearer ")) {
-            jwt = jwt.substring(7);
-            long id = this.extractId(jwt);
+        try {
+            if (jwt != null && jwt.startsWith("Bearer ")) {
+                jwt = jwt.substring(7);
+                long id = this.extractId(jwt);
 
-            if (this.isTokenValid(jwt)) {
-                return id;
+                if (this.isTokenValid(jwt)) {
+                    return id;
+                }
             }
+        } catch (MalformedJwtException e) {
+            throw new InvalidTokenException("Malformed JWT");
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException("Expired JWT");
         }
 
         // checks above failed, jwt is invalid.

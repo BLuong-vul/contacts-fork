@@ -15,7 +15,7 @@ import java.util.Set;
 public class LoginResponseDTO {
 
     private String username;
-    private String email;
+    private long userId;
     private Collection<? extends GrantedAuthority> roles;
     private String jwt;
 

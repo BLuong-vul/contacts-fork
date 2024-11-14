@@ -1,8 +1,11 @@
 package com.vision.middleware.service;
 
 import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.MediaPost;
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,28 +23,51 @@ import java.util.NoSuchElementException;
 @Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
 public class PostService {
 
-    // todo: decide on whether it is okay to access repositories directly through services, or if
-    // services should expose functionality of the repositories...does it matter? maybe not.
-
     @Autowired
     private final PostRepository postRepository;
 
     @Autowired
     private final UserService userService;
 
+    @Autowired
+    private final VotingService votingService;
+
     public Post createPost(PostDTO postDTO, long userId) {
 
         Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
-        /*Design Pattern: Builder*/
-        Post newPost = Post.builder()
-                .postedBy(postingUser)
-                .datePosted(date)
-                .title(postDTO.getTitle())
-                .text(postDTO.getText())
-                .build();
-        /*Design Pattern: Builder*/
+        Post newPost;
+
+        if (postDTO.getMediaFileName() == null) {
+            // text post
+            newPost = Post.builder()
+                    .postedBy(postingUser)
+                    .datePosted(date)
+                    .title(postDTO.getTitle())
+                    .text(postDTO.getText())
+                    .build();
+        } else {
+            // image post
+            // todo: check if media exists in the s3 bucket
+
+            newPost = MediaPost.builder()
+                    .postedBy(postingUser)
+                    .datePosted(date)
+                    .title(postDTO.getTitle())
+                    .text(postDTO.getText())
+                    .mediaFileName(postDTO.getMediaFileName())
+                    .build();
+        }
         return postRepository.save(newPost);
+    }
+
+    public void userVoteOnPost(long postId, long userId, UserVote.VoteType voteType) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IdNotFoundException("Post id " + postId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        votingService.voteOnVotable(user, post, voteType);
     }
 
     public Page<Post> getAllPosts(int page, int size) {
