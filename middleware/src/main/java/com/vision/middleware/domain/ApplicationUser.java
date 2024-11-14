@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,32 +23,55 @@ public class ApplicationUser implements UserDetails {
     @Column(name = "user_id")
     private long id;
 
-    @NonNull
-    @Column(name = "username", unique = true)
+    private String profilePictureFileName;
+    // Essential info
+    @Column(name = "username", unique = true, nullable=false)
     private String username;
 
     @NonNull
+    @Column(length = 64, nullable=false)
     private String password;
+    @NonNull
+    private String fullName; // TODO: DELETE
 
     @NonNull
-    private String fullName;
-
-    @NonNull
-    @Column(unique = true)
+    @Column(unique = true, length = 127, nullable=false)
     private String email;
 
     @NonNull
-    @Column(unique = true)
+    @Column(unique = true, length = 15)
     private String phoneNumber;
+  
+    private String address; // TODO: DELETE
+    private String city; // TODO: DELETE
+    private String state; // TODO: DELETE
+    private String zipCode; // TODO: DELETE
+    private String country; // TODO: DELETE
 
-    @NonNull private String address;
-    @NonNull private String city;
-    @NonNull private String state;
-    @NonNull private String zipCode;
-    @NonNull private String country;
-    private long followerCount; // TODO: decide to remove this or not?
+    // Customization (Visible on Bio)
+    @Column(length = 18)
+    private String displayName; 
 
-    private String profilePictureFileName;
+    @Column(length = 255)
+    private String bio;
+
+    @Column(length = 32)
+    private String occupation;
+
+    @Column(length = 32)
+    private String location;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date birthdate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date joinDate = new Date();
+
+    // Followers / Following
+    @Column(nullable=false)
+    private long followerCount = 0;
+    @Column(nullable=false)
+    private long followingCount = 0;
 
     // Follower relations
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

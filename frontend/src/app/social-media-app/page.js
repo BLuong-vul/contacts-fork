@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import homepagestyles from './social-media-homepage.module.css'; 
 import styles from '../styles/app.layout.css';
 
@@ -8,57 +8,11 @@ import Link from 'next/link';
 
 import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
+import RightMenu from '../../components/rightmenu/right-menu';
+import * as Fetch from '../../components/Functions';
 
-import { Post } from './Post.js';
+import Post from '../../components/Post';
 
-
-// This does not currently actually fetch posts before a current date
-// It just gets all posts.
-async function fetchPostsBeforeDate(date){
-	const page=0;
-	const size=10;
-	const response = await fetch(`https://four800-webapp.onrender.com/post/all?page=${page}&size=${size}`);
-	if (!response.ok){
-		throw new Error('Network response not ok ' + response.statusText);
-	}
-	const pagedData = await response.json();
-	console.log(pagedData.content);
-
-	const posts = pagedData.content.map(postData => new Post(postData));
-	console.log(posts);
-	return posts;
-}
-
-async function uploadPost(postDTO){
-	const token = localStorage.getItem('token');
-	if (!token) {
-	    console.error('User not authenticated. Redirecting to login page.');
-	    window.location.href = '/login'; 
-	    return;
-	}
-	console.log(token);
-	try {
-		const response = await fetch('https://four800-webapp.onrender.com/post/new', {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(postDTO)
-		});
-
-		if (!response.ok){
-			throw new Error('Failed to create post: ' + response.statusText);
-		}
-
-		const createdPost = await response.json();
-		console.log("Post upload successful", createdPost);
-		return createdPost;
-	} catch (error){
-		console.error('Error creating post:', error);
-		throw error;
-	}
-}
 
 
 export default function Projects() {
@@ -91,7 +45,7 @@ export default function Projects() {
 	// Track like, dislike, and comment countd for each post
 	const [likes, setLikes] = useState({});
 	const [dislikes, setDislikes] = useState({});
-	const [comments, setCOmments] = useState({});
+	const [comments, setComments] = useState({});
 	const [userLiked, setUserLiked] = useState({});
 	const [userDisliked, setUserDisliked] = useState({});
 	
@@ -103,16 +57,18 @@ export default function Projects() {
 	const [postVideo, setPostVideo] = useState(null);
 	const [error, setError] = useState('');
 	
-	const toggleCreatePost = () => setIsCreatingPost(!isCreatingPost);
+	const [posts, setPosts] = useState([]);
+	const [numPosts, setNumPosts] = useState(10)
+	const numPostsRef = useRef(numPosts);
+	
+
+	const toggleCreatePost = async () => {
+		if (await Fetch.validateTokenWithRedirect()){
+			setIsCreatingPost(!isCreatingPost)
+		}
+	};
 	
 	const handleCreatePost = async () => {
-		const token = localStorage.getItem('token');
-		if (!token) {
-		    console.error('User not authenticated. Redirecting to login page.');
-		    window.location.href = '/login'; 
-		    return;
-		}
-
 		if (!postText && !postImage && !postVideo) {
 			setError('Must enter text, or upload an image or video.')
 		}
@@ -124,8 +80,8 @@ export default function Projects() {
 				// video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
 			};
 			
-			await uploadPost(newPost);
-			const updatedPosts = await fetchPostsBeforeDate('');
+			await Fetch.uploadPost(newPost);
+			const updatedPosts = await Fetch.fetchAllPosts();
 			setPosts(updatedPosts);
 			
 			// reset form once submission is done
@@ -137,13 +93,31 @@ export default function Projects() {
 		}
 	};
 
+	// If reach bottom of page, fetch some more posts
+	useEffect(()=> {
+		numPostsRef.current = numPosts;
+	}, [numPosts]);
+	useEffect(() => {
+	  	const handleScroll = async () => {
+		    if (window.innerHeight + window.scrollY + 30 >= document.body.offsetHeight) {
+		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 5);
+		      setNumPosts(numPostsRef.current + 5);
+		      setPosts(fetchedPosts);
+		    }
+  		};
+		// Add scroll listener
+		window.addEventListener('scroll', handleScroll);
+		// Clean up listener on unmount
+		return () => { window.removeEventListener('scroll', handleScroll); };
+	}, []);
 
-	const [posts, setPosts] = useState([]);
+
+	
 	// Fetches posts from database and saves to "posts"
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {
 	        try {
-	            const fetchedPosts = await fetchPostsBeforeDate('2025-01-30');
+	            const fetchedPosts = await Fetch.fetchAllPosts();
 	            setPosts(fetchedPosts); 
 	        } catch (error) {
 	            console.error('Error fetching posts:', error);
@@ -172,7 +146,8 @@ export default function Projects() {
 							Create Post
 						</button>
 					</div>
-					
+
+
 					{/*Create Post Form*/}
 					{isCreatingPost && (
 						<>
@@ -217,10 +192,15 @@ export default function Projects() {
 
 				{/*display posts section*/}
 				<div className={homepagestyles.postsContainer}>
-					{posts.map(post => post.render())}
+					{posts.map(post => <Post key={post.postId} postData={post} />)}
 	            </div>
 			</div>
 			</main>
+
+			{/*<div className="hidden lg:block w-[30%]">
+				<RightMenu/>
+			</div>*/}
+
 		</div>
 		</>
 	);

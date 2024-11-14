@@ -18,6 +18,6 @@ public abstract class VotableEntity implements Votable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private long likeCount;
-    private long dislikeCount;
+    private long likeCount=0;
+    private long dislikeCount=0;
 }

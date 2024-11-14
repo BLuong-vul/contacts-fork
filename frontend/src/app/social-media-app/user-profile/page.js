@@ -1,9 +1,9 @@
-
-{/*import Feed from "@/components/feed/Feed";
-import RightMenu from "@/components/rightMenu";*/}
+{/*import Feed from "@/components/feed/Feed";*/}
+import RightMenu from '../../../components/rightmenu/right-menu';
 import LeftMenu from '../../../components/leftmenu/left-menu';
+import Feed from "../../../components/Feed";
 import Image from "next/image";
-
+import Link from "next/link";
 const userProfile = () => {
   return (
     <div className="flex gap-6 pt-6">
@@ -47,16 +47,19 @@ const userProfile = () => {
                 <span className="text-sm">Following</span>
               </div>
             </div>
+            {/** End display for followers */}
           </div>
+          <Link href="/social-media-app/user-profile" className="bg-blue-500 text-white text-xs p-2 rounded-md">Follow</Link>
           {/* Adjust for post updates
           *<Feed username={user.username}/>*/}
+          <Feed/>
         </div>
       </div>
-      {/*<div className="hidden lg:block w-[30%]">
-        <RightMenu user={user} />
-      </div>*/}
+      <div className="hidden lg:block w-[30%]">
+        {/** <RightMenu user={user} />*/}
+        <RightMenu/>
+      </div>
     </div>
   );
 };
-
 export default userProfile;

@@ -3,6 +3,7 @@ package com.vision.middleware.domain;
 import com.vision.middleware.domain.baseEntities.VotableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -24,19 +24,48 @@ public class PostController {
     @Autowired
     private final PostService postService;
 
+    // This used to return a Post and has been changed to just return an OK response entity. Oct 31 
     @PostMapping("/new")
-    public Post createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
+    public ResponseEntity<Void> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
-        return postService.createPost(postDTO, id);
+        Post createdPost = postService.createPost(postDTO, id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/all")
     public ResponseEntity<Page<PostDTO>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
                                                             @RequestParam(value = "size", defaultValue = "10") int size) {
         Page<Post> posts = postService.getAllPosts(page, size);
+        
+        Page<PostDTO> postsDTO = posts.map(
+                /*Design Pattern: Builder*/
+                post -> PostDTO.builder()
+                        .postId(post.getId())
+                        .datePosted(post.getDatePosted())
+                        .dislikeCount(post.getDislikeCount())
+                        .text(post.getText())
+                        .title(post.getTitle())
+                        .postedBy(
+                                UserDTO.builder().username(post.getPostedBy().getUsername())
+                                        .userId(post.getPostedBy().getId())
+                                        .build()
+                        )
+                        .build()
+                /*Design Pattern: Builder*/
+        );
+
+        return ResponseEntity.ok(postsDTO);
+    }
+
+    @GetMapping("/by-user")
+    public ResponseEntity<Page<PostDTO>> getPostPageByUsername(@RequestParam(value = "username", defaultValue = "") String username, 
+                                                               @RequestParam(value = "page", defaultValue = "0") int page, 
+                                                               @RequestParam(value = "size", defaultValue = "10") int size) {
+        Page<Post> posts = postService.getAllPostsByUsername(username, page, size);
 
         Page<PostDTO> postsDTO = posts.map(
                 post -> PostDTO.builder()
+                        .postId(post.getId())
                         .datePosted(post.getDatePosted())
                         .dislikeCount(post.getDislikeCount())
                         .text(post.getText())
