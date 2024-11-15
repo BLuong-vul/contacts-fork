@@ -6,7 +6,7 @@ import { authFetchFromApi } from './FunctionHelpers';
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
-async function validationHelper(redirect=false){
+export async function validationHelper(redirect=false){
 	const token = localStorage.getItem('token');
 	if (!token){
 		console.log('User not logged in.');

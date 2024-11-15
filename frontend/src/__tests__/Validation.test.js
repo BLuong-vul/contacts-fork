@@ -8,6 +8,7 @@ const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 let fetchFromApi = require('../components/FunctionHelpers').fetchFromApi;
 let authFetchFromApi = require('../components/FunctionHelpers').authFetchFromApi;
 
+let validationHelper = require('../components/ValidationFunctions').validationHelper;
 let validateToken = require('../components/ValidationFunctions').validateToken;
 let validateTokenWithRedirect = require('../components/ValidationFunctions').validateTokenWithRedirect;
 
@@ -23,8 +24,69 @@ global.window = {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks(); // Clear previous mocks
-  global.fetch = jest.fn(); // Mock global fetch
+  jest.clearAllMocks(); // clear previous mocks
+  global.fetch = jest.fn(); // mock global fetch
+});
+
+describe('validationHelper', () => {
+  it('should return false and not redirect if token is missing', async () => {
+    localStorage.getItem.mockReturnValue(null);
+
+    const result = await validationHelper();
+
+    expect(localStorage.getItem).toHaveBeenCalledWith('token');
+    expect(result).toBe(false);
+    // expect(window.location.href).toBe('');
+  });
+
+  it('should return false and redirect if token is missing and redirect is true', async () => {
+    localStorage.getItem.mockReturnValue(null);
+
+    const result = await validationHelper(true);
+
+    expect(localStorage.getItem).toHaveBeenCalledWith('token');
+    expect(result).toBe(false);
+    // expect(window.location.href).toBe('/login');
+  });
+
+  it('should return true if token exists and validation succeeds', async () => {
+    localStorage.getItem.mockReturnValue('mock-token');
+    authFetchFromApi.mockResolvedValue({});
+
+    const result = await validationHelper();
+
+    expect(localStorage.getItem).toHaveBeenCalledWith('token');
+    expect(authFetchFromApi).toHaveBeenCalledWith(`${baseURL}/auth/validate`);
+    expect(result).toBe(true);
+    expect(localStorage.removeItem).not.toHaveBeenCalled();
+    // expect(window.location.href).toBe('');
+  });
+
+  it('should return false, remove token, and not redirect if validation fails', async () => {
+    localStorage.getItem.mockReturnValue('mock-token');
+    authFetchFromApi.mockRejectedValue(new Error('Validation failed'));
+
+    const result = await validationHelper();
+
+    expect(localStorage.getItem).toHaveBeenCalledWith('token');
+    expect(authFetchFromApi).toHaveBeenCalledWith(`${baseURL}/auth/validate`);
+    expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+    expect(result).toBe(false);
+    // expect(window.location.href).toBe('');
+  });
+
+  it('should return false, remove token, and redirect if validation fails and redirect is true', async () => {
+    localStorage.getItem.mockReturnValue('mock-token');
+    authFetchFromApi.mockRejectedValue(new Error('Validation failed'));
+
+    const result = await validationHelper(true);
+
+    expect(localStorage.getItem).toHaveBeenCalledWith('token');
+    expect(authFetchFromApi).toHaveBeenCalledWith(`${baseURL}/auth/validate`);
+    expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+    expect(result).toBe(false);
+    // expect(window.location.href).toBe('/login');
+  });
 });
 
 

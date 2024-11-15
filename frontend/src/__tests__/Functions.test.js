@@ -16,7 +16,7 @@ let validateToken = require('../components/ValidationFunctions').validateToken;
 let validateTokenWithRedirect = require('../components/ValidationFunctions').validateTokenWithRedirect;
 
 // Things being tested
-let updateProfileInfo = require('../components/Functions').updateProfileInfo;
+let updateProfileInfo = require('../components/ProfileUpdateFunctions').updateProfileInfo;
 let createAccount = require('../components/Functions').createAccount;
 let logout = require('../components/Functions').logout;
 let login = require('../components/Functions').login;

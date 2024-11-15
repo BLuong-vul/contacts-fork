@@ -1,6 +1,7 @@
 import Post from "./Post";
 import { fetchFromApi, authFetchFromApi } from './FunctionHelpers';
 import { validateToken, validateTokenWithRedirect } from './ValidationFunctions';
+import { updateProfileInfo } from './ProfileUpdateFunctions';
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
@@ -39,16 +40,16 @@ const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 /* ===== PROFILE CUSTOMIZATION UPDATES ===== */
 
 // TODO:  Change the backend so that it accepts the values as body instead of like this. Just for parity/clarity/cleanliness
-export async function updateProfileInfo(attribute, value){
-	if (!(await validateTokenWithRedirect())) return false;
-	try {
-		const res = await authFetchFromApi(`${baseURL}/user/account/${attribute}?${attribute}=${value}`, 'POST');
-		return true;
-	} catch (error){
-		console.error('Error during profile update:', error);
-		return false;
-	}
-}
+// export async function updateProfileInfo(attribute, value){
+// 	if (!(await validateTokenWithRedirect())) return false;
+// 	try {
+// 		const res = await authFetchFromApi(`${baseURL}/user/account/${attribute}?${attribute}=${value}`, 'POST');
+// 		return true;
+// 	} catch (error){
+// 		console.error('Error during profile update:', error);
+// 		return false;
+// 	}
+// }
 
 // TODO: delete all of these and just use updateProfileInfo directly maybe?
 export async function updateDisplayName(displayName) {
