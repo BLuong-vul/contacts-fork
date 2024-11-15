@@ -3,9 +3,11 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.Reply;
+import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.repo.ReplyRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,47 +34,55 @@ public class ReplyService {
     @Autowired
     private final ReplyRepository replyRepository;
 
-    public Reply creatReply(ReplyDTO replyDTO, Long postId, Long userId){
-        Date date = new Date();
-        ApplicationUser postingUser = userService.loadUserById(userId);
-        Post post = postService.loadPostById(postId);
-        /*Design Pattern: Builder*/
-        Reply newReply = Reply.builder()
-        .author(postingUser)
-        .post(post)
-        .datePosted(date)
-        .text(replyDTO.getText())
-        .parentReply(replyDTO.getParentReply()) // If parentReply is nullable, this can be null
-        .build();
-        /*Design Pattern: Builder*/
-        return replyRepository.save(newReply);
-    }
-    
-    public List<Reply> getReplyTree(Long postId) {
-        //Old version
-        //List<Reply> rootReplies = replyRepository.findByReplyId(postId);
+    @Autowired
+    private final VotingService votingService;
 
-//        List<Reply> rootReplies = replyRepository.findById(postId); // todo: does this return all posts and not just root posts?
-//        for (Reply reply : rootReplies) {
-//            populateChildReplies(reply);
-//        }
-//
-//        return rootReplies;
-        return null;
-      
-        // old line of code. I am leaving it here while merging because this section seems unfinished. 13 Nov, BL
-        // List<Reply> rootReplies = replyRepository.findByReplyIdAndParentReplyReplyIdIsNull(postId);
+    // null parent reply if this is supposed to be a root reply.
+    public Reply createReply(Post post, ApplicationUser author, String text, Reply parentReply) {
+        Reply reply = Reply.builder()
+                .post(post)
+                .author(author)
+                .text(text)
+                .parentReply(parentReply)
+                .datePosted(new Date())
+                .likeCount(0L)
+                .dislikeCount(0L)
+                .voteScore(0L)
+                .build();
+
+        if (parentReply != null && parentReply.getLevel() >= 100) {
+            throw new IllegalArgumentException("Maximum nesting level exceeded");
+        }
+
+        return replyRepository.save(reply);
     }
 
-    // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
-    private void populateChildReplies(Reply reply) {
-//        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
-//
-//        reply.setChildReplies(childReplies);
-//
-//        for (Reply child : childReplies) {
-//            populateChildReplies(child); // recurse
-//        }
+    public void voteOnReply(ApplicationUser user, Reply reply, UserVote.VoteType voteType) {
+        votingService.voteOnVotable(user, reply, voteType);
+    }
+
+    public void deleteReply(Reply reply) {
+        if (!reply.getChildReplies().isEmpty()) {
+            // preserve tree structure
+            reply.softDelete();
+            replyRepository.save(reply);
+        } else {
+            // delete that thing
+            replyRepository.delete(reply);
+        }
+    }
+
+    public List<Reply> getRepliesForPost(Long postId) {
+        return replyRepository.findTopLevelRepliesByPostId(postId);
+    }
+
+    public void updateVote(Reply reply, boolean isUpvote) {
+        if (isUpvote) {
+            reply.setLikeCount(reply.getLikeCount() + 1);
+        } else {
+            reply.setDislikeCount(reply.getDislikeCount() + 1);
+        }
+        replyRepository.save(reply);
     }
 
 }
