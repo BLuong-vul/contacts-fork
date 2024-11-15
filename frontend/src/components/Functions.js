@@ -123,22 +123,10 @@ export async function createAccount(userData){
 	// TODO: CHECK REQUIRED FIELDS
 
 	try {							
-	  const response = await fetch(`${baseURL}/auth/register`, {
-	    method: 'POST',
-	    headers: {
-	      'Content-Type': 'application/json',
-	    },
-	    body: JSON.stringify(userPayload),
-	  });
-
-	  if (!response.ok) {
-	    throw new Error(`Error: ${response.status}`);
-	  }
-
+	  const response = await fetchFromApi(`${baseURL}/auth/register`, 'POST', userPayload);
 	  const result = await response.json();
 	  console.log('User created successfully:', result);
 	  alert('Account creation successful!')
-
 	  window.location.href = '/login';
 	} catch (error) {
 	  console.error('Error:', error);
@@ -208,28 +196,6 @@ export async function getCurrentUserInfo(){
 	}
 }
 
-// // Gets info for the current logged in user, like ID and username
-// // Returns null if not logged in
-// export async function tryGetCurrentUserInfo(){
-// 	const token = localStorage.getItem('token');
-// 	if (!(await validateToken())){
-// 		return null;
-// 	}
-
-// 	const res = await fetch(`${baseURL}/user/info`, {
-// 	    method: 'GET',
-// 	    headers: {
-// 	        'Authorization': `Bearer ${token}`,
-// 	        'Content-Type': 'application/json',
-// 	    },
-// 	});
-
-// 	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
-
-// 	const result = await res.json();
-// 	return result;
-// }
-
 // Search for a user's public info based on username
 // Returns it as json
 export async function getPublicInfo(username){
@@ -245,31 +211,15 @@ export async function getPublicInfo(username){
 			// const newPost = {
 			// 	title: postTitle,
 			// 	text: postText
+			//	...
 			// };
 export async function uploadPost(postDTO){
-	if (!(await validateToken())){
-		return false;
-	}
-	const token = localStorage.getItem('token');
-	
 	try {
-		const response = await fetch(`${baseURL}/post/new`, {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(postDTO)
-		});
-
-		if (!response.ok){
-			throw new Error('Failed to create post: ' + response.statusText);
-		}
+		const response = await authFetchFromApi(`${baseURL}/post/new`, 'POST', postDTO);
 		console.log("Post upload successful");
 		return true;
 	} catch (error){
 		console.error('Error creating post:', error);
-		throw error;
 		return false;
 	}
 }
@@ -278,35 +228,18 @@ export async function uploadPost(postDTO){
 // Tries to fetch all posts
 // 4 November: This now only returns the data and not actual post components.
 export async function fetchAllPosts(page=0, size=10){
-	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
-	if (!response.ok){
-		throw new Error('Network response not ok ' + response.statusText);
-	}
+	const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}`);
 	const pagedData = await response.json();
-
-	// const posts = pagedData.content.map( ??? );
-	console.log(pagedData.content);
 	return pagedData.content;
 }
 
 
 // Fetches all posts made by a certain user
-// Returns a list of Posts (see Post.js)
-export async function getPostsByUser(username){
-	try{
-		const page=0;
-		const size=10;
-
-		const postRes = await fetch(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
-		if (!postRes.ok) throw new Error('Network response not ok ' + postRes.statusText);
-		
-		const pagedData = await postRes.json();
-		// const posts = pagedData.content.map(postData => new Post(postData));
-		return pagedData.content;
-	} catch (error){
-		console.error("Error fetching posts");
-		throw error;
-	}
+// 4 November: This now only returns the data and not actual post components.
+export async function getPostsByUser(username, page=0, size=10){
+	const response = await authFetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
+	const pagedData = await response.json();
+	return pagedData.content;
 }
 
 
@@ -317,20 +250,10 @@ export async function getPostsByUser(username){
 // Returns true if successful, false otherwise
 export async function unfollowUser(followeeId){
 	try {
-		const token = localStorage.getItem('token');
-		const res = await fetch(`${baseURL}/user/unfollow/${followeeId}`, {
-		method: 'POST',
-		headers: {
-			  'Authorization': `Bearer ${token}`,
-			  'Content-Type': 'application/json',
-			},
-		});
-		if (!res.ok) throw new Error('Failed to unfollow');
-
-		// console.log("DEBUG: unfollowed successfully");
+		const response = await authFetchFromApi(`${baseURL}/user/unfollow/${followeeId}`, 'POST');
 		return true;
 	} catch (error) {
-		console.error("Error unfollowing user");
+		console.error("Error unfollowing user: ", error);
 		return false;
 	}
 }
@@ -339,20 +262,10 @@ export async function unfollowUser(followeeId){
 // Returns true if successful, false otherwise
 export async function followUser(followeeId){
 	try {
-		const token = localStorage.getItem('token');
-		const res = await fetch(`${baseURL}/user/follow/${followeeId}`, {
-		method: 'POST',
-		headers: {
-			  'Authorization': `Bearer ${token}`,
-			  'Content-Type': 'application/json',
-			},
-		});
-		if (!res.ok) throw new Error('Failed to follow');
-
-		// console.log("DEBUG: followed successfully");
+		const response = await authFetchFromApi(`${baseURL}/user/follow/${followeeId}`, 'POST');
 		return true;
 	} catch (error) {
-		console.error("Error following user");
+		console.error("Error following user: ", error);
 		return false;
 	}
 }
@@ -361,18 +274,12 @@ export async function followUser(followeeId){
 // Returns true if current user is following followee, else returns false
 export async function isFollowing(followeeUsername){
 	try{
-		const token = localStorage.getItem('token');
-		const followedRes = await fetch(`${baseURL}/user/following/list`, {
-		  headers: {
-		    'Authorization': `Bearer ${token}`,
-		  },
-		});
-		if (!followedRes.ok) throw new Error("Failed to fetch followed users");
-		const followedUsers = await followedRes.json();
+		const response = await authFetchFromApi(`${baseURL}/user/following/list`);
+		const followedUsers = await response.json();
 		const isFollowing = followedUsers.some(user => user.username === followeeUsername);
 		return isFollowing;
 	} catch (error){
-		console.error("Error fetching follower information");
+		console.error("Error fetching follower information: ", error);
 		throw error;
 	}
 }
