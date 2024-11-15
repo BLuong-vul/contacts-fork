@@ -16,10 +16,10 @@ export default function FollowersListPage() {
         const fetchUserId = async () => {
             try {
                 const currentUserInfo = await Fetch.getCurrentUserInfo();
+                if (!currentUserInfo) window.location.href = '/login';
 
                 setUserId(currentUserInfo.userId);
                 setCurrentUsername(currentUserInfo.username);
-                console.log(currentUserInfo);
 
                 // Following users list
                 const followingRes = await Fetch.getFollowingList();

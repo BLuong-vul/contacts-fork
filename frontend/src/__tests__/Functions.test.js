@@ -5,6 +5,7 @@ const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 global.fetch = jest.fn();
 
+// Test suite 1
 describe('Functions.getPublicInfo', () => {
   afterEach(() => {
     fetch.mockClear();
