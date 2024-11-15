@@ -37,7 +37,7 @@
     "tailwindcss": "^3.4.1"
   },
   "jest": {
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "setupFilesAfterEnv": [
       "@testing-library/jest-dom"
     ],
