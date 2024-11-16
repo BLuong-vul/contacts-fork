@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * TODO: make it so that a user cannot vote on their own post / reply.
  */
@@ -41,7 +43,13 @@ public class ReplyController {
     @Autowired
     private final JwtUtil jwtUtil;
 
-    @PostMapping("/posts/{postId}")
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<ReplyDTO>> getRepliesToPostNoAuth(@PathVariable long postId) {
+        List<ReplyDTO> commentTreeForPost = replyService.getCommentTreeForPost(postId, null);
+        return ResponseEntity.ok(commentTreeForPost);
+    }
+
+    @PostMapping("/post/{postId}")
     public ResponseEntity<ReplyDTO> createReply(
             @RequestHeader("Authorization") String token,
             @PathVariable long postId,

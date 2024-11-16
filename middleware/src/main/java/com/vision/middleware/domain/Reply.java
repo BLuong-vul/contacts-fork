@@ -46,7 +46,7 @@ public class Reply extends VotableEntity {
 
     // nested replies: a reply can be associated with many replies.
     @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL)
-    @OrderBy("voteScore DESC, date DESC")
+    @OrderBy("voteScore DESC, datePosted DESC")
     private Set<Reply> childReplies = new HashSet<>();
 
     @Column(nullable = false)

@@ -22,6 +22,7 @@ import java.beans.Transient;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -102,7 +103,7 @@ public class ReplyService {
 
     private ReplyDTO convertToCommentTree(Reply reply, ApplicationUser currentUser) {
         // Get the user's vote on this reply if it exists
-        UserVote.VoteType userVoteType = votingService.getUserVoteOnVotable(currentUser, reply);
+        Optional<UserVote.VoteType> userVoteType = votingService.getUserVoteOnVotable(currentUser, reply);
 
         // Convert child replies recursively
         List<ReplyDTO> childComments = reply.getChildReplies().stream()
@@ -127,7 +128,7 @@ public class ReplyService {
                 .likeCount(reply.getLikeCount())
                 .dislikeCount(reply.getDislikeCount())
                 .voteScore(reply.getVoteScore())
-                .userVoteType(userVoteType)
+                .userVoteType(userVoteType.orElse(null))
                 .isDeleted(reply.isDeleted())
                 .replies(childComments)
                 .build();

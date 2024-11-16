@@ -40,11 +40,10 @@ public class VotingService {
         );
     }
 
-    public UserVote.VoteType getUserVoteOnVotable(ApplicationUser user, VotableEntity votable) {
+    public Optional<UserVote.VoteType> getUserVoteOnVotable(ApplicationUser user, VotableEntity votable) {
         VotableType type = getVotableType(votable);
-        return userVoteRepository.findByUserAndVotableAndVotableType(user, votable, type).orElseThrow(
-                () -> new EntityNotFoundException("Vote DNE")
-        ).getVoteType();
+        Optional<UserVote> optionalVote = userVoteRepository.findByUserAndVotableAndVotableType(user, votable, type);
+        return optionalVote.map(UserVote::getVoteType);
     }
 
     private VotableType getVotableType(VotableEntity votable) {
