@@ -24,7 +24,8 @@ public class PostController {
     @Autowired
     private final PostService postService;
 
-    // This used to return a Post and has been changed to just return an OK response entity. Oct 31 
+    // This used to return a Post and has been changed to just return an OK response entity. Oct 31
+    // todo: maybe we should just have it return the id of the post instead? or maybe a post DTO.
     @PostMapping("/new")
     public ResponseEntity<Void> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
@@ -34,50 +35,18 @@ public class PostController {
 
     @GetMapping("/all")
     public ResponseEntity<Page<PostDTO>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                            @RequestParam(value = "size", defaultValue = "10") int size) {
+                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
         Page<Post> posts = postService.getAllPosts(page, size);
-        
-        Page<PostDTO> postsDTO = posts.map(
-                /*Design Pattern: Builder*/
-                post -> PostDTO.builder()
-                        .postId(post.getId())
-                        .datePosted(post.getDatePosted())
-                        .dislikeCount(post.getDislikeCount())
-                        .text(post.getText())
-                        .title(post.getTitle())
-                        .postedBy(
-                                UserDTO.builder().username(post.getPostedBy().getUsername())
-                                        .userId(post.getPostedBy().getId())
-                                        .build()
-                        )
-                        .build()
-                /*Design Pattern: Builder*/
-        );
-
+        Page<PostDTO> postsDTO = posts.map(this::buildDTOFromPost);
         return ResponseEntity.ok(postsDTO);
     }
 
     @GetMapping("/by-user")
-    public ResponseEntity<Page<PostDTO>> getPostPageByUsername(@RequestParam(value = "username", defaultValue = "") String username, 
-                                                               @RequestParam(value = "page", defaultValue = "0") int page, 
+    public ResponseEntity<Page<PostDTO>> getPostPageByUsername(@RequestParam(value = "username", defaultValue = "") String username,
+                                                               @RequestParam(value = "page", defaultValue = "0") int page,
                                                                @RequestParam(value = "size", defaultValue = "10") int size) {
         Page<Post> posts = postService.getAllPostsByUsername(username, page, size);
-
-        Page<PostDTO> postsDTO = posts.map(
-                post -> PostDTO.builder()
-                        .postId(post.getId())
-                        .datePosted(post.getDatePosted())
-                        .dislikeCount(post.getDislikeCount())
-                        .text(post.getText())
-                        .title(post.getTitle())
-                        .postedBy(
-                                UserDTO.builder().username(post.getPostedBy().getUsername())
-                                        .userId(post.getPostedBy().getId())
-                                        .build()
-                        )
-                        .build()
-        );
-
+        Page<PostDTO> postsDTO = posts.map(this::buildDTOFromPost);
         return ResponseEntity.ok(postsDTO);
     }
 
@@ -86,5 +55,22 @@ public class PostController {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
         postService.userVoteOnPost(voteDTO.getVotableId(), userId, voteDTO.getVoteType());
         return voteDTO;
+    }
+
+    private PostDTO buildDTOFromPost(Post post) {
+        // only the information required.
+        return PostDTO.builder()
+                .postId(post.getId())
+                .datePosted(post.getDatePosted())
+                .dislikeCount(post.getDislikeCount())
+                .likeCount(post.getLikeCount())
+                .text(post.getText())
+                .title(post.getTitle())
+                .postedBy(
+                        UserDTO.builder().username(post.getPostedBy().getUsername())
+                                .userId(post.getPostedBy().getId())
+                                .build()
+                )
+                .build();
     }
 }

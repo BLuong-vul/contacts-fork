@@ -1,9 +1,11 @@
 package com.vision.middleware.domain;
 
 import com.vision.middleware.domain.baseEntities.VotableEntity;
-import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;

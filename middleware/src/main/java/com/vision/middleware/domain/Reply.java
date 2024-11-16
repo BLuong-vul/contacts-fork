@@ -57,14 +57,18 @@ public class Reply extends VotableEntity {
     private long voteScore;
 
     @PrePersist
-    @PreUpdate
-    protected void updateDerivedFields() {
-        this.voteScore = this.getLikeCount() - this.getDislikeCount();
+    protected void onPrePersist() {
+        this.datePosted = new Date();
+        updateDerivedFields();
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.datePosted = new Date();
+    @PreUpdate
+    protected void onPreUpdate() {
+        updateDerivedFields();
+    }
+
+    private void updateDerivedFields() {
+        this.voteScore = this.getLikeCount() - this.getDislikeCount();
     }
 
     public void addChildReply(Reply reply) {

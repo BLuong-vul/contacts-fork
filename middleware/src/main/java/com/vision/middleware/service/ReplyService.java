@@ -6,6 +6,7 @@ import com.vision.middleware.domain.Reply;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.dto.UserDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.ReplyRepository;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.beans.Transient;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
 public class ReplyService {
 
     private static final int MAX_REPLY_LENGTH = 5000;
-    private static final int MAX_NESTING_DEPTH = 10;
+    private static final int MAX_NESTING_DEPTH = 100;
 
     @Autowired
     private final UserService userService;
@@ -40,6 +43,7 @@ public class ReplyService {
     private final VotingService votingService;
 
     // null parent reply if this is supposed to be a root reply.
+    @Transactional
     public Reply createReply(Post post, ApplicationUser author, String text, Reply parentReply) {
         validateReply(text, parentReply);
 
@@ -63,17 +67,28 @@ public class ReplyService {
         return replyRepository.save(reply);
     }
 
+    public Reply findReplyById(long replyId) {
+        return replyRepository.findById(replyId).orElseThrow(
+                () -> new IdNotFoundException(String.format("Reply with id %d not found.", replyId))
+        );
+    }
+
     public void voteOnReply(ApplicationUser user, Reply reply, UserVote.VoteType voteType) {
         votingService.voteOnVotable(user, reply, voteType);
     }
 
+    @Transactional
     public void deleteReply(Reply reply) {
         if (!reply.getChildReplies().isEmpty()) {
             // preserve tree structure
             reply.softDelete();
             replyRepository.save(reply);
         } else {
-            // delete that thing
+            // delete that thing. Update parent that we are removing one of its children as well.
+            Reply parentReply = reply.getParentReply();
+            parentReply.removeChildReply(reply);
+            replyRepository.save(parentReply);
+
             replyRepository.delete(reply);
         }
     }
