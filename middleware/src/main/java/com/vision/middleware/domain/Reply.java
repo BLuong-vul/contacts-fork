@@ -52,21 +52,14 @@ public class Reply extends VotableEntity {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    @Column(nullable = false)
-    private int depth;
-
     // derived fields
     @Column(name = "vote_score")
     private long voteScore;
-
-    @Column(name = "level")
-    private int level;
 
     @PrePersist
     @PreUpdate
     protected void updateDerivedFields() {
         this.voteScore = this.getLikeCount() - this.getDislikeCount();
-        this.level = (this.parentReply == null) ? 0 : this.parentReply.getLevel() + 1;
     }
 
     @PrePersist
