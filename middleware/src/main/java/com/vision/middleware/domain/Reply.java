@@ -19,6 +19,7 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@SequenceGenerator(name = "id_generator", sequenceName = "reply_sequence", allocationSize = 1)
 public class Reply extends VotableEntity {
     // Replies can be grouped by a post: the only place for a reply
     // to appear would be a post.
