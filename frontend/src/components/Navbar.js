@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import MobileMenu from "../app//styles/mobile.menu";
 import * as Fetch from "./Functions";
+import { validateTokenWithRedirect, validateToken } from './ValidationFunctions';
 import Tooltip from '@mui/material/Tooltip';
 
 
@@ -15,7 +16,7 @@ const Navbar = () => {
   const [accountUrl, setAccountUrl] = useState("/login");
   useEffect(() => {
     const init = async() => {
-      if(!(await Fetch.validateToken())){
+      if(!(await validateToken())){
         setUsername("Login");
         setAccountUrl("/login");
       } else {
@@ -70,11 +71,6 @@ const Navbar = () => {
       </div>
       {/* RIGHT */}
       <div className="w-[30%] flex items-center gap-4 xl:gap-8 mr-8 justify-end">
-            <div className="cursor-pointer">
-              <Tooltip title="Follower/Following" arrow>
-              	<Image src="/people.png" alt="" width={24} height={24} />
-              </Tooltip>
-            </div>
 			<Tooltip title="Messages" arrow>
 				<Link href="/social-media-app/direct-messages">
               	<Image src="/messages.png" alt="" width={20} height={20} />

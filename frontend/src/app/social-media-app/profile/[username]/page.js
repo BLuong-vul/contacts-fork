@@ -4,9 +4,11 @@ import homepagestyles from '../../social-media-homepage.module.css';
 import LeftMenu from '../../../../components/leftmenu/left-menu';
 import UserInfo from '../../../../components/rightmenu/user-info';
 import * as Fetch from '../../../../components/Functions';
+import { validateTokenWithRedirect, validateToken } from '../../../../components/ValidationFunctions';
 import Image from "next/image";
 import Link from "next/link";
 import Post from '../../../../components/Post';
+
 
 
 export default function ProfilePage({ params }) {
@@ -36,7 +38,7 @@ export default function ProfilePage({ params }) {
 
         // Check if we are logged in
         // console.log("DEBUG: checking login...");
-        if (await Fetch.validateToken()){
+        if (await validateToken()){
           // console.log("DEBUG: logged in");
           //If logged in, check if already following
           const isFollowing = await Fetch.isFollowing(data.username);
@@ -52,7 +54,7 @@ export default function ProfilePage({ params }) {
   // Handle follow button click
   const handleFollow = async () => {
     // Check if logged in
-    if (Fetch.validateTokenWithRedirect()){
+    if (validateTokenWithRedirect()){
       //If logged in, check if already following
       const isFollowing = await Fetch.isFollowing(profileData.username);
       setIsFollowing(isFollowing);

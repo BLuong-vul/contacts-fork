@@ -13,7 +13,6 @@ export async function fetchFromApi(endpoint, methodArg='GET', body=null){
 		},
 		body: body ? JSON.stringify(body) : null,
 	});
-	console.log(response);
 	if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
 	return response;
 }
@@ -21,7 +20,6 @@ export async function fetchFromApi(endpoint, methodArg='GET', body=null){
 // Use for fetches that require authentication
 // Only returns the response. Remember to do .json() or .text() or whatever on the return value
 export async function authFetchFromApi(endpoint, methodArg='GET', body=null) {
-	console.log("AUTH FETCH BEING CALLED");
     const token = localStorage.getItem('token');
     const response = await fetch(endpoint, {
     	method: methodArg,
