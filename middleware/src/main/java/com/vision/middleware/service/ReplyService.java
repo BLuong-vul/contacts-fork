@@ -32,7 +32,6 @@ public class ReplyService {
 
     private static final int MAX_REPLY_LENGTH = 5000;
     private static final int MAX_NESTING_DEPTH = 100;
-
     @Autowired
     private final UserService userService;
     private final PostService postService;
@@ -59,10 +58,8 @@ public class ReplyService {
                 .voteScore(0L)
                 .build();
 
-        // if there is a parent reply, it needs to be updated and persisted as well.
         if (parentReply != null) {
             parentReply.addChildReply(reply);
-            replyRepository.save(parentReply);
         }
 
         return replyRepository.save(reply);

@@ -53,23 +53,9 @@ public class Reply extends VotableEntity {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    // derived fields
-    @Column(name = "vote_score")
-    private long voteScore;
-
     @PrePersist
     protected void onPrePersist() {
         this.datePosted = new Date();
-        updateDerivedFields();
-    }
-
-    @PreUpdate
-    protected void onPreUpdate() {
-        updateDerivedFields();
-    }
-
-    private void updateDerivedFields() {
-        this.voteScore = this.getLikeCount() - this.getDislikeCount();
     }
 
     public void addChildReply(Reply reply) {

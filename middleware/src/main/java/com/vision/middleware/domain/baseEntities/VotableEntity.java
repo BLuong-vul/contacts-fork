@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -22,4 +24,23 @@ public abstract class VotableEntity implements Votable {
 
     private long likeCount;
     private long dislikeCount;
+
+
+    // derived fields
+    @Column(name = "vote_score")
+    private long voteScore;
+
+    @PrePersist
+    protected void onPrePersist() {
+        updateDerivedFields();
+    }
+
+    @PreUpdate
+    protected void onPreUpdate() {
+        updateDerivedFields();
+    }
+
+    private void updateDerivedFields() {
+        this.voteScore = this.getLikeCount() - this.getDislikeCount();
+    }
 }
