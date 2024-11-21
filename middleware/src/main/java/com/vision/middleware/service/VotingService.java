@@ -11,6 +11,7 @@ import com.vision.middleware.exceptions.DuplicateVoteException;
 import com.vision.middleware.repo.PostRepository;
 import com.vision.middleware.repo.ReplyRepository;
 import com.vision.middleware.repo.UserVoteRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,12 @@ public class VotingService {
                 vote -> updateVote(vote, voteType, votable),
                 () -> createVote(user, votable, votableType, voteType)
         );
+    }
+
+    public Optional<UserVote.VoteType> getUserVoteOnVotable(ApplicationUser user, VotableEntity votable) {
+        VotableType type = getVotableType(votable);
+        Optional<UserVote> optionalVote = userVoteRepository.findByUserAndVotableAndVotableType(user, votable, type);
+        return optionalVote.map(UserVote::getVoteType);
     }
 
     private VotableType getVotableType(VotableEntity votable) {
