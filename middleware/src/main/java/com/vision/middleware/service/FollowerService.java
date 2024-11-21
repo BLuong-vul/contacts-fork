@@ -23,9 +23,6 @@ public class FollowerService {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
     @Transactional
     public void followUser(long followerId, long followeeId) {
         ApplicationUser follower = userService.loadUserById(followerId);
