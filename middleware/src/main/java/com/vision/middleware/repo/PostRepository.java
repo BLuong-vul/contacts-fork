@@ -2,17 +2,41 @@ package com.vision.middleware.repo;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.utils.PostSearchSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
     Optional<Post> findById(long id);
     Page<Post> findByPostedBy(ApplicationUser postedBy, Pageable pageable);
+
+    // searching methods
+    default List<Post> searchPosts(String query, ApplicationUser user) {
+        return findAll(PostSearchSpecification.searchPosts(query, user));
+    }
+
+    default List<Post> searchPostsByDateAndQuery(
+            String query,
+            ApplicationUser user,
+            Date startDate,
+            Date endDate
+    ) {
+        return findAll(
+                Specification.where(
+                        PostSearchSpecification.searchPosts(query, user)
+                                .and(PostSearchSpecification.searchByDateRange(startDate, endDate))
+                )
+        );
+    }
 }
