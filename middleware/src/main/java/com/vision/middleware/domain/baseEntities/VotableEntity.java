@@ -25,7 +25,6 @@ public abstract class VotableEntity implements Votable {
     private long likeCount;
     private long dislikeCount;
 
-
     // derived fields
     @Column(name = "vote_score")
     private long voteScore;

@@ -165,7 +165,7 @@ function GeneralContent() {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
         <textarea
           value={userInfo.bio}
-          onChange={(e) => handleChange(e, 'displayName')}
+          onChange={(e) => handleChange(e, 'bio')}
           readOnly={!isEditing.bio}
           style={{
             width: '100%',
