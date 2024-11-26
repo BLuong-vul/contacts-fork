@@ -7,20 +7,42 @@ import Link from 'next/link';
 const PostContainer = ({ postData }) => {
     // State variables for dynamic content
     const [user, setUser] = useState({
-        name: "Rick Ricky",
         profileImage: "https://images.pexels.com/photos/29117255/pexels-photo-29117255/free-photo-of-woman-with-bicycle-and-tote-bag-on-urban-street.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
     });
 
     const [post, setPost] = useState({
-        text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos repellat ut debitis iste aspernatur porro unde quam ipsam, cupiditate sequi expedita omnis molestiae.",
         image: "https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load",
     });
 
-    const [interaction, setInteraction] = useState({
-        likes: 999,
-        comments: 999,
-        shares: 999,
-    });
+    const [likes, setLikes] = useState(postData.likes || 0);
+    const [dislikes, setDislikes] = useState(postData.dislikes || 0);
+    const [userRating, setUserRating] = useState(null);
+
+    const handleLike = () => {
+        if (userRating === "like") {
+            setLikes(likes - 1);
+            setUserRating(null);
+        } else {
+            if (userRating === "dislike") {
+                setDislikes(dislikes - 1);
+            }
+            setLikes(likes + 1);
+            setUserRating("like");
+        }
+    };
+
+    const handleDislike = () => {
+        if (userRating === "dislike") {
+            setDislikes(dislikes - 1);
+            setUserRating(null);
+        } else {
+            if (userRating === "like") {
+                setLikes(likes - 1);
+            }
+            setDislikes(dislikes + 1);
+            setUserRating("dislike");
+        }
+    };
 
     return (
         <div className="p-4 bg-slate-700 shadow-md rounded-lg flex flex-col gap-4 mb-8 w-11/12">
@@ -30,7 +52,7 @@ const PostContainer = ({ postData }) => {
                     {/* Profile image */}
                     <Image
                         src={user.profileImage}
-                        alt={`${user.name}'s profile`}
+                        alt={`${postData?.postedBy?.username}'s profile`}
                         width={40}
                         height={40}
                         className="w-10 h-10 rounded-full"
@@ -64,19 +86,19 @@ const PostContainer = ({ postData }) => {
                 <div className="flex gap-8">
                     <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl ml-4">
                         {/* Likes */}
-                        <Image src="/like.png" alt="Like" width={16} height={16} className="cursor-pointer" />
+                        <Image src="/like.png" alt="Like" width={16} height={16} onClick={handleLike} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
-                            {postData.likeCount}
+                            {likes}
                             <span className="hidden md:inline"> Likes</span>
                         </span>
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl">
                         {/* Dislikes */}
-                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} className="cursor-pointer" />
+                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} onClick={handleDislike} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
-                            {postData.dislikeCount}
+                            {dislikes}
                             <span className="hidden md:inline"> Dislikes</span>
                         </span>
                     </div>
@@ -85,7 +107,7 @@ const PostContainer = ({ postData }) => {
                         <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
-                            {interaction.comments}
+                            999
                             <span className="hidden md:inline"> Comments</span>
                         </span>
                     </div>
