@@ -40,8 +40,37 @@ public class VotingService {
     }
 
     @Transactional
-    public void deleteVote(long votableId, long userId){
-        userVoteRepository.deleteByVotableIdAndUserId(votableId, userId);
+    public void deleteVote(ApplicationUser user, VotableEntity votable){
+        VotableType votableType = getVotableType(votable);
+        Optional<UserVote> optionalVote = userVoteRepository.findByUserAndVotableAndVotableType(user, votable, votableType);
+        optionalVote.ifPresent(
+            vote -> {
+                if (votable instanceof Post post){
+                    if (vote.getVoteType() ==  UserVote.VoteType.LIKE){
+                        post.setLikeCount(post.getLikeCount()-1);
+                    } else if (vote.getVoteType() == UserVote.VoteType.DISLIKE){
+                        post.setDislikeCount(post.getDislikeCount()-1);
+                    }
+                    postRepository.save(post);
+                } else if (votable instanceof Reply reply) {
+                    if (vote.getVoteType() ==  UserVote.VoteType.LIKE){
+                        reply.setLikeCount(reply.getLikeCount()-1);
+                    } else if (vote.getVoteType() == UserVote.VoteType.DISLIKE){
+                        reply.setDislikeCount(reply.getDislikeCount()-1);
+                    }
+                    replyRepository.save(reply);
+                }
+            }
+        );
+        
+        userVoteRepository.deleteByVotableIdAndUserId(votable.getId(), user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UserVote.VoteType> getUserVoteOnVotable(ApplicationUser user, VotableEntity votable) {
+        VotableType votableType = getVotableType(votable);
+        Optional<UserVote> optionalVote = userVoteRepository.findByUserAndVotableAndVotableType(user, votable, votableType);
+        return optionalVote.map(UserVote::getVoteType);
     }
 
     private VotableType getVotableType(VotableEntity votable) {

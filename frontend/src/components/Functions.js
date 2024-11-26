@@ -124,7 +124,7 @@ export async function login(username, password){
 
 // Returns JSON list of users following us
 export async function getFollowersList(){
-	validateTokenWithRedirect();
+	await validateTokenWithRedirect();
 	try {
 		const response = await authFetchFromApi(`${baseURL}/user/followers/list`);
 		return await response.json();
@@ -136,7 +136,7 @@ export async function getFollowersList(){
 
 // Returns JSON list of users we are following
 export async function getFollowingList(){
-	validateTokenWithRedirect();
+	await validateTokenWithRedirect();
 	try {
 		const response = await authFetchFromApi(`${baseURL}/user/following/list`);
 		return await response.json();
@@ -225,7 +225,7 @@ export async function getPostsByUser(username, page=0, size=10){
 
 // voteType should be "LIKE" or "DISLIKE"
 async function _vote(votableId, voteType) {
-	validateTokenWithRedirect();
+	await validateTokenWithRedirect();
 	const voteDTO = {
 	  votableId: votableId,
 	  voteType: voteType, 
@@ -248,13 +248,29 @@ export async function dislikeVotable(votableId){
 }
 
 export async function unvote(votableId){
-	validateTokenWithRedirect();
+	await validateTokenWithRedirect();
 	try{
 		const response = await authFetchFromApi(`${baseURL}/post/unvote?votableId=${votableId}`, 'DELETE');
 		return true;
 	} catch (error){
 		console.error("Error unvoting: ", error);
 		return false;
+	}
+}
+
+export async function getVoteOnVotable(votableId){
+	if (!(await validateToken())) return null;
+	try {
+		const response = await authFetchFromApi(`${baseURL}/post/get-vote?votableId=${votableId}`);
+		if (response.ok) {
+            // Check if there is content before parsing JSON
+            if (response.status === 200) {
+                return await response.json(); // Return the vote type
+            }
+            return null; // No vote exists
+        }
+	} catch (error){
+		console.error("Error checking vote: ", error);
 	}
 }
 

@@ -1,6 +1,8 @@
 package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.relations.UserVote;
+import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.dto.VoteDTO;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/post")
@@ -42,6 +46,7 @@ public class PostController {
                 post -> PostDTO.builder()
                         .postId(post.getId())
                         .datePosted(post.getDatePosted())
+                        .likeCount(post.getLikeCount())
                         .dislikeCount(post.getDislikeCount())
                         .text(post.getText())
                         .title(post.getTitle())
@@ -67,6 +72,7 @@ public class PostController {
                 post -> PostDTO.builder()
                         .postId(post.getId())
                         .datePosted(post.getDatePosted())
+                        .likeCount(post.getLikeCount())
                         .dislikeCount(post.getDislikeCount())
                         .text(post.getText())
                         .title(post.getTitle())
@@ -93,5 +99,15 @@ public class PostController {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
         postService.removeUserVote(votableId, userId);
         return ResponseEntity.noContent().build(); 
+    }
+
+    @GetMapping("/get-vote")
+    public ResponseEntity<UserVote.VoteType> checkUserVote(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        Optional<UserVote.VoteType> voteType = postService.getUserVote(votableId, userId);
+
+        return voteType
+            .map(ResponseEntity::ok) // Return the vote type if present
+            .orElse(ResponseEntity.noContent().build()); // Null if no vote exists
     }
 }

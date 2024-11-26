@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Comments from "./Comments";
 import Link from 'next/link';
@@ -19,33 +19,49 @@ const PostContainer = ({ postData }) => {
     const [dislikes, setDislikes] = useState(postData.dislikeCount || 0);
     const [userRating, setUserRating] = useState(null);
 
+
+    useEffect(() => {
+        // Fetch the user's vote on the post
+        const fetchUserVote = async () => {
+            try {
+                const voteType = await Fetch.getVoteOnVotable(postData.postId);
+                setUserRating(voteType); // voteType will be "LIKE", "DISLIKE", or null
+            } catch (error) {
+                console.error("Error fetching user vote:", error);
+            }
+        };
+        fetchUserVote();
+        console.log(postData);
+    }, [postData.postId]); 
+
+
     const handleLike = () => {
-        if (userRating === "like") {
+        if (userRating === "LIKE") {
             Fetch.unvote(postData.postId);
             setLikes(likes - 1);
             setUserRating(null);
         } else {
-            if (userRating === "dislike") {
+            if (userRating === "DISLIKE") {
                 setDislikes(dislikes - 1);
             }
             Fetch.likeVotable(postData.postId);
             setLikes(likes + 1);
-            setUserRating("like");
+            setUserRating("LIKE");
         }
     };
 
     const handleDislike = () => {
-        if (userRating === "dislike") {
+        if (userRating === "DISLIKE") {
             Fetch.unvote(postData.postId);
             setDislikes(dislikes - 1);
             setUserRating(null);
         } else {
-            if (userRating === "like") {
+            if (userRating === "LIKE") {
                 setLikes(likes - 1);
             }
             Fetch.dislikeVotable(postData.postId);
             setDislikes(dislikes + 1);
-            setUserRating("dislike");
+            setUserRating("DISLIKE");
         }
     };
 
