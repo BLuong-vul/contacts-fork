@@ -70,6 +70,11 @@ public class PostService {
         votingService.voteOnVotable(user, post, voteType);
     }
 
+    public void removeUserVote(long votableId, long userId) {
+        votingService.deleteVote(votableId, userId);
+    }
+
+
     public Page<Post> getAllPosts(int page, int size) {
         return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));
     }

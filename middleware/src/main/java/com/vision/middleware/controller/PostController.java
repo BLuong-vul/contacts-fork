@@ -87,4 +87,11 @@ public class PostController {
         postService.userVoteOnPost(voteDTO.getVotableId(), userId, voteDTO.getVoteType());
         return voteDTO;
     }
+
+    @DeleteMapping("/unvote")
+    public ResponseEntity<Void> unvoteOnPost(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        postService.removeUserVote(votableId, userId);
+        return ResponseEntity.noContent().build(); 
+    }
 }

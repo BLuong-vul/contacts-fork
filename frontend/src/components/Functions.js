@@ -220,8 +220,42 @@ export async function getPostsByUser(username, page=0, size=10){
 	} catch (error){
 		console.error("Failed to fetch user posts: ", error);
 		return [];
+	}	
+}
+
+// voteType should be "LIKE" or "DISLIKE"
+async function _vote(votableId, voteType) {
+	validateTokenWithRedirect();
+	const voteDTO = {
+	  votableId: votableId,
+	  voteType: voteType, 
+	};
+	try { 
+		const response = await authFetchFromApi(`${baseURL}/post/vote`, 'POST', voteDTO);
+		return true;
+	} catch (error){
+		console.error("Error voting: ", error);
+		return false;
 	}
-	
+}
+
+export async function likeVotable(votableId){
+	return await _vote(votableId, "LIKE");
+}
+
+export async function dislikeVotable(votableId){
+	return await _vote(votableId, "DISLIKE");
+}
+
+export async function unvote(votableId){
+	validateTokenWithRedirect();
+	try{
+		const response = await authFetchFromApi(`${baseURL}/post/unvote?votableId=${votableId}`, 'DELETE');
+		return true;
+	} catch (error){
+		console.error("Error unvoting: ", error);
+		return false;
+	}
 }
 
 

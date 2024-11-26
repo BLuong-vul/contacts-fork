@@ -39,6 +39,11 @@ public class VotingService {
         );
     }
 
+    @Transactional
+    public void deleteVote(long votableId, long userId){
+        userVoteRepository.deleteByVotableIdAndUserId(votableId, userId);
+    }
+
     private VotableType getVotableType(VotableEntity votable) {
         if (votable instanceof Post) {
             return VotableType.POST;

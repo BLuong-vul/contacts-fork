@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Comments from "./Comments";
 import Link from 'next/link';
+import * as Fetch from './Functions';
 
 const PostContainer = ({ postData }) => {
     // State variables for dynamic content
@@ -14,18 +15,20 @@ const PostContainer = ({ postData }) => {
         image: "https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load",
     });
 
-    const [likes, setLikes] = useState(postData.likes || 0);
-    const [dislikes, setDislikes] = useState(postData.dislikes || 0);
+    const [likes, setLikes] = useState(postData.likeCount || 0);
+    const [dislikes, setDislikes] = useState(postData.dislikeCount || 0);
     const [userRating, setUserRating] = useState(null);
 
     const handleLike = () => {
         if (userRating === "like") {
+            Fetch.unvote(postData.postId);
             setLikes(likes - 1);
             setUserRating(null);
         } else {
             if (userRating === "dislike") {
                 setDislikes(dislikes - 1);
             }
+            Fetch.likeVotable(postData.postId);
             setLikes(likes + 1);
             setUserRating("like");
         }
@@ -33,12 +36,14 @@ const PostContainer = ({ postData }) => {
 
     const handleDislike = () => {
         if (userRating === "dislike") {
+            Fetch.unvote(postData.postId);
             setDislikes(dislikes - 1);
             setUserRating(null);
         } else {
             if (userRating === "like") {
                 setLikes(likes - 1);
             }
+            Fetch.dislikeVotable(postData.postId);
             setDislikes(dislikes + 1);
             setUserRating("dislike");
         }

@@ -10,4 +10,5 @@ import java.util.Optional;
 
 public interface UserVoteRepository extends JpaRepository<UserVote, Long> {
     Optional<UserVote> findByUserAndVotableAndVotableType(ApplicationUser user, Votable votable, VotableType votableType);
+    void deleteByVotableIdAndUserId(long votableId, long userId);
 }
