@@ -12,7 +12,7 @@ import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
 import { validateTokenWithRedirect, validateToken } from '../../components/ValidationFunctions';
 
-import Post from '../../components/Post';
+import Post from '../../components/PostContainer';
 
 
 

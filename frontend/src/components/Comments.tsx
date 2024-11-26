@@ -12,11 +12,11 @@ const Comments = () => {
                 height={32}
                 className="w-8 h-8 rounded-full"
                 />
-                <div className="flex-1 flex items-center justify-between bg-slate-100 rounded-xl text-sm px-2 py-2 w-full">
+                <div className="flex-1 flex items-center justify-between bg-slate-500 rounded-xl text-sm px-2 py-2 w-full">
                     <input 
                     type="text" 
                     placeholder="Write a comment ..." 
-                    className="bg-transparent outline-none flex-1"
+                    className="bg-transparent outline-none flex-1 placeholder-slate-200 text-white"
                     />
                     <Image src="/emoji.png"
                     alt="" 
@@ -40,8 +40,8 @@ const Comments = () => {
                 rounded-full"/>
                 {/* Description */}
                 <div className="flex flex-col gap-2 flex-1">
-                    <span className="font-medium">Bruce Banner</span>
-                    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus accusantium rem debitis veniam, 
+                    <span className="font-medium text-slate-200">Bruce Banner</span>
+                    <p className="text-slate-200"> Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus accusantium rem debitis veniam, 
                         nulla repudiandae eveniet.
                     </p>
                     <div className="flex item-center gap-8 text-xs text-gray-500 mt-2">
