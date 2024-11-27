@@ -4,6 +4,7 @@ import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import styles from './direct-messages.module.css';
 import Tooltip from '@mui/material/Tooltip';
+import { FaUser } from "react-icons/fa";
 
 import * as Fetch from '../../../components/Functions';
 
@@ -22,12 +23,15 @@ const DirectMessages = () => {
     const stompClient = useRef(null); // websocket client ref
     const [selectedCategory, setSelectedCategory] = useState('mutual');
 
-    // Placeholder arrays for friends categories
-    const mutualFriends = ['Alice', 'Bob', 'Charlie'];
-    const followers = ['David', 'Eva'];
-    const following = ['Frank', 'Grace'];
+    // Friend categories
+    const [mutuals, setMutuals] = useState([]);
+    const [followers, setFollowers] = useState([]);
+    const [following, setFollowing] = useState([]);
+
+    const [selectedUserData, setSelectedUserData] = useState(null);
 
     // Fetch User ID and username when the component mounts
+    // and friend categories
     useEffect(() => {
         const fetchUserId = async () => {
             const result = await Fetch.getCurrentUserInfo();
@@ -36,7 +40,22 @@ const DirectMessages = () => {
             setCurrentUsername(result.username);
         };
 
+        const fetchFriends = async () => {
+            // Following users list
+            const followingRes = await Fetch.getFollowingList();
+            setFollowing(followingRes);
+
+            // Followers list
+            const followersRes = await Fetch.getFollowersList();
+            setFollowers(followersRes);
+
+            // Mutuals list
+            const mutualsFilter = followingRes.filter(user => followersRes.some(follower => follower.userId===user.userId));
+            setMutuals(mutualsFilter);
+        }
+
         fetchUserId();
+        fetchFriends();
     }, []);
 
 
@@ -92,6 +111,12 @@ const DirectMessages = () => {
         event.preventDefault();
         if (inputUsername.trim() !== '') {
             console.log('Starting chat with:', inputUsername);
+
+            const allUsers = [...mutuals, ...followers, ...following];
+            const userData = allUsers.find(user => user.username === inputUsername);
+
+            if (userData) setSelectedUserData(userData);
+
             try {
                 const response = await fetch(`${baseURL}/user/id/${inputUsername}`);
 
@@ -107,8 +132,6 @@ const DirectMessages = () => {
             }
         }
     };
-
-
     
     const handleMessageChange = (e) => {
         setMessage(e.target.value); //update message state
@@ -120,13 +143,6 @@ const DirectMessages = () => {
         const file = event.target.files[0];
     };
     
-    const handleAttachClick = () => {
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput){
-            fileInput.click();
-        }
-    };
-    
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
@@ -136,31 +152,30 @@ const DirectMessages = () => {
             {/* Select user to chat */}
             <aside className={styles.asideContainer}>
                 <form className={styles.form} onSubmit={handleUsernameSubmit}>
-                    <label htmlFor="inputUsername" className={styles.label}>
-                        Enter username:
-                    </label>
-                    <input
-                        type="text"
-                        id="input-username"
-                        name="input-username"
-                        className={styles.input}
-                        placeholder="Username"
-                        value={inputUsername}
-                        onChange={(e) => setInputUsername(e.target.value)}
-                        required
-                    />
-                    <button type="submit" className={styles.button}>
-                        Start Chat
-                    </button>
+                    <div className="mt-2 mb-8">
+                        <input
+                            type="text"
+                            id="input-username"
+                            name="input-username"
+                            className="bg-slate-500 rounded-xl text-sm px-2 py-2 mr-2 placeholder-slate-200"
+                            placeholder="Username"
+                            value={inputUsername}
+                            onChange={(e) => setInputUsername(e.target.value)}
+                            required
+                        />
+                        <button type="submit" className="text-white text-sm p-2 rounded-md bg-blue-500 hover:bg-blue-700 transition duration-100 mr-2">
+                            Start Chat
+                        </button>
+                    </div>
                     
                     <Tooltip title="Choose Type" arrow>
                     	<div className={styles.dropdownContainer}>
                         <label htmlFor="friendsDropdown" className={styles.dropDownLabel}>
-                            view:
+                            View:
                         </label>
                         <select
                             id="friendsDropdown"
-                            className={styles.dropDownMenu}
+                            className="p-2 rounded-md text-base bg-slate-900 border border-slate-600"
                             value={selectedCategory}
                             onChange={handleCategoryChange}
                         >
@@ -180,24 +195,36 @@ const DirectMessages = () => {
                     <div className={styles.listContainer}>
                         {selectedCategory === 'mutual' && (
                             <ul>
-                                {mutualFriends.map((friend, index) => (
-                                <li key={index}>{friend}</li>
+                                {mutuals.map(user => (
+                                <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
+                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                                    <a className="text-slate-400"> @{user.username} </a>
+                                </li>
                                 ))}
                             </ul>
                         )}
 
                         {selectedCategory === 'followers' && (
                             <ul>
-                                {followers.map((friend, index) => (
-                                <li key={index}>{friend}</li>
+                                {followers.map(user => (
+                                <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
+                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                                    <a className="text-slate-400"> @{user.username} </a>
+                                </li>
                                 ))}
                             </ul>
                         )}
 
                         {selectedCategory === 'following' && (
                             <ul>
-                                {following.map((friend, index) => (
-                                <li key={index}>{friend}</li>
+                                {following.map(user => (
+                                <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
+                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                                    <a className="text-slate-400"> @{user.username} </a>
+                                </li>
                                 ))}
                             </ul>
                         )}
@@ -209,7 +236,12 @@ const DirectMessages = () => {
             
             {/* Chat Area */}
             <main className={styles.chatArea}>
-                <h2 className={styles.chatHeader}>Conversation with {otherId || 'No one selected'}</h2>
+                <h2 className="text-3xl font-semibold text-slate-200 mb-4">
+                    <a> {otherId ? "Chatting with "+(selectedUserData.displayName ? selectedUserData.displayName : selectedUserData.username)
+                        : ("Select username to start chat")
+                    } </a>
+                    <a className="text-slate-400">{otherId ? '@'+selectedUserData.username : ''} </a>
+                </h2>
                 <div className={styles.conversationArea}>
                     {conversation.map((msg, index) => (
                         <div 
@@ -224,9 +256,6 @@ const DirectMessages = () => {
                     ))}
                 </div>
                 <div className={styles.messageInputBar}>
-                    <button className={styles.attachButton} onClick={handleAttachClick}>
-                        📎
-                    </button>
                     <input
                         type="text"
                         placeholder="Type a message..."
@@ -235,7 +264,7 @@ const DirectMessages = () => {
                         onChange={handleMessageChange}
                     />
                     <button
-                        className={`${styles.sendButton} ${isSendDisabled ? styles.disabledButton : ''}`}
+                        className={`px-4 py-2 bg-blue-500 text-white rounded-md border-none transition-colors duration-100 ${isSendDisabled ? 'bg-gray-400 cursor-not-allowed' : 'hover:bg-blue-700 cursor-pointer'}`}
                         disabled={isSendDisabled}
                         onClick={handleSendMessage}
                     >
