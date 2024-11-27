@@ -4,13 +4,10 @@ import Image from "next/image";
 import Comments from "./Comments";
 import Link from 'next/link';
 import * as Fetch from './Functions';
+import { FaUser } from "react-icons/fa";
 
 const PostContainer = ({ postData }) => {
-    // State variables for dynamic content
-    const [user, setUser] = useState({
-        profileImage: "https://images.pexels.com/photos/29117255/pexels-photo-29117255/free-photo-of-woman-with-bicycle-and-tote-bag-on-urban-street.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
-    });
-
+    // state variables for dynamic content
     const [post, setPost] = useState({
         image: "https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load",
     });
@@ -19,19 +16,27 @@ const PostContainer = ({ postData }) => {
     const [dislikes, setDislikes] = useState(postData.dislikeCount || 0);
     const [userRating, setUserRating] = useState(null);
 
+    const [commentData, setCommentData] = useState([]);
+    const [commentsVisible, setCommentsVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
 
     useEffect(() => {
-        // Fetch the user's vote on the post
+        // fetch the user's vote on the post
         const fetchUserVote = async () => {
-            try {
-                const voteType = await Fetch.getVoteOnVotable(postData.postId);
-                setUserRating(voteType); // voteType will be "LIKE", "DISLIKE", or null
-            } catch (error) {
-                console.error("Error fetching user vote:", error);
-            }
+            const voteType = await Fetch.getVoteOnVotable(postData.postId);
+            setUserRating(voteType); // voteType will be "LIKE", "DISLIKE", or null
         };
+
+        // fetch comments
+        const fetchComments = async () => {
+            const commentData = await Fetch.getReplies(postData.postId);
+            setCommentData(commentData);
+            setIsLoading(false);
+        };
+
         fetchUserVote();
-        console.log(postData);
+        fetchComments();
     }, [postData.postId]); 
 
 
@@ -63,24 +68,11 @@ const PostContainer = ({ postData }) => {
             setDislikes(dislikes + 1);
             setUserRating("DISLIKE");
         }
-    };
+    }; 
 
-    const commentData = [
-      {
-        avatar:
-          "https://images.pexels.com/photos/29117255/pexels-photo-29117255/free-photo-of-woman-with-bicycle-and-tote-bag-on-urban-street.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
-        username: "Bruce Banner",
-        text: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-        likes: 123,
-      },
-      {
-        avatar:
-          "https://images.pexels.com/photos/12312312/pexels-photo-12312312.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
-        username: "Natasha Romanoff",
-        text: "This is another example comment.",
-        likes: 45,
-      },
-    ];    
+    const toggleComments = () => {
+        setCommentsVisible((prevState) => !prevState);
+    };
 
     return (
         <div className="p-4 bg-slate-700 shadow-md rounded-lg flex flex-col gap-4 mb-8 w-11/12">
@@ -88,12 +80,8 @@ const PostContainer = ({ postData }) => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     {/* Profile image */}
-                    <Image
-                        src={user.profileImage}
-                        alt={`${postData?.postedBy?.username}'s profile`}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 rounded-full"
+                    <FaUser
+                        className="w-10 h-10 rounded-full bg-slate-600"
                     />
                     {/* Name */}
                     <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">
@@ -142,16 +130,20 @@ const PostContainer = ({ postData }) => {
                     </div>
                     <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl">
                         {/* Comments */}
-                        <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
+                        <Image src="/comment.png" alt="Comment" width={16} height={16} onClick={toggleComments} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
-                            999
+                            {commentData.length}
                             <span className="hidden md:inline"> Comments</span>
                         </span>
                     </div>
                 </div>
             </div>
-            <Comments initialComments={commentData} />
+            {isLoading ? (
+                <div className="text-slate-300">Loading comments...</div>
+            ) : (
+                commentsVisible && <Comments initialComments={commentData} postId={postData.postId} />
+            )}
         </div>
     );
 };

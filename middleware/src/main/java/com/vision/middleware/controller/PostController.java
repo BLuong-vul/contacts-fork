@@ -1,12 +1,15 @@
 package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.Reply;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.dto.VoteDTO;
+import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.service.PostService;
+import com.vision.middleware.service.ReplyService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post")
@@ -27,6 +32,9 @@ public class PostController {
 
     @Autowired
     private final PostService postService;
+
+    @Autowired
+    private final ReplyService replyService;
 
     // This used to return a Post and has been changed to just return an OK response entity. Oct 31 
     @PostMapping("/new")
@@ -109,5 +117,40 @@ public class PostController {
         return voteType
             .map(ResponseEntity::ok) // Return the vote type if present
             .orElse(ResponseEntity.noContent().build()); // Null if no vote exists
+    }
+
+    @PostMapping("/create-reply")
+    public ResponseEntity<Reply> createReply(@RequestHeader("Authorization") String token, @RequestBody ReplyDTO replyDTO){
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        Reply createdReply = replyService.createReply(replyDTO, replyDTO.getPostId(), userId);
+        return ResponseEntity.ok(createdReply);
+    }
+
+    @GetMapping("/get-replies")
+    public ResponseEntity<List<ReplyDTO>> getRepliesByPostId(@RequestParam long postId) {
+        List<Reply> replies = replyService.getReplyTree(postId);
+
+        List<ReplyDTO> replyDTO = replies.stream().map(this::mapToReplyDTO).collect(Collectors.toList());
+        return ResponseEntity.ok(replyDTO);
+    }
+
+    private ReplyDTO mapToReplyDTO(Reply reply) {
+        UserDTO authorDTO = UserDTO.builder()
+                .userId(reply.getAuthor().getId())
+                .username(reply.getAuthor().getUsername())
+                .displayName(reply.getAuthor().getDisplayName())
+                .build();
+
+        return ReplyDTO.builder()
+                .replyId(reply.getId())
+                .postId(reply.getPost().getId())
+                .author(authorDTO)
+                .datePosted(reply.getDatePosted())
+                .text(reply.getText())
+                .parentReplyId(reply.getParentReply() != null ? reply.getParentReply().getId() : null)
+                .childReplies(reply.getChildReplies().stream()
+                        .map(this::mapToReplyDTO)
+                        .collect(Collectors.toSet()))
+                .build();
     }
 }

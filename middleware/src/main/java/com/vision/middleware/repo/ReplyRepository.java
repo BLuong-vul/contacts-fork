@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
-    List<Reply> findById(long postId);
+    Optional<Reply> findById(Long replyId);
+    List<Reply> findByPostId(long postId);
     List<Reply> findByIdAndParentReplyIsNull(long replyId);
     List<Reply> findByParentReply(Reply parent);
 }

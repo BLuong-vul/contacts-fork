@@ -15,6 +15,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -32,36 +35,47 @@ public class ReplyService {
     @Autowired
     private final ReplyRepository replyRepository;
 
-    public Reply creatReply(ReplyDTO replyDTO, Long postId, Long userId){
+    public Reply createReply(ReplyDTO replyDTO, Long postId, Long userId){
         Date date = new Date();
         ApplicationUser postingUser = userService.loadUserById(userId);
         Post post = postService.loadPostById(postId);
+        Reply parentReply = null;
+        if (replyDTO.getParentReplyId() != null) {
+            parentReply = replyRepository.findById(replyDTO.getParentReplyId())
+                .orElseThrow(() -> new RuntimeException("Parent reply not found"));
+        }
+
         /*Design Pattern: Builder*/
         Reply newReply = Reply.builder()
         .author(postingUser)
         .post(post)
         .datePosted(date)
         .text(replyDTO.getText())
-        .parentReply(replyDTO.getParentReply()) // If parentReply is nullable, this can be null
+        .parentReply(parentReply) // If parentReply is nullable, this can be null
         .build();
         /*Design Pattern: Builder*/
         return replyRepository.save(newReply);
     }
     
     public List<Reply> getReplyTree(Long postId) {
-        //Old version
-        //List<Reply> rootReplies = replyRepository.findByReplyId(postId);
+        List<Reply> replies = replyRepository.findByPostId(postId);
 
-//        List<Reply> rootReplies = replyRepository.findById(postId); // todo: does this return all posts and not just root posts?
-//        for (Reply reply : rootReplies) {
-//            populateChildReplies(reply);
-//        }
-//
-//        return rootReplies;
-        return null;
-      
-        // old line of code. I am leaving it here while merging because this section seems unfinished. 13 Nov, BL
-        // List<Reply> rootReplies = replyRepository.findByReplyIdAndParentReplyReplyIdIsNull(postId);
+        Map<Long, Reply> replyMap = replies.stream().collect(Collectors.toMap(Reply::getId, reply -> reply));
+
+        List<Reply> rootReplies = new ArrayList<>();
+
+        for (Reply reply : replies) {
+            if (reply.getParentReply() != null) {
+                Reply parent = replyMap.get(reply.getParentReply().getId());
+                if (parent != null) {
+                    parent.getChildReplies().add(reply);
+                }
+            } else {
+                rootReplies.add(reply);
+            }
+        }
+
+        return rootReplies;
     }
 
     // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((

@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "reply")
@@ -19,6 +20,7 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Reply extends VotableEntity {
   // Replies can be grouped by a post: the only place for a reply
   // to appear would be a post.
@@ -43,5 +45,5 @@ public class Reply extends VotableEntity {
   // nested replies: a reply can be associated with many replies.
   // at the moment, if a reply is deleted, all child replies will also be too.
   @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<Reply> childReplies;
+  private Set<Reply> childReplies = new HashSet<>();
 }

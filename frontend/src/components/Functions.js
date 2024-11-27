@@ -248,7 +248,7 @@ export async function dislikeVotable(votableId){
 }
 
 export async function unvote(votableId){
-	await validateTokenWithRedirect();
+	if(!(await validateTokenWithRedirect())) return null;
 	try{
 		const response = await authFetchFromApi(`${baseURL}/post/unvote?votableId=${votableId}`, 'DELETE');
 		return true;
@@ -271,6 +271,34 @@ export async function getVoteOnVotable(votableId){
         }
 	} catch (error){
 		console.error("Error checking vote: ", error);
+	}
+}
+
+export async function uploadReply(postId, textContent, parentId=null){
+	if(!(await validateTokenWithRedirect())) return null;
+	if (textContent=="" || textContent==null) return null;
+	const replyDTO = {
+		postId: postId,
+		text: textContent,
+		parentReplyId: parentId
+	}
+	try{
+		const response = await authFetchFromApi(`${baseURL}/post/create-reply`, 'POST', replyDTO);
+		return true;
+	} catch (error){
+		console.error("Error creating reply: ", error);
+		return false;
+	}
+}
+
+export async function getReplies(postId){
+	try{
+		const response = await fetchFromApi(`${baseURL}/post/get-replies?postId=${postId}`);
+		const commentData = await response.json();
+		return commentData;
+	} catch (error){
+		console.error('Error fetching replies: ', error);
+		return false;
 	}
 }
 
