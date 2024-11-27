@@ -6,26 +6,84 @@ import * as Fetch from "./Functions";
 
 const Comments = ({ initialComments, postId }) => {
   const [comments, setComments] = useState(initialComments);
-
   const [commentField, setCommentField] = useState("");
+
+  const [replyField, setReplyField] = useState("");
+  const [replyingTo, setReplyingTo] = useState(null); // State to track the comment being replied to
 
   const handleCommentUpload = async (text) => {
     if (text.trim() !== "") {
-        const newComment = await Fetch.uploadReply(postId, text);
-        setCommentField("");
-        setComments((prevComments) => [...prevComments, newComment]);
+      const newComment = await Fetch.uploadReply(postId, text);
+      setCommentField("");
+      setComments((prevComments) => [...prevComments, newComment]);
     }
-    // console.log(comments);
   };
 
+    const handleReplyUpload = async(text, replyTo) => {
+        if (text.trim() !== "") {
+            const newReply = await Fetch.uploadReply(postId, text, replyTo);
+            setReplyField("");
+            setReplyingTo(null);
+            setComments((prevComments) => {
+            return prevComments.map(comment =>
+              comment.id === replyTo
+                ? { ...comment, replies: [...comment.replies, newReply] }
+                : comment
+            );
+          });
+        }
+    }
+
+    const toggleReplyField = (commentId) => {
+      setReplyingTo(replyingTo === commentId ? null : commentId);
+    };
+
+    const renderReplies = (replies, depth = 0) => {
+        return replies.map((reply) => (
+          <div
+            key={reply.id}
+            style={{ marginLeft: `${(depth+1) * 50}px` }}
+            className="border-b border-gray-600 pb-4"
+          >
+            <div className="flex gap-4 justify-between mt-4">
+              <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
+              <div className="flex flex-col gap-2 flex-1">
+                <span className="font-medium text-slate-200">
+                  {reply.author.displayName || reply.author.username}
+                </span>
+                <p className="text-slate-200">{reply.text}</p>
+                <div className="flex items-center gap-8 text-xs text-gray-500 mt-2">
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src="/like.png"
+                      alt=""
+                      width={12}
+                      height={12}
+                      className="cursor-pointer w-4 h-4"
+                    />
+                    <span className="text-gray-300">0 Likes</span>
+                  </div>
+                  <div
+                    className="cursor-pointer text-gray-300"
+                    onClick={() => toggleReplyField(reply.id)}
+                  >
+                    Reply
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Render replies recursively */}
+            {reply.replies && renderReplies(reply.replies, depth + 1)}
+          </div>
+        ));
+    };
 
   return (
     <div className="">
       {/* Write */}
       <div className="flex items-center gap-4">
-        <FaUser
-          className="w-8 h-8 rounded-full bg-slate-600"
-        />
+        <FaUser className="w-8 h-8 rounded-full bg-slate-600" />
         <div className="flex-1 flex items-center justify-between bg-slate-500 rounded-xl text-sm px-2 py-2 w-full">
           <input
             type="text"
@@ -33,7 +91,7 @@ const Comments = ({ initialComments, postId }) => {
             onChange={(e) => setCommentField(e.target.value)}
             className="bg-transparent outline-none flex-1 placeholder-slate-200 text-white"
           />
-          < FaPaperPlane
+          <FaPaperPlane
             size={16}
             className="cursor-pointer transition-colors duration 100"
             onClick={() => handleCommentUpload(commentField)}
@@ -47,14 +105,13 @@ const Comments = ({ initialComments, postId }) => {
       {/* Comments */}
       <div className="mt-6">
         {comments.map(comment => (
+          <div className="border-b border-gray-600 pb-4">
           <div
             key={comment.id}
-            className="flex gap-4 justify-between mt-4 border-b border-gray-600 pb-4"
+            className="flex gap-4 justify-between mt-4"
           >
             {/* Avatar */}
-            <FaUser
-              className="w-10 h-10 rounded-full bg-slate-600"
-            />
+            <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
             {/* Description */}
             <div className="flex flex-col gap-2 flex-1">
               <span className="font-medium text-slate-200">
@@ -70,14 +127,46 @@ const Comments = ({ initialComments, postId }) => {
                     height={12}
                     className="cursor-pointer w-4 h-4"
                   />
-                  <span className="text-gray-300">|</span>
                   <span className="text-gray-300">0 Likes</span>
                 </div>
-                <div className="cursor-pointer text-gray-300">Reply</div>
+                <div
+                  className="cursor-pointer text-gray-300"
+                  onClick={() => toggleReplyField(comment.id)}
+                >
+                  Reply
+                </div>
               </div>
             </div>
             {/* Icon */}
             {/* <Image src="/more.png" alt="" width={16} height={16} className="cursor-pointer w-4 h-4" /> */}
+          </div>
+
+          {/* Render replies */}
+          {comment.replies && renderReplies(comment.replies)}
+
+          {/* Reply text field */}
+          {replyingTo === comment.id && (
+            <div className="mt-4 flex items-center gap-4">
+              <FaUser className="w-8 h-8 rounded-full bg-slate-600" />
+              <div className="flex-1 flex items-center justify-between bg-slate-500 rounded-xl text-sm px-2 py-2 w-full">
+                <input
+                  type="text"
+                  placeholder="Write a reply ..."
+                  value={replyField}
+                  onChange={(e) => setReplyField(e.target.value)}
+                  className="bg-transparent outline-none flex-1 placeholder-slate-200 text-white"
+                />
+                <FaPaperPlane
+                  size={16}
+                  className="cursor-pointer transition-colors duration 100"
+                  onClick={() => handleReplyUpload(replyField, comment.id)}
+                  color="white"
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#3b83f6')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
+                />
+              </div>
+            </div>
+          )}
           </div>
         ))}
       </div>
