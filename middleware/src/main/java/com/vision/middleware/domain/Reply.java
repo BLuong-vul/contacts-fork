@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "reply")
@@ -72,5 +73,4 @@ public class Reply extends VotableEntity {
         this.deleted = true;
         this.text = "[deleted]";
     }
-
 }

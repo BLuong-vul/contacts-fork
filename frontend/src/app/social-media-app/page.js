@@ -10,8 +10,9 @@ import Navbar from "../../components/Navbar";
 import LeftMenu from '../../components/leftmenu/left-menu';
 import RightMenu from '../../components/rightmenu/right-menu';
 import * as Fetch from '../../components/Functions';
+import { validateTokenWithRedirect, validateToken } from '../../components/ValidationFunctions';
 
-import Post from '../../components/Post';
+import Post from '../../components/PostContainer';
 
 
 
@@ -63,7 +64,7 @@ export default function Projects() {
 	
 
 	const toggleCreatePost = async () => {
-		if (await Fetch.validateTokenWithRedirect()){
+		if (await validateTokenWithRedirect()){
 			setIsCreatingPost(!isCreatingPost)
 		}
 	};
@@ -118,6 +119,7 @@ export default function Projects() {
 	    const fetchAndSetPosts = async () => {
 	        try {
 	            const fetchedPosts = await Fetch.fetchAllPosts();
+	            console.log(fetchedPosts);
 	            setPosts(fetchedPosts); 
 	        } catch (error) {
 	            console.error('Error fetching posts:', error);
@@ -142,7 +144,7 @@ export default function Projects() {
 				<div className={homepagestyles.contentContainer} style={{ marginRight: setSidebarWidth}}>
 					{/*button for creating post*/}
 					<div className={homepagestyles.createPostContainer}>
-						<button onClick={toggleCreatePost} className={homepagestyles.createPostButton}>
+						<button onClick={toggleCreatePost} className="text-white text-l p-2 rounded-md bg-blue-500 hover:bg-blue-700 transition duration-100">
 							Create Post
 						</button>
 					</div>

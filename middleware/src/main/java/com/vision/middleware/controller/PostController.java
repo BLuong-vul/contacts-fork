@@ -1,16 +1,25 @@
 package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.Reply;
+import com.vision.middleware.domain.relations.UserVote;
+import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.dto.VoteDTO;
+import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.service.PostService;
+import com.vision.middleware.service.ReplyService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post")
@@ -24,8 +33,9 @@ public class PostController {
     @Autowired
     private final PostService postService;
 
-    // This used to return a Post and has been changed to just return an OK response entity. Oct 31
-    // todo: maybe we should just have it return the id of the post instead? or maybe a post DTO.
+    @Autowired
+    private final ReplyService replyService;
+
     @PostMapping("/new")
     public ResponseEntity<Void> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
@@ -72,5 +82,22 @@ public class PostController {
                                 .build()
                 )
                 .build();
+    }
+
+    @DeleteMapping("/unvote")
+    public ResponseEntity<Void> unvoteOnPost(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        postService.removeUserVote(votableId, userId);
+        return ResponseEntity.noContent().build(); 
+    }
+
+    @GetMapping("/get-vote")
+    public ResponseEntity<UserVote.VoteType> checkUserVote(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        Optional<UserVote.VoteType> voteType = postService.getUserVote(votableId, userId);
+
+        return voteType
+            .map(ResponseEntity::ok) // Return the vote type if present
+            .orElse(ResponseEntity.noContent().build()); // Null if no vote exists
     }
 }

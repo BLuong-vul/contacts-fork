@@ -1,133 +1,75 @@
 import Post from "./Post";
+import { fetchFromApi, authFetchFromApi } from './FunctionHelpers';
+import { validateToken, validateTokenWithRedirect } from './ValidationFunctions';
+import { updateProfileInfo } from './ProfileUpdateFunctions';
 
 const baseURL = process.env.BASE_API_URL || 'http://localhost:8080';
 
 
-/* ===== HELPER ===== */
-async function fetchFromApi(endpoint, params){
-	try{
-		const response = await fetch(endpoint, { 
-			method: 'GET', body: params 
-		});
-		if (!response.ok) throw new Error("Failed to fetch data");
-		const data = await response.json();
-		return data;
-	} catch (error){
-		console.error(error);
-		throw error;
-	}
-}
+// Moved to ValidationFunctions.js
+/* ===== VALIDATION ===== */
 
-async function postToApi(endpoint, params){
+// async function validationHelper(redirect=false){
+// 	const token = localStorage.getItem('token');
+// 	if (!token){
+// 		console.log('User not logged in.');
+// 		if (redirect) window.location.href = '/login';
+// 		return false;
+// 	}
 
-}
+// 	try {
+// 		await authFetchFromApi(`${baseURL}/auth/validate`);
+// 		return true;
+// 	} catch (error){
+// 		console.log('Validation error: ', error);
+// 		localStorage.removeItem('token');
+// 		if (redirect) window.location.href = '/login';
+// 		return false;
+// 	}
+// }
+
+// export async function validateToken(){
+// 	return validationHelper();
+// }
+
+// export async function validateTokenWithRedirect(){
+// 	return validationHelper(true);
+// }
+
 
 /* ===== PROFILE CUSTOMIZATION UPDATES ===== */
 
+// TODO:  Change the backend so that it accepts the values as body instead of like this. Just for parity/clarity/cleanliness
+// export async function updateProfileInfo(attribute, value){
+// 	if (!(await validateTokenWithRedirect())) return false;
+// 	try {
+// 		const res = await authFetchFromApi(`${baseURL}/user/account/${attribute}?${attribute}=${value}`, 'POST');
+// 		return true;
+// 	} catch (error){
+// 		console.error('Error during profile update:', error);
+// 		return false;
+// 	}
+// }
+
+// TODO: delete all of these and just use updateProfileInfo directly maybe?
 export async function updateDisplayName(displayName) {
-    validateTokenWithRedirect();
-    const token = localStorage.getItem('token');
-
-    try {
-        const updateRes = await fetch(`${baseURL}/user/account/displayName?displayName=${displayName}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!updateRes.ok) throw new Error('Failed to update display name: ' + updateRes.statusText);
-
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
+	return (await updateProfileInfo("displayName", displayName));
 }
 
 export async function updateBio(bio){
-	validateTokenWithRedirect();
-	const token = localStorage.getItem('token');
-
-	try {
-		const updateRes = await fetch(`${baseURL}/user/account/bio?bio=${bio}`, {
-			method: 'POST',
-		    headers: {
-		      'Authorization': `Bearer ${token}`,
-		    },
-		});
-
-		if (!updateRes.ok) throw new Error('Failed to update bio: ' + updateRes.statusText);
-
-		return true;
-	} catch (error){
-		console.error('Error:', error);
-		return false;
-	}
+	return(await updateProfileInfo("bio", bio));
 }
 
-
 export async function updateOccupation(occupation) {
-    validateTokenWithRedirect();
-    const token = localStorage.getItem('token');
-
-    try {
-        const updateRes = await fetch(`${baseURL}/user/account/occupation?occupation=${occupation}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!updateRes.ok) throw new Error('Failed to update occupation: ' + updateRes.statusText);
-
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
+	return(await updateProfileInfo("occupation", occupation));
 }
 
 export async function updateLocation(location) {
-    validateTokenWithRedirect();
-    const token = localStorage.getItem('token');
-
-    try {
-        const updateRes = await fetch(`${baseURL}/user/account/location?location=${location}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!updateRes.ok) throw new Error('Failed to update location: ' + updateRes.statusText);
-
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
+	return(await updateProfileInfo("location", location));
 }
 
 export async function updateBirthdate(birthdate) {
-    validateTokenWithRedirect();
-    const token = localStorage.getItem('token');
-
-    try {
-        const updateRes = await fetch(`${baseURL}/user/account/birthdate?birthdate=${birthdate}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!updateRes.ok) throw new Error('Failed to update birthdate: ' + updateRes.statusText);
-
-        return true;
-    } catch (error) {
-        console.error('Error:', error);
-        return false;
-    }
+	return(await updateProfileInfo("birthdate", birthdate));
 }
 
 /* ===== ACCOUNT MANAGEMENT ===== */
@@ -142,23 +84,13 @@ export async function createAccount(userData){
 	  return;
 	}
 
+	// TODO: CHECK REQUIRED FIELDS
+
 	try {							
-	  const response = await fetch(`${baseURL}/auth/register`, {
-	    method: 'POST',
-	    headers: {
-	      'Content-Type': 'application/json',
-	    },
-	    body: JSON.stringify(userPayload),
-	  });
-
-	  if (!response.ok) {
-	    throw new Error(`Error: ${response.status}`);
-	  }
-
+	  const response = await fetchFromApi(`${baseURL}/auth/register`, 'POST', userPayload);
 	  const result = await response.json();
 	  console.log('User created successfully:', result);
 	  alert('Account creation successful!')
-
 	  window.location.href = '/login';
 	} catch (error) {
 	  console.error('Error:', error);
@@ -178,121 +110,66 @@ export async function logout(){
 export async function login(username, password){
 	try {
 		const loginData = { username, password };
-	    const response = await fetch(`${baseURL}/auth/login`, {
-	        method: 'POST',
-	        headers: {
-	            'Content-Type': 'application/json',
-	        },
-	        body: JSON.stringify(loginData),
-	    });
+		const response = await fetchFromApi(`${baseURL}/auth/login`, 'POST', loginData);
 
-	    if (!response.ok) {
-	        throw new Error('Invalid username or password');
-	    }
+		const result = await response.json();
+		localStorage.setItem('token', result.jwt);
 
-	    const result = await response.json();
-
-	    // Store JWT in localStorage
-	    localStorage.setItem('token', result.jwt);
-
-	    return true;
+		return true;
 	} catch (error) {
-	    console.error('Login error:', error);
+	    console.error('Login error: ', error);
 	    return false;
 	}
 }
 
 // Returns JSON list of users following us
 export async function getFollowersList(){
-	const token = localStorage.getItem('token');
-	validateTokenWithRedirect();
-
-	const followerRes = await fetch(`${baseURL}/user/followers/list`, {
-	    headers: {
-	      'Authorization': `Bearer ${token}`,
-	    },
-	});
-
-	if (!followerRes.ok) throw new Error('Failed to fetch followed users: ' + followerRes.statusText);
-
-	const followersJson = await followerRes.json();
-	return followersJson;
+	await validateTokenWithRedirect();
+	try {
+		const response = await authFetchFromApi(`${baseURL}/user/followers/list`);
+		return await response.json();
+	} catch (error){
+		console.error('Failed to fetch followers list: ', error);
+		return null;
+	}
 }
 
 // Returns JSON list of users we are following
 export async function getFollowingList(){
-	const token = localStorage.getItem('token');
-	validateTokenWithRedirect();
-
-	const followingRes = await fetch(`${baseURL}/user/following/list`, {
-	    headers: {
-	      'Authorization': `Bearer ${token}`,
-	    },
-	});
-
-	if (!followingRes.ok) throw new Error('Failed to fetch followed users: ' + followingRes.statusText);
-
-	const followingUsersJson = await followingRes.json();
-	return followingUsersJson;
-}
-
-
-// Gets info for the current logged in user, like ID and username
-// Redirects to login page if unsuccessful
-export async function getCurrentUserInfo(){
-	const token = localStorage.getItem('token');
-	validateTokenWithRedirect();
-
-	const res = await fetch(`${baseURL}/user/info`, {
-	    method: 'GET',
-	    headers: {
-	        'Authorization': `Bearer ${token}`,
-	        'Content-Type': 'application/json',
-	    },
-	});
-
-	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
-
-	const result = await res.json();
-	return result;
-}
-
-// Gets info for the current logged in user, like ID and username
-// Returns null if not logged in
-export async function tryGetCurrentUserInfo(){
-	const token = localStorage.getItem('token');
-	if (!validateToken()){
+	await validateTokenWithRedirect();
+	try {
+		const response = await authFetchFromApi(`${baseURL}/user/following/list`);
+		return await response.json();
+	} catch (error){
+		console.error('Failed to fetch following list: ', error);
 		return null;
 	}
+}
 
-	const res = await fetch(`${baseURL}/user/info`, {
-	    method: 'GET',
-	    headers: {
-	        'Authorization': `Bearer ${token}`,
-	        'Content-Type': 'application/json',
-	    },
-	});
 
-	if (!res.ok) throw new Error('Failed to fetch ID: ' + res.statusText);
-
-	const result = await res.json();
-	return result;
+// Gets info for the current logged in user, like ID and username
+// Returns null if unsuccessful
+export async function getCurrentUserInfo(){
+	if (!(await validateToken())){ return null; }
+	try {
+		const response = await authFetchFromApi(`${baseURL}/user/info`);
+		return await response.json();
+	} catch (error){
+		console.error('Failed to fetch current user info: ', error);
+		return null;
+	}
 }
 
 // Search for a user's public info based on username
 // Returns it as json
-export async function getPublicInfo(targetUsername){
-
-	// return await fetchFromApi(`${baseURL}/user/public-info`, { username: targetUsername });
-	try{
-		const res = await fetch(`${baseURL}/user/public-info?username=${targetUsername}`);
-		if (!res.ok) throw new Error("Failed to fetch data");
-		const data = await res.json();
-		return data;
-	} catch (error){
-		console.error(error);
-		throw error;
+export async function getPublicInfo(username){
+	try {
+		const response = await fetchFromApi(`${baseURL}/user/public-info?username=${username}`);
+		return await response.json();
+	} catch (error) {
+		throw new Error("Failed to fetch public info");
 	}
+	
 }
 
 
@@ -304,31 +181,15 @@ export async function getPublicInfo(targetUsername){
 			// const newPost = {
 			// 	title: postTitle,
 			// 	text: postText
+			//	...
 			// };
 export async function uploadPost(postDTO){
-	if (!(await validateToken())){
-		return false;
-	}
-	const token = localStorage.getItem('token');
-	
 	try {
-		const response = await fetch(`${baseURL}/post/new`, {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(postDTO)
-		});
-
-		if (!response.ok){
-			throw new Error('Failed to create post: ' + response.statusText);
-		}
+		const response = await authFetchFromApi(`${baseURL}/post/new`, 'POST', postDTO);
 		console.log("Post upload successful");
 		return true;
 	} catch (error){
 		console.error('Error creating post:', error);
-		throw error;
 		return false;
 	}
 }
@@ -337,34 +198,108 @@ export async function uploadPost(postDTO){
 // Tries to fetch all posts
 // 4 November: This now only returns the data and not actual post components.
 export async function fetchAllPosts(page=0, size=10){
-	const response = await fetch(`${baseURL}/post/all?page=${page}&size=${size}`);
-	if (!response.ok){
-		throw new Error('Network response not ok ' + response.statusText);
+	try {
+		const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}`);
+		const pagedData = await response.json();
+		return pagedData.content;
+	} catch (error){
+		console.error("Failed to fetch posts: ", error);
+		return [];
 	}
-	const pagedData = await response.json();
-
-	// const posts = pagedData.content.map( ??? );
-	console.log(pagedData.content);
-	return pagedData.content;
+	
 }
 
 
 // Fetches all posts made by a certain user
-// Returns a list of Posts (see Post.js)
-export async function getPostsByUser(username){
-	try{
-		const page=0;
-		const size=10;
-
-		const postRes = await fetch(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
-		if (!postRes.ok) throw new Error('Network response not ok ' + postRes.statusText);
-		
-		const pagedData = await postRes.json();
-		// const posts = pagedData.content.map(postData => new Post(postData));
+// 4 November: This now only returns the data and not actual post components.
+export async function getPostsByUser(username, page=0, size=10){
+	try {
+		const response = await authFetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
+		const pagedData = await response.json();
 		return pagedData.content;
 	} catch (error){
-		console.error("Error fetching posts");
-		throw error;
+		console.error("Failed to fetch user posts: ", error);
+		return [];
+	}	
+}
+
+// voteType should be "LIKE" or "DISLIKE"
+async function _vote(votableId, voteType) {
+	await validateTokenWithRedirect();
+	const voteDTO = {
+	  votableId: votableId,
+	  voteType: voteType, 
+	};
+	try { 
+		const response = await authFetchFromApi(`${baseURL}/post/vote`, 'POST', voteDTO);
+		return true;
+	} catch (error){
+		console.error("Error voting: ", error);
+		return false;
+	}
+}
+
+export async function likeVotable(votableId){
+	return await _vote(votableId, "LIKE");
+}
+
+export async function dislikeVotable(votableId){
+	return await _vote(votableId, "DISLIKE");
+}
+
+export async function unvote(votableId){
+	if(!(await validateTokenWithRedirect())) return null;
+	try{
+		const response = await authFetchFromApi(`${baseURL}/post/unvote?votableId=${votableId}`, 'DELETE');
+		return true;
+	} catch (error){
+		console.error("Error unvoting: ", error);
+		return false;
+	}
+}
+
+export async function getVoteOnVotable(votableId){
+	if (!(await validateToken())) return null;
+	try {
+		const response = await authFetchFromApi(`${baseURL}/post/get-vote?votableId=${votableId}`);
+		if (response.ok) {
+            // Check if there is content before parsing JSON
+            if (response.status === 200) {
+                return await response.json(); // Return the vote type
+            }
+            return null; // No vote exists
+        }
+	} catch (error){
+		console.error("Error checking vote: ", error);
+	}
+}
+
+export async function uploadReply(postId, textContent, parentId=0){
+	if(!(await validateTokenWithRedirect())) return null;
+	if (textContent=="" || textContent==null) return null;
+	const replyRequestDTO = {
+		postId: postId,
+		toReplyId: parentId,
+		text: textContent
+	}
+	try{
+		const response = await authFetchFromApi(`${baseURL}/replies/post/${postId}`, 'POST', replyRequestDTO);
+		const comment = await response.json();
+		return comment;
+	} catch (error){
+		console.error("Error creating reply: ", error);
+		return false;
+	}
+}
+
+export async function getReplies(postId){
+	try{
+		const response = await fetchFromApi(`${baseURL}/replies/post/${postId}`);
+		const commentData = await response.json();
+		return commentData;
+	} catch (error){
+		console.error('Error fetching replies: ', error);
+		return false;
 	}
 }
 
@@ -376,20 +311,10 @@ export async function getPostsByUser(username){
 // Returns true if successful, false otherwise
 export async function unfollowUser(followeeId){
 	try {
-		const token = localStorage.getItem('token');
-		const res = await fetch(`${baseURL}/user/unfollow/${followeeId}`, {
-		method: 'POST',
-		headers: {
-			  'Authorization': `Bearer ${token}`,
-			  'Content-Type': 'application/json',
-			},
-		});
-		if (!res.ok) throw new Error('Failed to unfollow');
-
-		// console.log("DEBUG: unfollowed successfully");
+		const response = await authFetchFromApi(`${baseURL}/user/unfollow/${followeeId}`, 'POST');
 		return true;
 	} catch (error) {
-		console.error("Error unfollowing user");
+		console.error("Error unfollowing user: ", error);
 		return false;
 	}
 }
@@ -398,105 +323,27 @@ export async function unfollowUser(followeeId){
 // Returns true if successful, false otherwise
 export async function followUser(followeeId){
 	try {
-		const token = localStorage.getItem('token');
-		const res = await fetch(`${baseURL}/user/follow/${followeeId}`, {
-		method: 'POST',
-		headers: {
-			  'Authorization': `Bearer ${token}`,
-			  'Content-Type': 'application/json',
-			},
-		});
-		if (!res.ok) throw new Error('Failed to follow');
-
-		// console.log("DEBUG: followed successfully");
+		const response = await authFetchFromApi(`${baseURL}/user/follow/${followeeId}`, 'POST');
 		return true;
 	} catch (error) {
-		console.error("Error following user");
+		console.error("Error following user: ", error);
 		return false;
 	}
 }
 
-// TODO: This currently searches a following list. That should maybe be done on the backend instead. 
+// TODO: This currently searches a following list. That should probably be done on the backend instead. 
 // Returns true if current user is following followee, else returns false
 export async function isFollowing(followeeUsername){
 	try{
-		const token = localStorage.getItem('token');
-		const followedRes = await fetch(`${baseURL}/user/following/list`, {
-		  headers: {
-		    'Authorization': `Bearer ${token}`,
-		  },
-		});
-		if (!followedRes.ok) throw new Error("Failed to fetch followed users");
-		const followedUsers = await followedRes.json();
+		const response = await authFetchFromApi(`${baseURL}/user/following/list`);
+		const followedUsers = await response.json();
 		const isFollowing = followedUsers.some(user => user.username === followeeUsername);
 		return isFollowing;
 	} catch (error){
-		console.error("Error fetching follower information");
+		console.error("Error fetching follower information: ", error);
 		throw error;
 	}
 }
 
 
 
-
-/* ===== VALIDATION ===== */
-
-// Checks for token and if it is valid
-// Deletes token if not valid
-// Returns true if valid, false if not
-export async function validateToken(){
-	const token = localStorage.getItem('token');
-	if (!token){
-		console.log('User not logged in.');
-		return false;
-	}
-
-	try {
-		const response = await fetch(`${baseURL}/auth/validate`, {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-			},
-		});
-
-		if (!response.ok){
-			throw new Error('Invalid token');
-		}
-		return true;
-	} catch (error){
-		console.log('Login expired.');
-		localStorage.removeItem('token');
-		return false;
-	}
-}
-
-// Checks for token and if it is valid
-// Deletes token if not valid
-// Redirects if not valid
-export async function validateTokenWithRedirect(){
-	const token = localStorage.getItem('token');
-	if (!token){
-		console.log('User not logged in. Redirecting to login page.');
-		window.location.href = '/login'; 
-		return false;
-	}
-
-	try {
-		const response = await fetch(`${baseURL}/auth/validate`, {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${token}`,
-			},
-		});
-
-		if (!response.ok){
-			throw new Error('Invalid token');
-		}
-		return true;
-	} catch (error){
-		console.error('Login expired. Redirecting to login page.');
-		localStorage.removeItem('token');
-		window.location.href = '/login';
-		return false;
-	}
-}
