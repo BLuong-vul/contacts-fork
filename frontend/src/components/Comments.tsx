@@ -105,11 +105,8 @@ const Comments = ({ initialComments, postId }) => {
       {/* Comments */}
       <div className="mt-6">
         {comments.map(comment => (
-          <div className="border-b border-gray-600 pb-4">
-          <div
-            key={comment.id}
-            className="flex gap-4 justify-between mt-4"
-          >
+          <div className="border-b border-gray-600 pb-4" key={comment.id}>
+          <div className="flex gap-4 justify-between mt-4">
             {/* Avatar */}
             <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
             {/* Description */}
