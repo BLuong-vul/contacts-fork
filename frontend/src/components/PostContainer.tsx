@@ -65,6 +65,23 @@ const PostContainer = ({ postData }) => {
         }
     };
 
+    const commentData = [
+      {
+        avatar:
+          "https://images.pexels.com/photos/29117255/pexels-photo-29117255/free-photo-of-woman-with-bicycle-and-tote-bag-on-urban-street.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
+        username: "Bruce Banner",
+        text: "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+        likes: 123,
+      },
+      {
+        avatar:
+          "https://images.pexels.com/photos/12312312/pexels-photo-12312312.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load",
+        username: "Natasha Romanoff",
+        text: "This is another example comment.",
+        likes: 45,
+      },
+    ];    
+
     return (
         <div className="p-4 bg-slate-700 shadow-md rounded-lg flex flex-col gap-4 mb-8 w-11/12">
             {/* User */}
@@ -134,7 +151,7 @@ const PostContainer = ({ postData }) => {
                     </div>
                 </div>
             </div>
-            <Comments />
+            <Comments initialComments={commentData} />
         </div>
     );
 };
