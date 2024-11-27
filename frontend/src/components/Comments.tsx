@@ -18,6 +18,7 @@ const Comments = ({ initialComments, postId }) => {
     // console.log(comments);
   };
 
+
   return (
     <div className="">
       {/* Write */}
@@ -34,9 +35,11 @@ const Comments = ({ initialComments, postId }) => {
           />
           < FaPaperPlane
             size={16}
-            className="cursor-pointer"
+            className="cursor-pointer transition-colors duration 100"
             onClick={() => handleCommentUpload(commentField)}
             color="white"
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#3b83f6')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'white')}
           />
         </div>
       </div>
