@@ -144,7 +144,7 @@ export default function Projects() {
 				<div className={homepagestyles.contentContainer} style={{ marginRight: setSidebarWidth}}>
 					{/*button for creating post*/}
 					<div className={homepagestyles.createPostContainer}>
-						<button onClick={toggleCreatePost} className={homepagestyles.createPostButton}>
+						<button onClick={toggleCreatePost} className="text-white text-l p-2 rounded-md bg-blue-500 hover:bg-blue-700 transition duration-100">
 							Create Post
 						</button>
 					</div>

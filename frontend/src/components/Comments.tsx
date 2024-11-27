@@ -9,12 +9,13 @@ const Comments = ({ initialComments, postId }) => {
 
   const [commentField, setCommentField] = useState("");
 
-  const handleCommentUpload = (text) => {
+  const handleCommentUpload = async (text) => {
     if (text.trim() !== "") {
-        console.log(text);
-        Fetch.uploadReply(postId, text);
+        const newComment = await Fetch.uploadReply(postId, text);
+        setCommentField("");
+        setComments((prevComments) => [...prevComments, newComment]);
     }
-    console.log(comments);
+    // console.log(comments);
   };
 
   return (

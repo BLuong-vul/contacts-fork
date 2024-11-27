@@ -284,7 +284,8 @@ export async function uploadReply(postId, textContent, parentId=0){
 	}
 	try{
 		const response = await authFetchFromApi(`${baseURL}/replies/post/${postId}`, 'POST', replyRequestDTO);
-		return true;
+		const comment = await response.json();
+		return comment;
 	} catch (error){
 		console.error("Error creating reply: ", error);
 		return false;

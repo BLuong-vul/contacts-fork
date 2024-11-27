@@ -108,29 +108,29 @@ const PostContainer = ({ postData }) => {
                 <p className="text-slate-200">{postData?.text}</p>
             </div>
             {/* Interaction */}
-            <div className="flex items-center justify-between text-sm rounded-xl bg-slate-800">
-                <div className="flex gap-8">
-                    <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl ml-4">
+            <div className="flex items-center justify-between text-sm rounded-xl">
+                <div className="flex gap-6">
+                    <div onClick={handleLike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Likes */}
-                        <Image src="/like.png" alt="Like" width={16} height={16} onClick={handleLike} className="cursor-pointer" />
+                        <Image src="/like.png" alt="Like" width={16} height={16} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
                             {likes}
                             <span className="hidden md:inline"> Likes</span>
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl">
+                    <div onClick={handleDislike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Dislikes */}
-                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} onClick={handleDislike} className="cursor-pointer" />
+                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
                             {dislikes}
                             <span className="hidden md:inline"> Dislikes</span>
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-800 p-2 rounded-xl">
+                    <div onClick={toggleComments} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Comments */}
-                        <Image src="/comment.png" alt="Comment" width={16} height={16} onClick={toggleComments} className="cursor-pointer" />
+                        <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
                             {commentData.length}

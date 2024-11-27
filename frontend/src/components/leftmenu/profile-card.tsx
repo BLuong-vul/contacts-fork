@@ -54,7 +54,7 @@ const ProfileCard = () => {
           <span className="text-xs text-slate-200">{isLoggedIn ? followerCount + ' Followers' : ''}</span>
           <Link
             href={isLoggedIn ? `/social-media-app/profile/${username}` : '/login'}
-            className="bg-blue-500 text-white text-xs p-2 rounded-md"
+            className="text-white text-sm p-2 rounded-md bg-blue-500 hover:bg-blue-700 transition duration-100"
           >
             {isLoggedIn ? 'My Profile' : 'Log In'}
           </Link>
