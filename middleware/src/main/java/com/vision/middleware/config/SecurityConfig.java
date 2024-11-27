@@ -90,7 +90,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/user/account/**").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/chat/**").hasAnyRole("ADMIN", "USER"); // is this being used?
-                auth.requestMatchers("/post/get-replies").permitAll();
+                auth.requestMatchers("/replies/post/**").permitAll();
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/post/all").permitAll();
                 auth.requestMatchers("/ws/**", "/ws/notifications/**").permitAll(); // websocket

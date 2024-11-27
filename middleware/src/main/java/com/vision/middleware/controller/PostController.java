@@ -81,6 +81,9 @@ public class PostController {
                                 .userId(post.getPostedBy().getId())
                                 .build()
                 )
+                .build();
+    }
+
     @DeleteMapping("/unvote")
     public ResponseEntity<Void> unvoteOnPost(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
@@ -96,40 +99,5 @@ public class PostController {
         return voteType
             .map(ResponseEntity::ok) // Return the vote type if present
             .orElse(ResponseEntity.noContent().build()); // Null if no vote exists
-    }
-
-    @PostMapping("/create-reply")
-    public ResponseEntity<Reply> createReply(@RequestHeader("Authorization") String token, @RequestBody ReplyDTO replyDTO){
-        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
-        Reply createdReply = replyService.createReply(replyDTO, replyDTO.getPostId(), userId);
-        return ResponseEntity.ok(createdReply);
-    }
-
-    @GetMapping("/get-replies")
-    public ResponseEntity<List<ReplyDTO>> getRepliesByPostId(@RequestParam long postId) {
-        List<Reply> replies = replyService.getReplyTree(postId);
-
-        List<ReplyDTO> replyDTO = replies.stream().map(this::mapToReplyDTO).collect(Collectors.toList());
-        return ResponseEntity.ok(replyDTO);
-    }
-
-    private ReplyDTO mapToReplyDTO(Reply reply) {
-        UserDTO authorDTO = UserDTO.builder()
-                .userId(reply.getAuthor().getId())
-                .username(reply.getAuthor().getUsername())
-                .displayName(reply.getAuthor().getDisplayName())
-                .build();
-
-        return ReplyDTO.builder()
-                .replyId(reply.getId())
-                .postId(reply.getPost().getId())
-                .author(authorDTO)
-                .datePosted(reply.getDatePosted())
-                .text(reply.getText())
-                .parentReplyId(reply.getParentReply() != null ? reply.getParentReply().getId() : null)
-                .childReplies(reply.getChildReplies().stream()
-                        .map(this::mapToReplyDTO)
-                        .collect(Collectors.toSet()))
-                .build();
     }
 }

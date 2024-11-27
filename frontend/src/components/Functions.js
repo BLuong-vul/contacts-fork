@@ -274,16 +274,16 @@ export async function getVoteOnVotable(votableId){
 	}
 }
 
-export async function uploadReply(postId, textContent, parentId=null){
+export async function uploadReply(postId, textContent, parentId=0){
 	if(!(await validateTokenWithRedirect())) return null;
 	if (textContent=="" || textContent==null) return null;
-	const replyDTO = {
+	const replyRequestDTO = {
 		postId: postId,
-		text: textContent,
-		parentReplyId: parentId
+		toReplyId: parentId,
+		text: textContent
 	}
 	try{
-		const response = await authFetchFromApi(`${baseURL}/post/create-reply`, 'POST', replyDTO);
+		const response = await authFetchFromApi(`${baseURL}/replies/post/${postId}`, 'POST', replyRequestDTO);
 		return true;
 	} catch (error){
 		console.error("Error creating reply: ", error);
@@ -293,7 +293,7 @@ export async function uploadReply(postId, textContent, parentId=null){
 
 export async function getReplies(postId){
 	try{
-		const response = await fetchFromApi(`${baseURL}/post/get-replies?postId=${postId}`);
+		const response = await fetchFromApi(`${baseURL}/replies/post/${postId}`);
 		const commentData = await response.json();
 		return commentData;
 	} catch (error){
