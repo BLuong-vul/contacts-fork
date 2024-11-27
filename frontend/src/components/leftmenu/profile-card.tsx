@@ -27,7 +27,7 @@ const ProfileCard = () => {
   }, []); 
 
   return (
-    <div className='p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-6'>
+    <div className='p-4 bg-slate-600 rounded-lg shadow-md text-sm flex flex-col gap-6'>
         <div className='h-20 relative'>
           {isLoggedIn ? (
             <>
@@ -46,12 +46,12 @@ const ProfileCard = () => {
               />
             </>
           ) : (
-            <p className="text-black text-xl text-center absolute left-0 right-0 m-auto -bottom-2">Log in to view profile</p>
+            <p className="text-white text-xl text-center absolute left-0 right-0 m-auto -bottom-2">Log in to view profile</p>
           )}
         </div>
         <div className="h-20 flex flex-col gap-2 items-center">
-          <span className="font-semibold">{username}</span>
-          <span className="text-xs text-gray-500">{isLoggedIn ? followerCount + ' Followers' : ''}</span>
+          <span className="font-semibold text-slate-200">{username}</span>
+          <span className="text-xs text-slate-200">{isLoggedIn ? followerCount + ' Followers' : ''}</span>
           <Link
             href={isLoggedIn ? `/social-media-app/profile/${username}` : '/login'}
             className="bg-blue-500 text-white text-xs p-2 rounded-md"

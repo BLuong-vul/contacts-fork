@@ -7,7 +7,7 @@ import * as Fetch from '../../../../components/Functions';
 import { validateTokenWithRedirect, validateToken } from '../../../../components/ValidationFunctions';
 import Image from "next/image";
 import Link from "next/link";
-import Post from '../../../../components/Post';
+import Post from '../../../../components/PostContainer';
 
 
 
@@ -103,7 +103,7 @@ export default function ProfilePage({ params }) {
             </div>
             {/** Name of user*/}
             <h1 className="mt-20 mb-4 text-2xl font-medium">
-              {profileData.displayName}
+              {profileData.displayName ? profileData.displayName : profileData.username}
             </h1>
             {/** Display for followers*/}
             <div className="flex items-center justify-center gap-12 mb-4">
