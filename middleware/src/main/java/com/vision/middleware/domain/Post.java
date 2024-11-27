@@ -1,9 +1,11 @@
 package com.vision.middleware.domain;
 
 import com.vision.middleware.domain.baseEntities.VotableEntity;
-import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
@@ -17,6 +19,7 @@ import java.util.Date;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("TEXT")
+@SequenceGenerator(name = "id_generator", sequenceName = "post_sequence", allocationSize = 1)
 public class Post extends VotableEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", nullable = false)

@@ -1,8 +1,10 @@
 package com.vision.middleware.dto;
 
+import com.vision.middleware.domain.relations.UserVote;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -16,13 +18,17 @@ import com.vision.middleware.dto.UserDTO;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
 public class ReplyDTO {
-    private long replyId;
-    private long postId;
-    private UserDTO author; 
-    private Date datePosted;
+    private Long id;
     private String text;
-    private Long parentReplyId; // Nullable
-    private Set<ReplyDTO> childReplies = new HashSet<>();
+    private UserDTO author;
+    private Date datePosted;
+    private long likeCount;
+    private long dislikeCount;
+    private long voteScore;
+    private UserVote.VoteType userVoteType;
+    private boolean isDeleted;
+    private List<ReplyDTO> replies;
 }

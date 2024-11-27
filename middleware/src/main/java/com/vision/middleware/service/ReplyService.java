@@ -3,90 +3,168 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.Reply;
+import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.ReplyDTO;
+import com.vision.middleware.dto.UserDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.ReplyRepository;
-
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.beans.Transient;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Builder
 public class ReplyService {
 
+    private static final int MAX_REPLY_LENGTH = 5000;
+    private static final int MAX_NESTING_DEPTH = 100;
     @Autowired
     private final UserService userService;
     private final PostService postService;
     
-    // todo: cast tree of replies that will be returned into DTO, or at least have a fucntion that is able to do that.
-    // what information does the front end need to be able to properly construct a post?
-    // should the DTOs be nested for required information?
-
     @Autowired
     private final ReplyRepository replyRepository;
 
-    public Reply createReply(ReplyDTO replyDTO, Long postId, Long userId){
-        Date date = new Date();
-        ApplicationUser postingUser = userService.loadUserById(userId);
-        Post post = postService.loadPostById(postId);
-        Reply parentReply = null;
-        if (replyDTO.getParentReplyId() != null) {
-            parentReply = replyRepository.findById(replyDTO.getParentReplyId())
-                .orElseThrow(() -> new RuntimeException("Parent reply not found"));
+    @Autowired
+    private final VotingService votingService;
+
+    // null parent reply if this is supposed to be a root reply.
+    @Transactional
+    public Reply createReply(Post post, ApplicationUser author, String text, Reply parentReply) {
+        validateReply(text, parentReply);
+
+        Reply reply = Reply.builder()
+                .post(post)
+                .author(author)
+                .text(text)
+                .parentReply(parentReply)
+                .datePosted(new Date())
+                .likeCount(0L)
+                .dislikeCount(0L)
+                .voteScore(0L)
+                .build();
+
+        if (parentReply != null) {
+            parentReply.addChildReply(reply);
         }
 
-        /*Design Pattern: Builder*/
-        Reply newReply = Reply.builder()
-        .author(postingUser)
-        .post(post)
-        .datePosted(date)
-        .text(replyDTO.getText())
-        .parentReply(parentReply) // If parentReply is nullable, this can be null
-        .build();
-        /*Design Pattern: Builder*/
-        return replyRepository.save(newReply);
+        return replyRepository.save(reply);
     }
-    
-    public List<Reply> getReplyTree(Long postId) {
-        List<Reply> replies = replyRepository.findByPostId(postId);
 
-        Map<Long, Reply> replyMap = replies.stream().collect(Collectors.toMap(Reply::getId, reply -> reply));
+    public Reply findReplyById(long replyId) {
+        return replyRepository.findById(replyId).orElseThrow(
+                () -> new IdNotFoundException(String.format("Reply with id %d not found.", replyId))
+        );
+    }
 
-        List<Reply> rootReplies = new ArrayList<>();
+    public void voteOnReply(ApplicationUser user, Reply reply, UserVote.VoteType voteType) {
+        votingService.voteOnVotable(user, reply, voteType);
+    }
 
-        for (Reply reply : replies) {
-            if (reply.getParentReply() != null) {
-                Reply parent = replyMap.get(reply.getParentReply().getId());
-                if (parent != null) {
-                    parent.getChildReplies().add(reply);
-                }
-            } else {
-                rootReplies.add(reply);
-            }
+    @Transactional
+    public void deleteReply(Reply reply) {
+        if (!reply.getChildReplies().isEmpty()) {
+            // preserve tree structure
+            reply.softDelete();
+            replyRepository.save(reply);
+        } else {
+            // delete that thing. Update parent that we are removing one of its children as well.
+            Reply parentReply = reply.getParentReply();
+            parentReply.removeChildReply(reply);
+            replyRepository.save(parentReply);
+
+            replyRepository.delete(reply);
         }
-
-        return rootReplies;
     }
 
-    // todo: stop working on this and actually start working on the thing that we need to have done by this week :(((((((
-    private void populateChildReplies(Reply reply) {
-//        Set<Reply> childReplies = new LinkedHashSet<>(replyRepository.findByParentReplyReplyId(reply.getId()));
-//
-//        reply.setChildReplies(childReplies);
-//
-//        for (Reply child : childReplies) {
-//            populateChildReplies(child); // recurse
-//        }
+    public List<ReplyDTO> getCommentTreeForPost(Long postId, ApplicationUser currentUser) {
+        List<Reply> topLevelReplies = replyRepository.findTopLevelRepliesByPostId(postId);
+        return topLevelReplies.stream()
+                .map(reply -> convertToCommentTree(reply, currentUser))
+                .collect(Collectors.toList());
     }
 
+    private ReplyDTO convertToCommentTree(Reply reply, ApplicationUser currentUser) {
+        // Get the user's vote on this reply if it exists
+        Optional<UserVote.VoteType> userVoteType = votingService.getUserVoteOnVotable(currentUser, reply);
+
+        // Convert child replies recursively
+        List<ReplyDTO> childComments = reply.getChildReplies().stream()
+                .sorted(Comparator
+                        .comparingLong(Reply::getVoteScore).reversed()
+                        .thenComparing(Reply::getDatePosted).reversed()) // Note the reversed() for date
+                .map(childReply -> convertToCommentTree(childReply, currentUser))
+                .collect(Collectors.toList());
+
+        // Build author DTO
+        UserDTO author = UserDTO.builder()
+                .userId(reply.getAuthor().getId())
+                .username(reply.getAuthor().getUsername())
+                .build();
+
+        // Build the comment tree DTO
+        return ReplyDTO.builder()
+                .id(reply.getId())
+                .text(reply.getText())
+                .author(author)
+                .datePosted(reply.getDatePosted())
+                .likeCount(reply.getLikeCount())
+                .dislikeCount(reply.getDislikeCount())
+                .voteScore(reply.getVoteScore())
+                .userVoteType(userVoteType.orElse(null))
+                .isDeleted(reply.isDeleted())
+                .replies(childComments)
+                .build();
+    }
+
+    private void validateReply(String text, Reply parentReply) {
+        validateReplyLength(text);
+        if (parentReply != null) {
+            validateNestingDepth(parentReply);
+        }
+    }
+
+    private void validateReplyLength(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            throw new IllegalArgumentException("Reply text cannot be empty");
+        }
+        if (text.length() > MAX_REPLY_LENGTH) {
+            throw new IllegalArgumentException(
+                    String.format("Reply text exceeds maximum length of %d characters", MAX_REPLY_LENGTH)
+            );
+        }
+    }
+
+    private void validateNestingDepth(Reply parentReply) {
+        int depth = calculateDepth(parentReply);
+        if (depth >= MAX_NESTING_DEPTH) {
+            throw new IllegalArgumentException(
+                    String.format("Maximum nesting depth of %d exceeded", MAX_NESTING_DEPTH)
+            );
+        }
+    }
+
+    private int calculateDepth(Reply reply) {
+        int depth = 0;
+        Reply current = reply;
+        while (current.getParentReply() != null) {
+            depth++;
+            current = current.getParentReply();
+        }
+        return depth;
+    }
 }
