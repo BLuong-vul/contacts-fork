@@ -31,6 +31,7 @@ const DirectMessages = () => {
     useEffect(() => {
         const fetchUserId = async () => {
             const result = await Fetch.getCurrentUserInfo();
+            if (!result) window.location.href = '/login';
             setUserId(result.userId);
             setCurrentUsername(result.username);
         };

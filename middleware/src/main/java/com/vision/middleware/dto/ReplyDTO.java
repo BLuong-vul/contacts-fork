@@ -6,10 +6,13 @@ import lombok.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.Reply;
+
+import com.vision.middleware.dto.UserDTO;
 
 @Getter
 @Setter

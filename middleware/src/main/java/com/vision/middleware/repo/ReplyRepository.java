@@ -16,4 +16,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     List<Reply> findTopLevelRepliesByPostId(@Param("postId") Long postId);
 
     Optional<Reply> findById(long id);
+    List<Reply> findByPostId(long postId);
+    List<Reply> findByIdAndParentReplyIsNull(long replyId);
+    List<Reply> findByParentReply(Reply parent);
 }
