@@ -74,13 +74,7 @@ const Comments = ({ initialComments, postId }) => {
               </div>
             </div>
             {/* Icon */}
-            <Image
-              src="/more.png"
-              alt=""
-              width={16}
-              height={16}
-              className="cursor-pointer w-4 h-4"
-            />
+            {/* <Image src="/more.png" alt="" width={16} height={16} className="cursor-pointer w-4 h-4" /> */}
           </div>
         ))}
       </div>

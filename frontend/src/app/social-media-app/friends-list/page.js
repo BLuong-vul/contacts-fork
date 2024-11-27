@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import styles from './friends-list.module.css'; // adjust the path as necessary
 import Link from 'next/link';
 import * as Fetch from '../../../components/Functions';
+import { FaUser } from "react-icons/fa";
 
 export default function FollowersListPage() {
     const [userId, setUserId] = useState('');
@@ -51,10 +52,10 @@ export default function FollowersListPage() {
                 <h1 className={styles.title}>Mutuals</h1>
                 <ul className={styles.friendList}>
                     {mutuals.map(user => (
-                        <li key={user.userId} className={styles.friendItem}>
-                            <a href={`./profile/${user.username}`}>
-                                {user.username}
-                            </a>
+                        <li key={user.userId} href={`./profile/${user.username}`} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100">
+                            <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                            <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                            <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}
                 </ul>
@@ -64,10 +65,10 @@ export default function FollowersListPage() {
                 <h1 className={styles.title}>Followers</h1>
                 <ul className={styles.friendList}>
                     {followers.map(user => (
-                        <li key={user.userId} className={styles.friendItem}>
-                            <a href={`./profile/${user.username}`}>
-                                {user.username}
-                            </a>
+                        <li key={user.userId} href={`./profile/${user.username}`} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100">
+                            <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                            <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                            <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}
                 </ul>
@@ -77,10 +78,10 @@ export default function FollowersListPage() {
                 <h1 className={styles.title}>Following</h1>
                 <ul className={styles.friendList}>
                     {followingUsers.map(user => (
-                        <li key={user.userId} className={styles.friendItem}>
-                            <a href={`./profile/${user.username}`}>
-                                {user.username}
-                            </a>
+                        <li key={user.userId} href={`./profile/${user.username}`} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100">
+                            <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                            <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
+                            <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}
                 </ul>

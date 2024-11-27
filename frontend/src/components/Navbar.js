@@ -31,16 +31,16 @@ const Navbar = () => {
     <div className="h-24 flex items-center justify-between bg-slate-900">
       {/* LEFT */}
       <div className="md:hidden lg:block w-[20%]">
-        <Link href="/social-media-app" className="font-bold text-xl text-blue-600">
+        <Link href="/social-media-app" className="ml-4 font-bold text-3xl text-blue-600">
           CONT@CTS
         </Link>
       </div>
       {/* CENTER */}
       <div className="hidden md:flex w-[50%] text-m items-center justify-between">
         {/* LINKS */}
-        <div className="flex gap-6 text-slate-400 hover:text-slate-100 transition duration-200">
+        <div className="flex gap-6 text-slate-400">
           <Tooltip title="Home" arrow>
-          	<Link href="/social-media-app" className="flex items-center gap-2">
+          	<Link href="/social-media-app" className="flex items-center gap-2 hover:text-slate-100 transition duration-200">
             <Image
               src="/home.png"
               alt="Homepage"
