@@ -1,9 +1,11 @@
 package com.vision.middleware.controller;
 
+import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.dto.VoteDTO;
+import com.vision.middleware.repo.UserRepository;
 import com.vision.middleware.service.PostService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/post")
@@ -23,6 +29,9 @@ public class PostController {
 
     @Autowired
     private final PostService postService;
+
+    @Autowired
+    private final UserRepository userRepository;
 
     // This used to return a Post and has been changed to just return an OK response entity. Oct 31
     // todo: maybe we should just have it return the id of the post instead? or maybe a post DTO.
@@ -55,6 +64,56 @@ public class PostController {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
         postService.userVoteOnPost(voteDTO.getVotableId(), userId, voteDTO.getVoteType());
         return voteDTO;
+    }
+
+    // todo: allow in security config
+    @GetMapping("/search")
+    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam String query) {
+        // todo: do not allow searches with empty queries?
+        if (isQueryInvalid(query)) {
+            return ResponseEntity.badRequest().body(null); // do not allow
+        }
+
+        // perform search and map to DTOs.
+        return ResponseEntity.ok(
+                postService.searchPosts(query).stream().map(this::buildDTOFromPost).toList()
+        );
+    }
+
+    // todo: allow in security config
+    @GetMapping("/search-by-user")
+    public ResponseEntity<List<PostDTO>> searchPostsByUser(@RequestParam String query, @RequestParam long userId) {
+        ApplicationUser user = userRepository.findById(userId).orElse(null);
+
+        // is query valid? does user exist?
+        if (isQueryInvalid(query) || user == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // ok to do search.
+        return ResponseEntity.ok(
+                postService.searchPostsByUser(query, user).stream().map(this::buildDTOFromPost).toList()
+        );
+    }
+
+    // todo: allow in security config
+    @GetMapping("/search-by-user-date")
+    public ResponseEntity<List<PostDTO>> searchPostsByUserAndDate(@RequestParam String query, @RequestParam long userId, @RequestParam Date startDate, @RequestParam Date endDate) {
+        ApplicationUser user = userRepository.findById(userId).orElse(null);
+
+        // is query valid? is startdate < enddate?
+        if (isQueryInvalid(query) || user == null || (startDate.compareTo(endDate) > 0)) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // perform search
+        return ResponseEntity.ok(
+                postService.searchPostsByDateRange(query, user, startDate, endDate).stream().map(this::buildDTOFromPost).toList()
+        );
+    }
+
+    private boolean isQueryInvalid(String query) {
+        return query == null || query.trim().isEmpty();
     }
 
     private PostDTO buildDTOFromPost(Post post) {
