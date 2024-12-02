@@ -2,16 +2,12 @@ package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
-import com.vision.middleware.domain.Reply;
-import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.dto.VoteDTO;
-import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.repo.UserRepository;
 import com.vision.middleware.service.PostService;
-import com.vision.middleware.service.ReplyService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/post")
@@ -35,9 +30,6 @@ public class PostController {
 
     @Autowired
     private final PostService postService;
-
-    @Autowired
-    private final ReplyService replyService;
 
     @Autowired
     private final UserRepository userRepository;
