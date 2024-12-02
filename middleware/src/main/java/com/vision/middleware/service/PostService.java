@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -70,6 +71,25 @@ public class PostService {
 
         votingService.voteOnVotable(user, post, voteType);
     }
+
+    public void removeUserVote(long postId, long userId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IdNotFoundException("Post id " + postId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        votingService.deleteVote(user, post);
+    }
+
+    public Optional<UserVote.VoteType> getUserVote(long postId, long userId){
+        Post post = postRepository.findById(postId).orElseThrow(
+            () -> new IdNotFoundException("Post id " + postId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        return votingService.getUserVoteOnVotable(user, post);
+    }
+
 
     public Page<Post> getAllPosts(int page, int size) {
         return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));

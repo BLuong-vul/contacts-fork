@@ -7,12 +7,6 @@
 	color: white;
 }
 
-.input {
-	background: transparent;
-	color: white;
-	border: 1px solid white;
-}
-
 .chatArea {
 	flex: 1;
 	padding: 20px;
@@ -96,30 +90,6 @@
 .dropDownLabel {
 	font-weight: 600;
 	margin-right: 10px;
-}
-
-.dropDownMenu {
-	padding: 8px;
-	border-radius: 4px;
-	font-size: 1rem;
-	background-color: #222333;
-	border: 2px solid white;
-}
-
-.listContainer {
-	margin-top: 15px;
-	color: white;
-
-}
-
-.listContainer ul {
-	list-style: none;
-	padding: 0;
-}
-
-.listContainer ul li {
-	padding: 8px;
-	border-bottom: 1px solid #ddd;
 }
 
 .messageBubble {

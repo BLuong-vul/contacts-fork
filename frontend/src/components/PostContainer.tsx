@@ -1,65 +1,151 @@
-import React from "react";
+'use client';
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Comments from "./Comments";
-const PostContainer = () => {
-    return(
-        <div className="flex flex-col gap-4">
+import Link from 'next/link';
+import * as Fetch from './Functions';
+import { FaUser } from "react-icons/fa";
+
+const PostContainer = ({ postData }) => {
+    // state variables for dynamic content
+    const [post, setPost] = useState({
+        image: "https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load",
+    });
+
+    const [likes, setLikes] = useState(postData.likeCount || 0);
+    const [dislikes, setDislikes] = useState(postData.dislikeCount || 0);
+    const [userRating, setUserRating] = useState(null);
+
+    const [commentData, setCommentData] = useState([]);
+    const [commentsVisible, setCommentsVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+
+    useEffect(() => {
+        // fetch the user's vote on the post
+        const fetchUserVote = async () => {
+            const voteType = await Fetch.getVoteOnVotable(postData.postId);
+            setUserRating(voteType); // voteType will be "LIKE", "DISLIKE", or null
+        };
+
+        // fetch comments
+        const fetchComments = async () => {
+            const commentData = await Fetch.getReplies(postData.postId);
+            setCommentData(commentData);
+            setIsLoading(false);
+        };
+
+        fetchUserVote();
+        fetchComments();
+    }, [postData.postId]); 
+
+
+    const handleLike = () => {
+        if (userRating === "LIKE") {
+            Fetch.unvote(postData.postId);
+            setLikes(likes - 1);
+            setUserRating(null);
+        } else {
+            if (userRating === "DISLIKE") {
+                setDislikes(dislikes - 1);
+            }
+            Fetch.likeVotable(postData.postId);
+            setLikes(likes + 1);
+            setUserRating("LIKE");
+        }
+    };
+
+    const handleDislike = () => {
+        if (userRating === "DISLIKE") {
+            Fetch.unvote(postData.postId);
+            setDislikes(dislikes - 1);
+            setUserRating(null);
+        } else {
+            if (userRating === "LIKE") {
+                setLikes(likes - 1);
+            }
+            Fetch.dislikeVotable(postData.postId);
+            setDislikes(dislikes + 1);
+            setUserRating("DISLIKE");
+        }
+    }; 
+
+    const toggleComments = () => {
+        setCommentsVisible((prevState) => !prevState);
+    };
+
+    return (
+        <div className="p-4 bg-slate-700 shadow-md rounded-lg flex flex-col gap-4 mb-8 w-11/12">
             {/* User */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Image src="https://images.pexels.com/photos/29117255/pexels-photo-29117255/free-photo-of-woman-with-bicycle-and-tote-bag-on-urban-street.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load" 
-                    alt=""
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full"
+                    {/* Profile image */}
+                    <FaUser
+                        className="w-10 h-10 rounded-full bg-slate-600"
                     />
-                    <span className="font-medium">Rick Ricky</span>
+                    {/* Name */}
+                    <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">
+                        {postData?.postedBy?.username || "Unknown User"}
+                    </Link>
                 </div>
-                <Image src="/more.png" alt="" width={16} height={16}/>
+                {/*<Image src="/more.png" alt="More options" width={16} height={16} />*/}
             </div>
-            {/* Description */}
+            {postData?.title && (
+                <h2 className="text-3xl font-semibold text-slate-100">{postData.title}</h2>
+            )}
+            {/* Text */}
             <div className="flex flex-col gap-4">
-                <div className="w-full min-h-96 relative">
-                <Image src="https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load" 
-                    alt=""
-                    fill
-                    className="object-cover rounded-md"
-                    />
-                </div>
-                <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quos repellat ut debitis 
-                    iste aspernatur porro unde quam ipsam, cupiditate sequi expedita omnis molestiae.
-                </p>
+                {postData?.image && (
+                        <div className="w-full min-h-96 relative">
+                            <Image
+                                src={post.image}
+                                alt="Post image"
+                                fill
+                                className="object-cover rounded-md"
+                            />
+                        </div>
+                    )}
+                <p className="text-slate-200">{postData?.text}</p>
             </div>
             {/* Interaction */}
-            <div className="flex items-center justify-between text-sm my-4">
-                <div className="flex gap-8">
-                    <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-                    {/* Likes */}
-                    <Image src="/like.png" alt="" width={16} height={16} className="cursor-pointer"/>
-                    <span className="text-gray-300">|</span>
-                    <span className="text-gray-500">
-                        999<span className="hidden md:inline"> Likes</span></span>
+            <div className="flex items-center justify-between text-sm rounded-xl">
+                <div className="flex gap-6">
+                    <div onClick={handleLike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
+                        {/* Likes */}
+                        <Image src="/like.png" alt="Like" width={16} height={16} className="cursor-pointer" />
+                        {/* <span className="text-slate-300">|</span> */}
+                        <span className="text-slate-300">
+                            {likes}
+                            <span className="hidden md:inline"> Likes</span>
+                        </span>
                     </div>
-                    <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-                    {/* Comments */}
-                    <Image src="/comment.png" alt="" width={16} height={16} className="cursor-pointer"/>
-                    <span className="text-gray-300">|</span>
-                    <span className="text-gray-500">
-                        999<span className="hidden md:inline"> Comments</span></span>
+                    <div onClick={handleDislike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
+                        {/* Dislikes */}
+                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} className="cursor-pointer" />
+                        {/* <span className="text-slate-300">|</span> */}
+                        <span className="text-slate-300">
+                            {dislikes}
+                            <span className="hidden md:inline"> Dislikes</span>
+                        </span>
                     </div>
-                    <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl">
-                    {/* Share */}
-                    <Image src="/share.png" alt="" width={16} height={16} className="cursor-pointer"/>
-                    <span className="text-gray-300">|</span>
-                    <span className="text-gray-500">
-                        999<span className="hidden md:inline"> Shares</span></span>
+                    <div onClick={toggleComments} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
+                        {/* Comments */}
+                        <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
+                        {/* <span className="text-slate-300">|</span> */}
+                        <span className="text-slate-300">
+                            {commentData.length}
+                            <span className="hidden md:inline"> Comments</span>
+                        </span>
                     </div>
                 </div>
             </div>
-            <Comments/>
+            {isLoading ? (
+                <div className="text-slate-300">Loading comments...</div>
+            ) : (
+                commentsVisible && <Comments initialComments={commentData} postId={postData.postId} />
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default PostContainer;

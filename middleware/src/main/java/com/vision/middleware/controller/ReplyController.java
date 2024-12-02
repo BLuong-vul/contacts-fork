@@ -26,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/replies")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class ReplyController {
 
     @Autowired
@@ -73,6 +74,7 @@ public class ReplyController {
                         UserDTO.builder()
                                 .userId(user.getId())
                                 .username(user.getUsername())
+                                .displayName(user.getDisplayName())
                                 .build()
                 )
                 .datePosted(reply.getDatePosted())
