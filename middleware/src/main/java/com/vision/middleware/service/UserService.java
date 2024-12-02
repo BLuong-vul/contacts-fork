@@ -54,29 +54,27 @@ public class UserService implements UserDetailsService {
     // Editing profile
     public void updateDisplayNameById(Long id, String displayName){
         userRepository.updateDisplayNameById(id, displayName);
-        return;
     }
 
     public void updateBioById(Long id, String bio){
         userRepository.updateBioById(id, bio);
-        return;
     }
 
     public void updateOccupationById(Long id, String occupation){
         userRepository.updateOccupationById(id, occupation);
-        return;
     }
 
     public void updateLocationById(Long id, String location){
         userRepository.updateLocationById(id, location);
-        return;
     }
 
     public void updateBirthdateById(long id, Date birthdate){
         userRepository.updateBirthdateById(id, birthdate);
-        return;
     }
 
+    public List<ApplicationUser> searchUsers(String query) {
+        return userRepository.findAllByUsernameContainingIgnoreCase(query);
+    }
 
     public Collection<GrantedAuthority> getAuthorities(String role) {
         List<GrantedAuthority> authorities = new ArrayList<>();

@@ -1,4 +1,4 @@
-package com.vision.middleware.utils;
+package com.vision.middleware.repo.searchspec;
 
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.ApplicationUser;

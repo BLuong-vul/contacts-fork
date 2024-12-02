@@ -2,15 +2,13 @@ package com.vision.middleware.repo;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
-import com.vision.middleware.utils.PostSearchSpecification;
+import com.vision.middleware.repo.searchspec.PostSearchSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import java.util.Date;
 import java.util.List;

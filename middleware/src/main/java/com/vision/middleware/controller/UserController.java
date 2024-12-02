@@ -1,5 +1,6 @@
 package com.vision.middleware.controller;
 
+import com.amazonaws.Response;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.relations.UserFollows;
 import com.vision.middleware.dto.UserDTO;
@@ -8,6 +9,7 @@ import com.vision.middleware.service.UserService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -127,6 +129,26 @@ public class UserController {
         followerService.unfollowUser(followerId, followeeId);
 
         return String.format("User %s unfollowed", followeeId);
+    }
+
+    // todo: add endpoint in security config
+    @GetMapping("/search")
+    public ResponseEntity<List<UserDTO>> searchUsers(@RequestParam String query) {
+        // query valid?
+        if (query == null || query.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // perform search.
+        return ResponseEntity.ok(
+                userService.searchUsers(query).stream().map(
+                        user -> UserDTO.builder()
+                                .username(user.getUsername())
+                                .userId(user.getId())
+                                .displayName(user.getDisplayName())
+                                .build()
+                ).toList()
+        );
     }
 
     // Profile customization updates
