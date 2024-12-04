@@ -49,6 +49,7 @@ public class ReplyService {
                 .build();
 
         if (parentReply != null) {
+            // JPA automatically cascades change to parents when calling save later on child. (CascadeType.ALL on childReplies)
             parentReply.addChildReply(reply);
         }
 

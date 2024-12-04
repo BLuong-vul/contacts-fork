@@ -131,6 +131,26 @@ public class ReplyServiceTest {
     }
 
     @Test
+    void createChildReply_ValidInput_ReplyCreatedSuccessfully() {
+        // given that parent reply has no replies:
+        testReply.setChildReplies(new HashSet<>());
+
+        testChildReply.setParentReply(testReply);
+        when(replyRepository.save(any(Reply.class))).thenReturn(testChildReply);
+
+        Reply createdReply = replyService.createReply(testPost, testUser, "Child test reply content", testReply);
+
+        assertThat(createdReply).isNotNull();
+        assertThat(createdReply.getPost()).isEqualTo(testPost);
+        assertThat(createdReply.getAuthor()).isEqualTo(testUser);
+        assertThat(createdReply.getText()).isEqualTo("Child test reply content");
+
+        assertThat(createdReply.getParentReply().getId()).isEqualTo(testReply.getId());
+
+        verify(replyRepository).save(any(Reply.class));
+    }
+
+    @Test
     void findReplyById_ExistingReply_ReturnsReply() {
         when(replyRepository.findById(1L)).thenReturn(Optional.of(testReply));
 

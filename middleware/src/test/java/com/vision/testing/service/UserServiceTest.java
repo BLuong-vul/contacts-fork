@@ -1,7 +1,9 @@
 package com.vision.testing.service;
 
 import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.relations.UserFollows;
 import com.vision.middleware.exceptions.IdNotFoundException;
+import com.vision.middleware.repo.UserFollowsRepository;
 import com.vision.middleware.repo.UserRepository;
 import com.vision.middleware.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,6 +31,9 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserFollowsRepository userFollowsRepository;
 
     @InjectMocks
     private UserService userService;
@@ -94,5 +99,136 @@ public class UserServiceTest {
         assertThat(authorities).isNotNull();
         assertThat(authorities).hasSize(1);
         assertThat(authorities.iterator().next().getAuthority()).isEqualTo("ROLE_USER");
+    }
+
+
+    @Test
+    public void testGetFollowerCount() {
+        // Prepare test user
+        ApplicationUser user = new ApplicationUser();
+        user.setId(1L);
+        user.setUsername("testUser");
+
+        // Create mock list of UserFollows
+        Set<UserFollows> followers = new HashSet<>(Arrays.asList(
+                new UserFollows(),
+                new UserFollows()
+        ));
+        user.setFollowers(followers);
+
+        // Test the getFollowerCount method
+        int followerCount = userService.getFollowerCount(user);
+
+        assertThat(followerCount).isEqualTo(2);
+    }
+
+    @Test
+    public void testGetFollowingCount() {
+        // Prepare test user
+        ApplicationUser user = new ApplicationUser();
+        user.setId(1L);
+        user.setUsername("testUser");
+
+        // Create mock list of UserFollows
+        Set<UserFollows> following = new HashSet<>(Arrays.asList(
+                new UserFollows(),
+                new UserFollows(),
+                new UserFollows()
+        ));
+        user.setFollowing(following);
+
+        // Test the getFollowingCount method
+        int followingCount = userService.getFollowingCount(user);
+
+        assertThat(followingCount).isEqualTo(3);
+    }
+
+    @Test
+    public void testUpdateDisplayNameById() {
+        Long userId = 1L;
+        String newDisplayName = "New Display Name";
+
+        // Call the method
+        userService.updateDisplayNameById(userId, newDisplayName);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateDisplayNameById(userId, newDisplayName);
+    }
+
+    @Test
+    public void testUpdateBioById() {
+        Long userId = 1L;
+        String newBio = "Updated personal bio";
+
+        // Call the method
+        userService.updateBioById(userId, newBio);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateBioById(userId, newBio);
+    }
+
+    @Test
+    public void testUpdateOccupationById() {
+        Long userId = 1L;
+        String newOccupation = "Software Engineer";
+
+        // Call the method
+        userService.updateOccupationById(userId, newOccupation);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateOccupationById(userId, newOccupation);
+    }
+
+    @Test
+    public void testUpdateLocationById() {
+        Long userId = 1L;
+        String newLocation = "San Francisco, CA";
+
+        // Call the method
+        userService.updateLocationById(userId, newLocation);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateLocationById(userId, newLocation);
+    }
+
+    @Test
+    public void testUpdateBirthdateById() {
+        long userId = 1L;
+        Date newBirthdate = new Date();
+
+        // Call the method
+        userService.updateBirthdateById(userId, newBirthdate);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateBirthdateById(userId, newBirthdate);
+    }
+
+    @Test
+    public void testSearchUsers() {
+        // Prepare test data
+        String searchQuery = "john";
+        List<ApplicationUser> mockUsers = new ArrayList<>();
+        ApplicationUser user1 = new ApplicationUser();
+        user1.setUsername("johndoe");
+        ApplicationUser user2 = new ApplicationUser();
+        user2.setUsername("johnsmith");
+        mockUsers.add(user1);
+        mockUsers.add(user2);
+
+        // Mock the repository method
+        when(userRepository.findAllByUsernameContainingIgnoreCase(searchQuery))
+                .thenReturn(mockUsers);
+
+        // Call the method
+        List<ApplicationUser> foundUsers = userService.searchUsers(searchQuery);
+
+        // Verify results
+        assertThat(foundUsers).isNotNull();
+        assertThat(foundUsers).hasSize(2);
+        assertThat(foundUsers.get(0).getUsername()).isEqualTo("johndoe");
+        assertThat(foundUsers.get(1).getUsername()).isEqualTo("johnsmith");
+
+        // Verify repository method was called
+        verify(userRepository, times(1)).findAllByUsernameContainingIgnoreCase(searchQuery);
     }
 }

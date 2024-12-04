@@ -10,6 +10,7 @@ import com.vision.middleware.repo.PostRepository;
 import com.vision.middleware.repo.ReplyRepository;
 import com.vision.middleware.repo.UserVoteRepository;
 import com.vision.middleware.service.VotingService;
+import com.vision.testing.testingutil.UnsupportedVotable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -157,7 +158,7 @@ public class VotingServiceTest {
     }
 
     @Test
-    void deleteVote_ShouldDecreaseVoteCount() {
+    void deleteVoteLikePost_ShouldDecreaseVoteCount() {
         // Arrange
         UserVote existingVote = UserVote.builder()
                 .user(testUser)
@@ -179,6 +180,77 @@ public class VotingServiceTest {
         verify(userVoteRepository).deleteByVotableIdAndUserId(testPost.getId(), testUser.getId());
     }
 
+
+    @Test
+    void deleteVoteDislikePost_ShouldDecreaseVoteCount() {
+        // Arrange
+        UserVote existingVote = UserVote.builder()
+                .user(testUser)
+                .votable(testPost)
+                .votableType(VotableType.POST)
+                .voteType(UserVote.VoteType.DISLIKE)
+                .build();
+        testPost.setDislikeCount(1);
+
+        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))
+                .thenReturn(Optional.of(existingVote));
+
+        // Act
+        votingService.deleteVote(testUser, testPost);
+
+        // Assert
+        verify(postRepository).save(testPost);
+        assertThat(testPost.getDislikeCount()).isEqualTo(0);
+        verify(userVoteRepository).deleteByVotableIdAndUserId(testPost.getId(), testUser.getId());
+    }
+
+    @Test
+    void deleteVoteLikeReply_ShouldDecreaseVoteCount() {
+        // Arrange
+        UserVote existingVote = UserVote.builder()
+                .user(testUser)
+                .votable(testReply)
+                .votableType(VotableType.REPLY)
+                .voteType(UserVote.VoteType.LIKE)
+                .build();
+        testReply.setLikeCount(1);
+
+        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))
+                .thenReturn(Optional.of(existingVote));
+
+        // Act
+        votingService.deleteVote(testUser, testReply);
+
+        // Assert
+        verify(replyRepository).save(testReply);
+        assertThat(testReply.getLikeCount()).isEqualTo(0);
+        verify(userVoteRepository).deleteByVotableIdAndUserId(testReply.getId(), testUser.getId());
+    }
+
+
+    @Test
+    void deleteVoteDislikeReply_ShouldDecreaseVoteCount() {
+        // Arrange
+        UserVote existingVote = UserVote.builder()
+                .user(testUser)
+                .votable(testReply)
+                .votableType(VotableType.REPLY)
+                .voteType(UserVote.VoteType.DISLIKE)
+                .build();
+        testReply.setDislikeCount(1);
+
+        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))
+                .thenReturn(Optional.of(existingVote));
+
+        // Act
+        votingService.deleteVote(testUser, testReply);
+
+        // Assert
+        verify(replyRepository).save(testReply);
+        assertThat(testReply.getDislikeCount()).isEqualTo(0);
+        verify(userVoteRepository).deleteByVotableIdAndUserId(testReply.getId(), testUser.getId());
+    }
+
     @Test
     void getUserVoteOnVotable_ShouldReturnVoteType() {
         // Arrange
@@ -197,5 +269,13 @@ public class VotingServiceTest {
 
         // Assert
         assertThat(result).contains(UserVote.VoteType.DISLIKE);
+    }
+
+    @Test
+    void voteOnUnsupportedVotable_ShouldThrowException() {
+        UnsupportedVotable unvotable = new UnsupportedVotable();
+
+        assertThatThrownBy(() -> votingService.voteOnVotable(testUser, unvotable, UserVote.VoteType.LIKE))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
