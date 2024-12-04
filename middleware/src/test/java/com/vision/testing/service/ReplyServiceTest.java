@@ -45,6 +45,7 @@ public class ReplyServiceTest {
     private ApplicationUser testUser;
     private Post testPost;
     private Reply testReply;
+    private Reply testChildReply;
 
     @BeforeEach
     void setUp() {
@@ -61,13 +62,22 @@ public class ReplyServiceTest {
                 .id(1L)
                 .build();
 
+        testChildReply = Reply.builder()
+                        .id(2L)
+                        .post(testPost)
+                        .author(testUser)
+                        .text("Child test reply content")
+                        .datePosted(new Date())
+                        .childReplies(new HashSet<>())
+                        .build();
+
         testReply = Reply.builder()
                 .id(1L)
                 .post(testPost)
                 .author(testUser)
                 .text("Test reply content")
                 .datePosted(new Date())
-                .childReplies(new HashSet<>())
+                .childReplies(new HashSet<>(Collections.singletonList(testChildReply)))
                 .build();
     }
 
@@ -192,5 +202,9 @@ public class ReplyServiceTest {
         ReplyDTO firstReply = commentTree.get(0);
         assertThat(firstReply.getId()).isEqualTo(testReply.getId());
         assertThat(firstReply.getText()).isEqualTo(testReply.getText());
+
+        ReplyDTO childReply = commentTree.get(0).getReplies().get(0);
+        assertThat(childReply.getId()).isEqualTo(testChildReply.getId());
+        assertThat(childReply.getText()).isEqualTo(testChildReply.getText());
     }
 }
