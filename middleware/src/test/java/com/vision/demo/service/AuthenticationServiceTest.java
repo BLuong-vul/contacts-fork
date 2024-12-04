@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTests {
+public class AuthenticationServiceTest {
 
     @InjectMocks
     private AuthenticationService authenticationService;

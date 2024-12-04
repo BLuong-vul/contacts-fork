@@ -5,7 +5,6 @@ import com.vision.middleware.utils.JwtUtil;
 import com.vision.middleware.utils.KeyGeneratorUtility;
 import com.vision.middleware.utils.RSAKeyProperties;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

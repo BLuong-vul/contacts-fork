@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class FollowerServiceTests {
+public class FollowerServiceTest {
 
     @InjectMocks
     private FollowerService followerService;
