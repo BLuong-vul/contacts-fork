@@ -1,7 +1,7 @@
 package com.vision.testing.service;
 
 import com.vision.middleware.domain.ExampleData;
-import com.vision.middleware.repo.ExampleDataRepo;
+import com.vision.middleware.repo.ExampleDataRepository;
 import com.vision.middleware.service.ExampleDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class ExampleDataServiceTest {
 
     @Mock
-    private ExampleDataRepo exampleDataRepo;
+    private ExampleDataRepository exampleDataRepository;
 
     @InjectMocks
     private ExampleDataService exampleDataService;
@@ -45,7 +45,7 @@ public class ExampleDataServiceTest {
         // Arrange
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("name"));
         Page<ExampleData> page = new PageImpl<>(List.of(exampleData));
-        when(exampleDataRepo.findAll(pageRequest)).thenReturn(page);
+        when(exampleDataRepository.findAll(pageRequest)).thenReturn(page);
 
         // Act
         Page<ExampleData> result = exampleDataService.getAllExampleData(0, 10);
@@ -59,7 +59,7 @@ public class ExampleDataServiceTest {
     @Test
     public void testGetExampleData_Found() {
         // Arrange
-        when(exampleDataRepo.findById("1")).thenReturn(Optional.of(exampleData));
+        when(exampleDataRepository.findById("1")).thenReturn(Optional.of(exampleData));
 
         // Act
         ExampleData result = exampleDataService.getExampleData("1");
@@ -72,7 +72,7 @@ public class ExampleDataServiceTest {
     @Test
     public void testGetExampleData_NotFound() {
         // Arrange
-        when(exampleDataRepo.findById("2")).thenReturn(Optional.empty());
+        when(exampleDataRepository.findById("2")).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThatThrownBy(() -> exampleDataService.getExampleData("2"))
@@ -83,7 +83,7 @@ public class ExampleDataServiceTest {
     @Test
     public void testCreateExampleData() {
         // Arrange
-        when(exampleDataRepo.save(any(ExampleData.class))).thenReturn(exampleData);
+        when(exampleDataRepository.save(any(ExampleData.class))).thenReturn(exampleData);
 
         // Act
         ExampleData result = exampleDataService.createExampleData(exampleData);

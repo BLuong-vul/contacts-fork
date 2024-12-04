@@ -31,18 +31,13 @@ public class FollowerServiceTest {
     @Mock
     private UserService userService;
 
-    @Mock
-    private JwtUtil jwtUtil;
-
-    private Role userRole;
-
     private ApplicationUser user1;
     private ApplicationUser user2;
     private ApplicationUser user3;
 
     @BeforeEach
     void setUp() {
-        userRole = new Role();
+        Role userRole = new Role();
         userRole.setAuthority("USER");
 
         // Create user with userId 1

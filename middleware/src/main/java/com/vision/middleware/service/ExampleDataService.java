@@ -1,7 +1,7 @@
 package com.vision.middleware.service;
 
 import com.vision.middleware.domain.ExampleData;
-import com.vision.middleware.repo.ExampleDataRepo;
+import com.vision.middleware.repo.ExampleDataRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Transactional(rollbackOn = Exception.class)
 @RequiredArgsConstructor
 public class ExampleDataService {
-    private final ExampleDataRepo repo;
+    private final ExampleDataRepository repo;
 
     public Page<ExampleData> getAllExampleData(int page, int size) {
         return repo.findAll(PageRequest.of(page, size, Sort.by("name")));

@@ -14,9 +14,5 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     @Query("SELECT r FROM Reply r WHERE r.post.id = :postId AND r.parentReply IS NULL " +
             "ORDER BY r.voteScore DESC, r.datePosted ASC")
     List<Reply> findTopLevelRepliesByPostId(@Param("postId") Long postId);
-
     Optional<Reply> findById(long id);
-    List<Reply> findByPostId(long postId);
-    List<Reply> findByIdAndParentReplyIsNull(long replyId);
-    List<Reply> findByParentReply(Reply parent);
 }

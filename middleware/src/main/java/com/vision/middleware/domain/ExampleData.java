@@ -23,5 +23,6 @@ public class ExampleData {
   private String id;
   private String name;
   private String ssn;
-  private String credit_card_number;
+  @Column(name = "credit_card_number")
+  private String creditCardNumber;
 }
