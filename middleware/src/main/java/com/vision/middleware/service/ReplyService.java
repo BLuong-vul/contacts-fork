@@ -8,17 +8,11 @@ import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.ReplyRepository;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.beans.Transient;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -27,15 +21,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Builder
 public class ReplyService {
 
     private static final int MAX_REPLY_LENGTH = 5000;
     private static final int MAX_NESTING_DEPTH = 100;
-    @Autowired
-    private final UserService userService;
-    private final PostService postService;
-    
+
     @Autowired
     private final ReplyRepository replyRepository;
 
