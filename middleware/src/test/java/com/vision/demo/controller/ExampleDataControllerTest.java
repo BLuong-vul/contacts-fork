@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,12 +39,10 @@ public class ExampleDataControllerTest {
     private ExampleDataController exampleDataController;
 
     private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(exampleDataController).build();
-        objectMapper = new ObjectMapper();
     }
 
     @Test
@@ -81,9 +81,10 @@ public class ExampleDataControllerTest {
         exampleData.setId("uuid");
         exampleData.setName("Test Data");
 
-        Page<ExampleData> page = new PageImpl<>(Collections.singletonList(exampleData));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ExampleData> page = new PageImpl<>(Collections.singletonList(exampleData), pageable, 1);
 
-        when(exampleDataService.getAllExampleData(any(Integer.class), any(Integer.class))).thenReturn(page);
+        when(exampleDataService.getAllExampleData(0, 10)).thenReturn(page);
 
         mockMvc.perform(get("/exampledata")
                         .param("page", "0")
