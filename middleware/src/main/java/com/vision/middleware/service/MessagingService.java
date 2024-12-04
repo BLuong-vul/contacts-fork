@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,17 +36,18 @@ public class MessagingService {
     }
 
     public List<Message> getChatBetween(long user1Id, long user2Id) {
-
         ApplicationUser user1 = userService.loadUserById(user1Id);
         ApplicationUser user2 = userService.loadUserById(user2Id);
 
+        // lists retrieved from repository are immutable, need new list to join them.
         List<Message> chat = messageRepository.findBySendingUserIdAndReceivingUserId(user1, user2);
         List<Message> u2SentTou1 = messageRepository.findBySendingUserIdAndReceivingUserId(user2, user1);
+        List<Message> retList = new ArrayList<>(chat.size() + u2SentTou1.size());
 
-        chat.addAll(u2SentTou1); // join two lists together: whole chat history
+        retList.addAll(chat);
+        retList.addAll(u2SentTou1);
+        retList.sort(Comparator.comparing(Message::getDateSent));
 
-        chat.sort(Comparator.comparing(Message::getDateSent));
-        return chat;
+        return retList;
     }
-
 }

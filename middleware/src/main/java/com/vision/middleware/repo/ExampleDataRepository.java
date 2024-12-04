@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ExampleDataRepo extends JpaRepository<ExampleData, String> {
+public interface ExampleDataRepository extends JpaRepository<ExampleData, String> {
     Optional<ExampleData> findById(String id);
 }

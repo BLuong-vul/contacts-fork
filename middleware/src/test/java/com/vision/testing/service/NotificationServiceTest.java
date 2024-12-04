@@ -1,4 +1,4 @@
-package com.vision.demo.service;
+package com.vision.testing.service;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Notification;
@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceTests {
+public class NotificationServiceTest {
 
     @Mock
     private SimpMessagingTemplate messagingTemplate;

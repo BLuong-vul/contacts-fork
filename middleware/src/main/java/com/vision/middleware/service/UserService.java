@@ -42,7 +42,6 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public int getFollowerCount(ApplicationUser user){
-        // System.out.println("DEBUG: " + user.getFollowers().size());
         return user.getFollowers().size();
     }
 

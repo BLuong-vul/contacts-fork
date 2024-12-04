@@ -2,16 +2,12 @@ package com.vision.middleware.domain;
 
 import com.vision.middleware.domain.baseEntities.VotableEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "reply")
@@ -47,8 +43,10 @@ public class Reply extends VotableEntity {
     private Reply parentReply;
 
     // nested replies: a reply can be associated with many replies.
+    @NonNull
     @OneToMany(mappedBy = "parentReply", cascade = CascadeType.ALL)
     @OrderBy("voteScore DESC, datePosted DESC")
+    @Builder.Default
     private Set<Reply> childReplies = new HashSet<>();
 
     @Column(nullable = false)
@@ -56,6 +54,7 @@ public class Reply extends VotableEntity {
 
     @PrePersist
     protected void onPrePersist() {
+        super.onPrePersist();
         this.datePosted = new Date();
     }
 

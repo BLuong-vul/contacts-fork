@@ -100,7 +100,7 @@ public class PostService {
         return postRepository.findByPostedBy(user, PageRequest.of(page, size, Sort.by("datePosted")));
     }
 
-    public Post loadPostById(Long postId) {
+    public Post loadPostById(long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Post with ID " + postId + " not found."));
     }

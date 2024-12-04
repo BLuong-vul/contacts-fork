@@ -1,4 +1,4 @@
-package com.vision.demo.service;
+package com.vision.testing.service;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Role;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class FollowerServiceTests {
+public class FollowerServiceTest {
 
     @InjectMocks
     private FollowerService followerService;
@@ -31,18 +31,13 @@ public class FollowerServiceTests {
     @Mock
     private UserService userService;
 
-    @Mock
-    private JwtUtil jwtUtil;
-
-    private Role userRole;
-
     private ApplicationUser user1;
     private ApplicationUser user2;
     private ApplicationUser user3;
 
     @BeforeEach
     void setUp() {
-        userRole = new Role();
+        Role userRole = new Role();
         userRole.setAuthority("USER");
 
         // Create user with userId 1

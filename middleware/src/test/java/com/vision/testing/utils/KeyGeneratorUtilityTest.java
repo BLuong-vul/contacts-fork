@@ -1,4 +1,4 @@
-package com.vision.demo.utils;
+package com.vision.testing.utils;
 
 
 import com.vision.middleware.utils.KeyGeneratorUtility;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-public class KeyGeneratorUtilityTests {
+public class KeyGeneratorUtilityTest {
     @Test
     void testGenerateRSAKey() {
         KeyPair keyPair = KeyGeneratorUtility.generateRsaKey();

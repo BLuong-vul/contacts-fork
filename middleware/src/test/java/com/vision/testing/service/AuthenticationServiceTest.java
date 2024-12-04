@@ -1,4 +1,4 @@
-package com.vision.demo.service;
+package com.vision.testing.service;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Role;
@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthenticationServiceTests {
+public class AuthenticationServiceTest {
 
     @InjectMocks
     private AuthenticationService authenticationService;
