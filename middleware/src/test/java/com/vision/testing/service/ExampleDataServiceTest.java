@@ -1,4 +1,4 @@
-package com.vision.demo.service;
+package com.vision.testing.service;
 
 import com.vision.middleware.domain.ExampleData;
 import com.vision.middleware.repo.ExampleDataRepo;

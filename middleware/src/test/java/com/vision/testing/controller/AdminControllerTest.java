@@ -1,4 +1,4 @@
-package com.vision.demo.controller;
+package com.vision.testing.controller;
 
 import com.vision.middleware.controller.AdminController;
 import org.junit.jupiter.api.Test;

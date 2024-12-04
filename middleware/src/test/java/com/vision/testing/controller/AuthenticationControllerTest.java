@@ -1,4 +1,4 @@
-package com.vision.demo.controller;
+package com.vision.testing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vision.middleware.controller.AuthenticationController;

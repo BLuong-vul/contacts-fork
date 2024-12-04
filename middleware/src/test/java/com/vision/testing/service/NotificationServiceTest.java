@@ -1,4 +1,4 @@
-package com.vision.demo.service;
+package com.vision.testing.service;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Notification;

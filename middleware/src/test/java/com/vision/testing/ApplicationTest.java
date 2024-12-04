@@ -1,4 +1,4 @@
-package com.vision.demo;
+package com.vision.testing;
 
 import com.vision.middleware.Application;
 import org.junit.jupiter.api.Test;

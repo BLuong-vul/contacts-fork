@@ -1,6 +1,5 @@
-package com.vision.demo.controller;
+package com.vision.testing.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vision.middleware.controller.ExampleDataController;
 import com.vision.middleware.domain.ExampleData;
 import com.vision.middleware.service.ExampleDataService;
