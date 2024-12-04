@@ -54,6 +54,7 @@ public class Reply extends VotableEntity {
 
     @PrePersist
     protected void onPrePersist() {
+        super.onPrePersist();
         this.datePosted = new Date();
     }
 
