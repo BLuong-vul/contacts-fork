@@ -66,23 +66,7 @@ public class ReplyController {
 
         // make reply
         Reply reply = replyService.createReply(post, user, request.getText(), parentReply);
-
-        ReplyDTO dto = ReplyDTO.builder()
-                .id(reply.getId())
-                .text(reply.getText())
-                .author(
-                        UserDTO.builder()
-                                .userId(user.getId())
-                                .username(user.getUsername())
-                                .displayName(user.getDisplayName())
-                                .build()
-                )
-                .datePosted(reply.getDatePosted())
-                .likeCount(reply.getLikeCount())
-                .dislikeCount(reply.getDislikeCount())
-                .voteScore(reply.getVoteScore())
-                .isDeleted(reply.isDeleted())
-                .build();
+        ReplyDTO dto = buildReplyDTO(reply, user);
 
         return ResponseEntity.ok(dto);
     }
@@ -100,5 +84,24 @@ public class ReplyController {
         votingService.voteOnVotable(user, reply, voteType);
 
         return ResponseEntity.ok("Vote created.");
+    }
+
+    private ReplyDTO buildReplyDTO(Reply reply, ApplicationUser user) {
+        return ReplyDTO.builder()
+                .id(reply.getId())
+                .text(reply.getText())
+                .author(
+                        UserDTO.builder()
+                                .userId(user.getId())
+                                .username(user.getUsername())
+                                .displayName(user.getDisplayName())
+                                .build()
+                )
+                .datePosted(reply.getDatePosted())
+                .likeCount(reply.getLikeCount())
+                .dislikeCount(reply.getDislikeCount())
+                .voteScore(reply.getVoteScore())
+                .isDeleted(reply.isDeleted())
+                .build();
     }
 }

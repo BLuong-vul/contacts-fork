@@ -12,6 +12,7 @@ import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,10 +36,10 @@ public class PostController {
     private final UserRepository userRepository;
 
     @PostMapping("/new")
-    public ResponseEntity<Void> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
+    public ResponseEntity<PostDTO> createPost(@RequestHeader("Authorization") String token, @RequestBody PostDTO postDTO) {
         long id = jwtUtil.checkJwtAuthAndGetUserId(token);
         Post createdPost = postService.createPost(postDTO, id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(buildDTOFromPost(createdPost));
     }
 
     @GetMapping("/all")
@@ -65,7 +66,6 @@ public class PostController {
         return voteDTO;
     }
 
-    // todo: allow in security config
     @GetMapping("/search")
     public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam String query) {
         // todo: do not allow searches with empty queries?
@@ -79,7 +79,6 @@ public class PostController {
         );
     }
 
-    // todo: allow in security config
     @GetMapping("/search-by-user")
     public ResponseEntity<List<PostDTO>> searchPostsByUser(@RequestParam String query, @RequestParam long userId) {
         ApplicationUser user = userRepository.findById(userId).orElse(null);
@@ -95,9 +94,13 @@ public class PostController {
         );
     }
 
-    // todo: allow in security config
     @GetMapping("/search-by-user-date")
-    public ResponseEntity<List<PostDTO>> searchPostsByUserAndDate(@RequestParam String query, @RequestParam long userId, @RequestParam Date startDate, @RequestParam Date endDate) {
+    public ResponseEntity<List<PostDTO>> searchPostsByUserAndDate(
+            @RequestParam String query,
+            @RequestParam long userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date endDate
+    ) {
         ApplicationUser user = userRepository.findById(userId).orElse(null);
 
         // is query valid? is startdate < enddate?
@@ -107,7 +110,8 @@ public class PostController {
 
         // perform search
         return ResponseEntity.ok(
-                postService.searchPostsByDateRange(query, user, startDate, endDate).stream().map(this::buildDTOFromPost).toList()
+                postService.searchPostsByDateRange(query, user, startDate, endDate)
+                        .stream().map(this::buildDTOFromPost).toList()
         );
     }
 
