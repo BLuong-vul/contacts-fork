@@ -19,10 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * TODO: make it so that a user cannot vote on their own post / reply.
- */
-
 @RestController
 @RequestMapping("/replies")
 @RequiredArgsConstructor
