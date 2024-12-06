@@ -46,22 +46,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginDTO body) {
+    public ResponseEntity<LoginResponseDTO> loginUser(@RequestBody LoginDTO body) {
         try {
             LoginResponseDTO user = authenticationService.loginUser(body.getUsername(), body.getPassword());
             return ResponseEntity.ok(user);
         } catch (AuthenticationException e) {
             log.error("Failed to login user: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 
-    // Lazy validation.
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String token) {
         // This is only reached if the token is valid
         // because in SecurityConfig this endpoint only accepts USER or ADMIN
         return ResponseEntity.ok("Token is valid");
     }
-
 }

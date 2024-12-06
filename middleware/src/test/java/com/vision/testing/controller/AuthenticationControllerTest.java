@@ -1,31 +1,50 @@
 package com.vision.testing.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vision.middleware.Application;
+import com.vision.middleware.config.SecurityConfig;
 import com.vision.middleware.controller.AuthenticationController;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.dto.LoginDTO;
 import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.service.AuthenticationService;
+import com.vision.middleware.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration
 public class AuthenticationControllerTest {
 
     private MockMvc mockMvc;
@@ -36,6 +55,9 @@ public class AuthenticationControllerTest {
 
     @InjectMocks
     private AuthenticationController authenticationController;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @BeforeEach
     public void setUp() {
@@ -119,6 +141,29 @@ public class AuthenticationControllerTest {
                         .content(objectMapper.writeValueAsString(loginDTO)))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
-                .andExpect(MockMvcResultMatchers.content().string("Login failed."));
+                .andExpect(MockMvcResultMatchers.content().string(emptyOrNullString()));
+    }
+
+    @Test
+    public void testValidTokenWithUserRole() throws Exception {
+        // Setup authentication with USER role
+        setupAuthentication("USER");
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/auth/validate")
+                        .header("Authorization", "valid-token"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Token is valid"));
+    }
+
+    // Utility method to set up authentication with a specific role
+    private void setupAuthentication(String role) {
+        List<SimpleGrantedAuthority> authorities =
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                "testuser", "password", authorities);
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(authentication);
     }
 }
