@@ -1,4 +1,4 @@
-package com.vision.middleware.domain.baseEntities;
+package com.vision.middleware.domain.baseentities;
 
 import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Date;
 
 @Entity
 @Getter

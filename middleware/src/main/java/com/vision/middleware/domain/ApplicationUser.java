@@ -68,9 +68,9 @@ public class ApplicationUser implements UserDetails {
     private Date joinDate = new Date();
 
     // Followers / Following
-    @Column(nullable=false)
+    @Column(nullable = false)
     private long followerCount = 0;
-    @Column(nullable=false)
+    @Column(nullable = false)
     private long followingCount = 0;
 
     // Follower relations
@@ -89,8 +89,8 @@ public class ApplicationUser implements UserDetails {
     )
     private Set<Role> authorities;
 
-    // Post relations
-    @OneToMany(fetch = FetchType.LAZY)
+    // Post relations: when user updated / saved, post is updated. If user deleted, post remains.
+    @OneToMany(mappedBy = "postedBy", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Post> posts;
 
     @Override

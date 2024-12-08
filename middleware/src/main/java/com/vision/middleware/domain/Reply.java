@@ -1,6 +1,6 @@
 package com.vision.middleware.domain;
 
-import com.vision.middleware.domain.baseEntities.VotableEntity;
+import com.vision.middleware.domain.baseentities.VotableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

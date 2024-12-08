@@ -1,6 +1,6 @@
 package com.vision.middleware.domain;
 
-import com.vision.middleware.domain.baseEntities.VotableEntity;
+import com.vision.middleware.domain.baseentities.VotableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +21,7 @@ import java.util.Date;
 @DiscriminatorValue("TEXT")
 @SequenceGenerator(name = "id_generator", sequenceName = "post_sequence", allocationSize = 1)
 public class Post extends VotableEntity {
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private ApplicationUser postedBy;
 

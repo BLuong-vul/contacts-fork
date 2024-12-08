@@ -95,6 +95,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/post/new").hasAnyRole("ADMIN", "USER");
                 auth.requestMatchers("/post/all").permitAll();
                 auth.requestMatchers("/post/search**").permitAll(); // anyone is allowed to search i guess
+                auth.requestMatchers("/ws/notifications/testCreate").denyAll();
                 auth.requestMatchers("/ws/**", "/ws/notifications/**").permitAll(); // websocket
 
                 auth.requestMatchers("/media/upload").hasAnyRole("ADMIN", "USER");
