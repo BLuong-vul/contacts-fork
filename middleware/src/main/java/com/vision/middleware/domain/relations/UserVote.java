@@ -1,10 +1,8 @@
 package com.vision.middleware.domain.relations;
 
 import com.vision.middleware.domain.ApplicationUser;
-import com.vision.middleware.domain.Post;
-import com.vision.middleware.domain.baseEntities.VotableEntity;
+import com.vision.middleware.domain.baseentities.VotableEntity;
 import com.vision.middleware.domain.enums.VotableType;
-import com.vision.middleware.domain.interfaces.Votable;
 import jakarta.persistence.*;
 import lombok.*;
 

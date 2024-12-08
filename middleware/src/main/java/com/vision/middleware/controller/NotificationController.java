@@ -53,7 +53,7 @@ public class NotificationController {
         }
     }
 
-    // todo: testing method to be removed later
+    // todo: testing method to be removed later...
     @PostMapping("/notifications/testCreate")
     @ResponseBody
     public NotificationDTO createCustomNotification(@RequestBody NotificationDTO notification) {
