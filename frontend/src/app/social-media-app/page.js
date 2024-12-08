@@ -80,12 +80,12 @@ export default function Projects() {
 		const formData = {
 				title: postTitle,
 				text: postText, 
+				mediaFileName: null,
 		};
 		if (postMedia){
-			if (!(await Fetch.uploadMedia(postMedia))){
-				setError('Error uploading file');
-				return;
-			}
+			const imageUrl = await Fetch.uploadMedia(postMedia);
+			formData.mediaFileName = imageUrl;
+			console.log(imageUrl);
 		}
 		await Fetch.uploadPost(formData);
 		const updatedPosts = await Fetch.fetchAllPosts();
