@@ -175,6 +175,32 @@ export async function getPublicInfo(username){
 
 /* ===== POSTS ===== */
 
+export async function uploadMedia(file){
+	const formData = new FormData();
+	formData.append('file', file);
+
+	const token = localStorage.getItem('token');
+	try {
+	    const response = await fetch(`${baseURL}/media/upload`, {
+	        method: 'POST',
+	        headers: {
+	            'Authorization': `Bearer ${token}`,
+	        },
+	        body: formData,
+	    });
+
+	    if (!response.ok) {
+	        throw new Error(`Failed to upload file: ${response.statusText}`);
+	    }
+
+	    console.log("File upload successful");
+	    return true;
+	} catch (error) {
+	    console.error('Error uploading file:', error);
+	    return false;
+	}
+}
+
 
 // Uploads a post to the database
 // postDTO should be in this format:

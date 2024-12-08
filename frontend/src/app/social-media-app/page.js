@@ -54,8 +54,7 @@ export default function Projects() {
 	const [isCreatingPost, setIsCreatingPost] = useState(false);
 	const [postTitle, setPostTitle] = useState('');
 	const [postText, setPostText] = useState('');
-	const [postImage, setPostImage] = useState(null);
-	const [postVideo, setPostVideo] = useState(null);
+	const [postMedia, setPostMedia] = useState(null);
 	const [error, setError] = useState('');
 	
 	const [posts, setPosts] = useState([]);
@@ -70,28 +69,34 @@ export default function Projects() {
 	};
 	
 	const handleCreatePost = async () => {
-		if (!postText && !postImage && !postVideo) {
-			setError('Must enter text, or upload an image or video.')
+		if (!postTitle){
+			setError('Must included post title');
+			return;
 		}
-		else {
-			const newPost = {
+		if (!postText && !postMedia) {
+			setError('Must enter text, or upload an image or video.');
+			return;
+		}
+		const formData = {
 				title: postTitle,
 				text: postText, 
-				// image: postImage ? URL.createObjectURL(postImage) : '', //URL for image
-				// video: postVideo ? URL.createObjectURL(postVideo) : ''  //URL for the video
-			};
-			
-			await Fetch.uploadPost(newPost);
-			const updatedPosts = await Fetch.fetchAllPosts();
-			setPosts(updatedPosts);
-			
-			// reset form once submission is done
-			setPostText('');
-			setPostImage(null);
-			setPostVideo(null);
-			setError('');
-			setIsCreatingPost(false);
+		};
+		if (postMedia){
+			if (!(await Fetch.uploadMedia(postMedia))){
+				setError('Error uploading file');
+				return;
+			}
 		}
+		await Fetch.uploadPost(formData);
+		const updatedPosts = await Fetch.fetchAllPosts();
+		setPosts(updatedPosts);
+		
+		// reset form after submitting successfully
+		setPostTitle('');
+		setPostText('');
+		setPostMedia(null);
+		setError('');
+		setIsCreatingPost(false);
 	};
 
 	// If reach bottom of page, fetch some more posts
@@ -170,16 +175,7 @@ export default function Projects() {
 								<input //image upload
 								type="file"
 								accept="image/*"
-								onChange={(e) => setPostImage(e.target.files[0])}
-								/>
-							</div>
-							<div>
-								<label htmlFor="imageUpload" className={homepagestyles.fileLabel}>Upload Video:</label>
-								<input //video upload 
-								id="videoUpload"
-								type="file"
-								accept="video/*"
-								onChange={(e) => setPostVideo(e.target.files[0])}
+								onChange={(e) => setPostMedia(e.target.files[0])}
 								/>
 							</div>
 							{error && <p className={homepagestyles.errorText}>{error}</p>}
