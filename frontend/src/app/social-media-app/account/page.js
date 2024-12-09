@@ -60,11 +60,7 @@ function GeneralContent() {
     qualifications: '',
     occupation: '',
   })
-  // const [displayName, setDisplayName] = useState('');
-  // const [bio, setBio] = useState('');
-  // const [location, setLocation] = useState('');
-  // const [qualifications, setQualifications] = useState('');
-  // const [occupation, setOccupation] = useState('');
+
   const [isEditing, setIsEditing] = useState({
     displayName: false,
     bio: false,
@@ -72,21 +68,16 @@ function GeneralContent() {
     qualifications: false,
     occupation: false
   });
-  // const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
-  // const [isEditingBio, setIsEditingBio] = useState(false);
-  // const [isEditingLocation, setIsEditingLocation] = useState(false);
-  // const [isEditingQualifications, setIsEditingQualifications] = useState(false);
-  // const [isEditingOccupation, setIsEditingOccupation] = useState(false);
+
   const [show, setShow] = useState({
     location: false,
     qualifications: false,
     occupation: false,
     birthdate: false
   });
-  // const [showLocation, setShowLocation] = useState(false);
-  // const [showQualifications, setShowQualifications] = useState(false);
-  // const [showOccupation, setShowOccupation] = useState(false);
-  // const [showBirthday, setShowBirthday] = useState(false);
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // For preview
 
 
   // Fetch user data on mount
@@ -121,6 +112,27 @@ function GeneralContent() {
       ...prevState,
       [field]: e.target.value
     }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file); // Generates preview URL
+    }
+  };
+
+  const handleImageSave = async () => {
+    console.log(selectedImage);
+    const imageFileName = await Fetch.uploadMedia(selectedImage);
+    console.log(await Fetch.updateProfilePictureFileName(imageFileName));
+  }
+
+  const handleImageRemove = () => {
+    console.log('Image removed');
+  }
+
+  const handleMenuToggle = () => {
+    setShowProfileMenu(!showProfileMenu);
   };
 
   // Toggle for checkboxes
@@ -203,14 +215,6 @@ function GeneralContent() {
           {isEditing.location ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
-      <label style={{ display: 'block', marginTop: '0px', marginBottom: '15px' }}>
-          <input
-            type="checkbox"
-            checked={show.location}
-            onChange={() => toggleShow('location')}
-          />
-          Display on profile
-      </label>
 
       {/* Occupation */}
       <label style={{ flex: 1 }}>Occupation:</label>
@@ -233,14 +237,6 @@ function GeneralContent() {
           {isEditing.occupation ? <FaCheck /> : <FaEdit />}
         </button>
       </div>
-      <label style={{ display: 'block', marginBottom: '15px' }}>
-        <input
-          type="checkbox"
-          checked={show.occupation}
-          onChange={() => toggleShow('occupation')}
-        />
-        Display on profile
-      </label>
 
       {/* Birthday display checkbox */}
       <div style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -255,10 +251,63 @@ function GeneralContent() {
       </div>
 
       {/* Profile picture / banner */}
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-        <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Picture</button>
-        <button style={{ padding: '10px', cursor: 'pointer' }}>Change Profile Banner</button>
+      <div className="relative flex gap-4 mb-5">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          onClick={handleMenuToggle}
+        >
+          Change Profile Picture
+        </button>
+        {showProfileMenu && (
+          <div className="absolute top-full mt-2 bg-slate-500 p-4 rounded-lg shadow-lg z-10">
+            <h4 className="text-lg text-center text-slate-300 mb-3">Select New Profile Picture</h4>
+            <div className="flex flex-col items-center">
+              {selectedImage ? (
+                <div className="mb-3 mr-4">
+                  <img
+                    src={URL.createObjectURL(selectedImage)}
+                    alt="Preview"
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                </div>
+              ) : (
+                <p className="text-slate-300 mb-3">No image selected</p>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="block w-32 mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+            </div>
+            <div className="flex">
+              <button
+                className="mt-3 ml-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+                onClick={() => {
+                  // TODO: Implement save functionality here
+                  handleImageSave();
+                  setShowProfileMenu(false);
+                }}
+              >
+                Save
+              </button>
+              <button
+                className="mt-3 ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+                onClick={() => {
+                  // TODO: Implement save functionality here
+                  handleImageRemove();
+                }}
+              >
+                Reset Profile Picture
+              </button>
+              </div>
+          </div>
+        )}
+        <button className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none">
+          Change Profile Banner
+        </button>
       </div>
+
 
       {/* Logout button */}
       <div className="mt-5">

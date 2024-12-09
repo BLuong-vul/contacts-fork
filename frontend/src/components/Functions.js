@@ -72,8 +72,11 @@ export async function updateBirthdate(birthdate) {
 	return(await updateProfileInfo("birthdate", birthdate));
 }
 
-/* ===== ACCOUNT MANAGEMENT ===== */
+export async function updateProfilePictureFileName(filename){
+	return (await updateProfileInfo("profile-picture-file-name", filename));
+}
 
+/* ===== ACCOUNT MANAGEMENT ===== */
 
 export async function createAccount(userData){
 	const { confirmPassword, ...userPayload } = userData;
@@ -173,7 +176,7 @@ export async function getPublicInfo(username){
 }
 
 
-/* ===== POSTS ===== */
+/* ===== MEDIA ===== */
 
 export async function getMedia(fileName){
 	try {
@@ -212,6 +215,7 @@ export async function uploadMedia(file){
 	}
 }
 
+/* ===== POSTS ===== */
 
 // Uploads a post to the database
 // postDTO should be in this format:
@@ -238,7 +242,7 @@ export async function fetchAllPosts(page=0, size=10){
 	try {
 		const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}`);
 		const pagedData = await response.json();
-		console.log(pagedData.content);
+		// console.log(pagedData.content);
 		return pagedData.content;
 	} catch (error){
 		console.error("Failed to fetch posts: ", error);

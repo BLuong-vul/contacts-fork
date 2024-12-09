@@ -24,6 +24,7 @@ public class ApplicationUser implements UserDetails {
     private long id;
 
     private String profilePictureFileName;
+    private String bannerPictureFileName;
     // Essential info
     @Column(name = "username", unique = true, nullable=false)
     private String username;

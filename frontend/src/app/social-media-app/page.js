@@ -85,7 +85,7 @@ export default function Projects() {
 		if (postMedia){
 			const imageUrl = await Fetch.uploadMedia(postMedia);
 			formData.mediaFileName = imageUrl;
-			console.log(imageUrl);
+			// console.log(imageUrl);
 		}
 		await Fetch.uploadPost(formData);
 		const updatedPosts = await Fetch.fetchAllPosts();
