@@ -3,6 +3,7 @@ package com.vision.testing.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vision.middleware.controller.PostController;
 import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.MediaPost;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
@@ -327,6 +328,28 @@ class PostControllerTest {
         verify(postService).removeUserVote(votableId, userId);
     }
 
+    @Test
+    void testMediaPostDTOCast_IsWorking() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        List<Post> posts = createSampleImagePosts();
+        Page<Post> postPage = new PageImpl<>(posts, PageRequest.of(page, size), posts.size());
+
+        when(postService.getAllPosts(page, size)).thenReturn(postPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/post/all")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").exists())
+                .andExpect(jsonPath("$.content.[0].mediaFileName").exists());
+
+        verify(postService).getAllPosts(page, size);
+    }
+
     // Helper methods to create sample objects for testing
     private PostDTO createSamplePostDTO() {
         UserDTO user = UserDTO.builder()
@@ -357,6 +380,27 @@ class PostControllerTest {
                 .title("Test Post")
                 .text("Test Content")
                 .postedBy(user)
+                .build();
+
+        return List.of(post);
+    }
+
+    private List<Post> createSampleImagePosts() {
+        ApplicationUser user = ApplicationUser.builder()
+                .id(1L)
+                .username("testuser")
+                .password("testpassword")
+                .fullName("hello world")
+                .email("a@b.com")
+                .phoneNumber("1234567890")
+                .build();
+
+        Post post = MediaPost.builder()
+                .id(1L)
+                .title("Test Post")
+                .text("Test Content")
+                .postedBy(user)
+                .mediaFileName("test media")
                 .build();
 
         return List.of(post);
