@@ -51,7 +51,6 @@ public class PostService {
         } else {
             // image post
             // todo: check if media exists in the s3 bucket
-
             newPost = MediaPost.builder()
                     .postedBy(postingUser)
                     .datePosted(date)

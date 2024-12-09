@@ -2,6 +2,7 @@ package com.vision.middleware.controller;
 
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.MediaPost;
 import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.PostDTO;
 import com.vision.middleware.dto.UserDTO;
@@ -120,8 +121,7 @@ public class PostController {
     }
 
     private PostDTO buildDTOFromPost(Post post) {
-        // only the information required.
-        return PostDTO.builder()
+        PostDTO.PostDTOBuilder builder = PostDTO.builder()
                 .postId(post.getId())
                 .datePosted(post.getDatePosted())
                 .dislikeCount(post.getDislikeCount())
@@ -132,8 +132,13 @@ public class PostController {
                         UserDTO.builder().username(post.getPostedBy().getUsername())
                                 .userId(post.getPostedBy().getId())
                                 .build()
-                )
-                .build();
+                );
+
+        if (post instanceof MediaPost mediaPost) {
+            builder.mediaFileName(mediaPost.getMediaFileName());
+        }
+
+        return builder.build();
     }
 
     @DeleteMapping("/unvote")

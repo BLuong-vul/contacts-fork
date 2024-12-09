@@ -5,7 +5,7 @@
 // Use for fetches that do not require authentication
 // Only returns the response. Remember to do .json() or .text() or whatever on the return value
 export async function fetchFromApi(endpoint, methodArg='GET', body=null){
-	console.log(endpoint);
+	// console.log(endpoint);
 	const response = await fetch(endpoint, {
 		method: methodArg,
 		headers: {

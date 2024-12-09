@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/media")
+@CrossOrigin("*")
 public class MediaController {
 
     @Autowired
