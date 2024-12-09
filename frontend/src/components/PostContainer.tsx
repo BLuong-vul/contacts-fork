@@ -9,8 +9,9 @@ import { FaUser } from "react-icons/fa";
 const PostContainer = ({ postData }) => {
     // state variables for dynamic content
     const [post, setPost] = useState({
-        image: "https://images.pexels.com/photos/29092532/pexels-photo-29092532/free-photo-of-chic-photographer-capturing-istanbul-charm.jpeg?auto=compress&cs=tinysrgb&w=300&lazy=load",
+        image: null,
     });
+    const[media, setMedia] = useState(null);
 
     const [likes, setLikes] = useState(postData.likeCount || 0);
     const [dislikes, setDislikes] = useState(postData.dislikeCount || 0);
@@ -34,6 +35,25 @@ const PostContainer = ({ postData }) => {
             setCommentData(commentData);
             setIsLoading(false);
         };
+
+        // try to load media based on mediaFileName
+        if (postData?.mediaFileName) {
+            const fetchMedia = async () => {
+                try {
+                    const mediaBlob = await Fetch.getMedia(postData.mediaFileName);
+                    console.log("THE BLOB: ", mediaBlob);
+                    if (mediaBlob instanceof Blob){
+                        const mediaUrl = URL.createObjectURL(mediaBlob);
+                        setMedia(mediaUrl);
+                        console.log(mediaUrl);
+                        setPost((prevPost) => ({ ...prevPost, image: mediaUrl }));
+                    }
+                } catch (error) {
+                    console.error('Error loading media:', error);
+                }
+            };
+            fetchMedia();
+        }
 
         fetchUserVote();
         fetchComments();
@@ -80,9 +100,7 @@ const PostContainer = ({ postData }) => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     {/* Profile image */}
-                    <FaUser
-                        className="w-10 h-10 rounded-full bg-slate-600"
-                    />
+                    <FaUser className="w-10 h-10 rounded-full bg-slate-600"/>
                     {/* Name */}
                     <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">
                         {postData?.postedBy?.username || "Unknown User"}
@@ -93,9 +111,19 @@ const PostContainer = ({ postData }) => {
             {postData?.title && (
                 <h2 className="text-3xl font-semibold text-slate-100">{postData.title}</h2>
             )}
-            {/* Text */}
+            {/* Body */}
             <div className="flex flex-col gap-4">
-                {postData?.image && (
+                {post?.image ? (
+                    <div className="w-full min-h-96 relative">
+                        <Image
+                            src={post?.image}
+                            alt="Post image"
+                            fill
+                            className="object-cover rounded-md"
+                        />
+                    </div>
+                ) : (
+                    postData?.image && (
                         <div className="w-full min-h-96 relative">
                             <Image
                                 src={post.image}
@@ -104,7 +132,8 @@ const PostContainer = ({ postData }) => {
                                 className="object-cover rounded-md"
                             />
                         </div>
-                    )}
+                    )
+                )}
                 <p className="text-slate-200">{postData?.text}</p>
             </div>
             {/* Interaction */}

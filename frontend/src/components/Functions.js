@@ -175,6 +175,43 @@ export async function getPublicInfo(username){
 
 /* ===== POSTS ===== */
 
+export async function getMedia(fileName){
+	try {
+		const response = await fetchFromApi(`${baseURL}/media/${fileName}`);
+		return response.blob();
+	} catch (error){
+		console.error("Failed to fetch media: ", error);
+		return false;
+	}	
+}
+
+
+export async function uploadMedia(file){
+	const formData = new FormData();
+	formData.append('file', file);
+
+	const token = localStorage.getItem('token');
+	try {
+	    const response = await fetch(`${baseURL}/media/upload`, {
+	        method: 'POST',
+	        headers: {
+	            'Authorization': `Bearer ${token}`,
+	        },
+	        body: formData,
+	    });
+
+	    if (!response.ok) {
+	        throw new Error(`Failed to upload file: ${response.statusText}`);
+	    }
+
+	    console.log("File upload successful");
+	    return response.text();
+	} catch (error) {
+	    console.error('Error uploading file:', error);
+	    return false;
+	}
+}
+
 
 // Uploads a post to the database
 // postDTO should be in this format:
@@ -201,6 +238,7 @@ export async function fetchAllPosts(page=0, size=10){
 	try {
 		const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}`);
 		const pagedData = await response.json();
+		console.log(pagedData.content);
 		return pagedData.content;
 	} catch (error){
 		console.error("Failed to fetch posts: ", error);
