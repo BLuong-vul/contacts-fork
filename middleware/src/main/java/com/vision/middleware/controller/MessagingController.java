@@ -5,6 +5,7 @@ import com.vision.middleware.dto.MessageDTO;
 import com.vision.middleware.service.MessagingService;
 import com.vision.middleware.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequestMapping("/chat")
 @RequiredArgsConstructor
 @CrossOrigin("*") // todo: change this later
+@Slf4j
 public class MessagingController {
 
     @Autowired
@@ -29,15 +31,16 @@ public class MessagingController {
     // endpoint to receive messages from User A
     @MessageMapping("/sendMessage")
     public void sendMessage(MessageDTO message) {
-        // todo: add constraints on message
-//        System.out.println("MESSAGE RECEIVED: " + message.getBody()); // todo: replace with logging statement
+        // todo: add constraints on message (eg. length)
+
+        log.info("MESSAGE RECEIVED: {}", message.getBody());
 
         messagingService.sendMessage(message.getRecipientId(), message);
 
         String conversationId = message.getSenderId() < message.getRecipientId()
             ? message.getSenderId() + "-" + message.getRecipientId()
             : message.getRecipientId() + "-" + message.getSenderId();
-//        System.out.println("SENDING TO DESTINATION: " + "/topic/conversations/" + conversationId); // todo: replace with logging statement
+        log.info("SENDING TO DESTINATION: /topic/conversations/{}", conversationId);
 
         // assuming we are sending a message to User B via "/topic/messages"
         messagingTemplate.convertAndSend(
