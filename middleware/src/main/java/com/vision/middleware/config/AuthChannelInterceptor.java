@@ -10,6 +10,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,9 +25,6 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     @Autowired
     private final JwtUtil jwtUtil;
 
-    @Autowired
-    private final ApplicationEventPublisher eventPublisher;
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
@@ -37,40 +35,24 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             String token = accessor.getFirstNativeHeader("Authorization");
 
             if (token != null && token.startsWith("Bearer ")) {
-                long userId = jwtUtil.checkJwtAuthAndGetUserId(token); // method handles invalid tokens
+                // Create mutable copy of headers
+                StompHeaderAccessor mutableAccessor = StompHeaderAccessor.wrap(message);
+
+                long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
                 Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, null);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                accessor.setUser(auth);
+                mutableAccessor.setUser(auth);
 
                 log.info("WS Authentication set for user: {}", userId);
+
+                // Return new message with mutable headers
+                return MessageBuilder.createMessage(message.getPayload(), mutableAccessor.getMessageHeaders());
             }
         }
 
         // behavior as of now is to allow non-authenticated connections.
         // these will not share the same context as user specific authenticated connections.
 
-        return message;
-    }
-
-    @Override
-    public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-        // Optionally handle post-send logic
-    }
-
-    @Override
-    public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
-        // Optionally handle post-send completion logic
-    }
-
-    @Override
-    public boolean preReceive(MessageChannel channel) {
-        // Optionally handle pre-receive logic
-        return true;
-    }
-
-    @Override
-    public Message<?> postReceive(Message<?> message, MessageChannel channel) {
-        // Optionally handle post-receive logic
         return message;
     }
 }
