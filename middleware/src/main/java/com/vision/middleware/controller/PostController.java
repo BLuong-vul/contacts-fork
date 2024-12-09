@@ -133,6 +133,7 @@ public class PostController {
                 .postedBy(
                         UserDTO.builder().username(post.getPostedBy().getUsername())
                                 .userId(post.getPostedBy().getId())
+                                .profilePictureFileName(post.getPostedBy().getProfilePictureFileName())
                                 .build()
                 )
                 .mediaFileName(mediaPost.getMediaFileName())

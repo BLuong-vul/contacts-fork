@@ -56,6 +56,14 @@ const PostContainer = ({ postData }) => {
             fetchMedia();
         }
 
+        fetchUserVote();
+        fetchComments();
+    }, [postData.postId]); 
+
+    useEffect(()=> {
+        console.log(postData.title + " -> " + postData.postedBy.profilePictureFileName);
+        console.log(postData);
+        console.log(" ");
         if (postData.postedBy?.profilePictureFileName){
             const fetchProfilePicture = async () => {
                 const mediaBlob = await Fetch.getMedia(postData.postedBy.profilePictureFileName);
@@ -63,16 +71,12 @@ const PostContainer = ({ postData }) => {
                 // console.log(mediaBlob);
                 if (mediaBlob instanceof Blob){
                     const mediaUrl = URL.createObjectURL(mediaBlob);
-                    // setProfilePicture(mediaUrl);
-                    setPost((prevPost) => ({ ...prevPost, profilePicture: mediaUrl }));
+                    setProfilePicture(mediaUrl);
                 }
             }
             fetchProfilePicture();
         }
-
-        fetchUserVote();
-        fetchComments();
-    }, [postData.postId]); 
+    }, [postData?.postedBy?.profilePictureFileName]);
 
 
     const handleLike = () => {
@@ -115,10 +119,10 @@ const PostContainer = ({ postData }) => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     {/* Profile image */}
-                    {post?.profilePicture ? (
+                    {profilePicture ? (
                         <div className="w-10 h-10 rounded-full bg-slate-600">
                             <Image
-                                src={post?.profilePicture}
+                                src={profilePicture}
                                 alt="Post profile picture"
                                 width={100}
                                 height={100}
