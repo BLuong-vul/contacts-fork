@@ -121,9 +121,7 @@ public class PostController {
     }
 
     private PostDTO buildDTOFromPost(Post post) {
-        if (post instanceof MediaPost){
-            MediaPost mediaPost = (MediaPost) post;
-            return PostDTO.builder()
+        PostDTO.PostDTOBuilder builder = PostDTO.builder()
                 .postId(post.getId())
                 .datePosted(post.getDatePosted())
                 .dislikeCount(post.getDislikeCount())
@@ -134,24 +132,13 @@ public class PostController {
                         UserDTO.builder().username(post.getPostedBy().getUsername())
                                 .userId(post.getPostedBy().getId())
                                 .build()
-                )
-                .mediaFileName(mediaPost.getMediaFileName())
-                .build();
-        } else {
-            return PostDTO.builder()
-                .postId(post.getId())
-                .datePosted(post.getDatePosted())
-                .dislikeCount(post.getDislikeCount())
-                .likeCount(post.getLikeCount())
-                .text(post.getText())
-                .title(post.getTitle())
-                .postedBy(
-                        UserDTO.builder().username(post.getPostedBy().getUsername())
-                                .userId(post.getPostedBy().getId())
-                                .build()
-                )
-                .build();
+                );
+
+        if (post instanceof MediaPost mediaPost) {
+            builder.mediaFileName(mediaPost.getMediaFileName());
         }
+
+        return builder.build();
     }
 
     @DeleteMapping("/unvote")
