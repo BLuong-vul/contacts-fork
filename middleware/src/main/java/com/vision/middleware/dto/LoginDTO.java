@@ -10,8 +10,4 @@ import lombok.Setter;
 public class LoginDTO {
     private String username;
     private String password;
-
-    public String toString() {
-        return "Login info | username: " + this.username + " password: " + this.password; //todo
-    }
 }
