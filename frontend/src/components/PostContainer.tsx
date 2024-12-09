@@ -59,8 +59,8 @@ const PostContainer = ({ postData }) => {
         if (postData.postedBy?.profilePictureFileName){
             const fetchProfilePicture = async () => {
                 const mediaBlob = await Fetch.getMedia(postData.postedBy.profilePictureFileName);
-                console.log(postData.postedBy.profilePictureFileName);
-                console.log(mediaBlob);
+                // console.log(postData.postedBy.profilePictureFileName);
+                // console.log(mediaBlob);
                 if (mediaBlob instanceof Blob){
                     const mediaUrl = URL.createObjectURL(mediaBlob);
                     // setProfilePicture(mediaUrl);
@@ -122,11 +122,11 @@ const PostContainer = ({ postData }) => {
                                 alt="Post profile picture"
                                 width={100}
                                 height={100}
-                                className="w-10 h-10 rounded-full bg-slate-600"
+                                className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"
                             />
                         </div>
                     ) : (
-                        <FaUser className="w-10 h-10 rounded-full bg-slate-600"/>
+                        <FaUser className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"/>
                     )}
                     {/* Name */}
                     <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">

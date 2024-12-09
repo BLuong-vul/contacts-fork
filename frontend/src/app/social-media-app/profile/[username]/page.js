@@ -8,12 +8,13 @@ import { validateTokenWithRedirect, validateToken } from '../../../../components
 import Image from "next/image";
 import Link from "next/link";
 import Post from '../../../../components/PostContainer';
-
+import { FaUser } from "react-icons/fa";
 
 
 export default function ProfilePage({ params }) {
   const { username } = params;
   const [profileData, setProfileData] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
   const [error, setError] = useState(null);
   const [postCount, setPostCount] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
@@ -30,6 +31,13 @@ export default function ProfilePage({ params }) {
         setProfileData(data);
         setFollowersCount(data.followerCount);
         setFollowingCount(data.followingCount);
+
+        // set profile picture
+        const mediaBlob = await Fetch.getMedia(data.profilePictureFileName);
+        if (mediaBlob instanceof Blob){
+            const mediaUrl = URL.createObjectURL(mediaBlob);
+            setProfilePicture(mediaUrl);
+        }
 
         // Handle posts
         const posts = await Fetch.getPostsByUser(username);
@@ -93,13 +101,19 @@ export default function ProfilePage({ params }) {
                 fill
                 className="rounded-md object-cover"
               />
-              <Image
-                src="https://images.pexels.com/photos/28210177/pexels-photo-28210177/free-photo-of-a-mountain-goat-standing-on-a-grassy-hill.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-                alt=""
-                width={128}
-                height={128}
-                className="w-32 h-32 rounded-full absolute left-0 right-0 m-auto -bottom-16 ring-4 ring-white object-cover"
-              />
+              {(profilePicture!=null) ? (
+                  <div className="w-10 h-10 rounded-full bg-slate-600">
+                      <Image
+                          src={profilePicture}
+                          alt="Post profile picture"
+                          width={128}
+                          height={128}
+                          className="rounded-full object-cover w-32 h-32 absolute left-0 right-0 m-auto -bottom-16 ring-1 ring-slate-900 z-10"
+                      />
+                  </div>
+              ) : (
+                  <FaUser className="rounded-full object-cover w-32 h-32 absolute left-0 right-0 m-auto -bottom-16 ring-1 ring-slate-900 z-10 bg-slate-600"/>
+              )}
             </div>
             {/** Name of user*/}
             <h1 className="mt-20 mb-4 text-2xl font-medium">
