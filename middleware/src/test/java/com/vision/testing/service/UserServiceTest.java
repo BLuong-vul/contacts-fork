@@ -231,4 +231,17 @@ public class UserServiceTest {
         // Verify repository method was called
         verify(userRepository, times(1)).findAllByUsernameContainingIgnoreCase(searchQuery);
     }
+
+
+    @Test
+    public void testUpdateProfilePictureById() {
+        long userId = 1L;
+        String newProfilePictureFileName = "newProfilePicture.jpg";
+
+        // Call the method
+        userService.updateProfilePictureById(userId, newProfilePictureFileName);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateProfilePictureFileNameById(userId, newProfilePictureFileName);
+    }
 }

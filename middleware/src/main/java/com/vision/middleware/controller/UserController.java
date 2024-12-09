@@ -110,6 +110,7 @@ public class UserController {
     }
 
     // Profile customization updates
+    // todo: potential improvement - make sure that image exists in s3 before approving the change
     @PostMapping("/account/profile-picture-file-name")
     public void updateProfilePictureFileName(@RequestHeader("Authorization") String token,
                                                     @RequestParam(value = "profile-picture-file-name") String profilePictureFileName) {
