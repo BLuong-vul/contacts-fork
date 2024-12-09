@@ -132,6 +132,7 @@ public class PostController {
                 .title(post.getTitle())
                 .postedBy(
                         UserDTO.builder().username(post.getPostedBy().getUsername())
+                                .displayName(post.getPostedBy().getDisplayName())
                                 .userId(post.getPostedBy().getId())
                                 .profilePictureFileName(post.getPostedBy().getProfilePictureFileName())
                                 .build()
@@ -148,6 +149,7 @@ public class PostController {
                 .title(post.getTitle())
                 .postedBy(
                         UserDTO.builder().username(post.getPostedBy().getUsername())
+                                .displayName(post.getPostedBy().getDisplayName())
                                 .userId(post.getPostedBy().getId())
                                 .profilePictureFileName(post.getPostedBy().getProfilePictureFileName())
                                 .build()

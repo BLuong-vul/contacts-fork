@@ -61,14 +61,9 @@ const PostContainer = ({ postData }) => {
     }, [postData.postId]); 
 
     useEffect(()=> {
-        console.log(postData.title + " -> " + postData.postedBy.profilePictureFileName);
-        console.log(postData);
-        console.log(" ");
         if (postData.postedBy?.profilePictureFileName){
             const fetchProfilePicture = async () => {
                 const mediaBlob = await Fetch.getMedia(postData.postedBy.profilePictureFileName);
-                // console.log(postData.postedBy.profilePictureFileName);
-                // console.log(mediaBlob);
                 if (mediaBlob instanceof Blob){
                     const mediaUrl = URL.createObjectURL(mediaBlob);
                     setProfilePicture(mediaUrl);

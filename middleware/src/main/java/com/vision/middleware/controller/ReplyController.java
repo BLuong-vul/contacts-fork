@@ -91,6 +91,7 @@ public class ReplyController {
                                 .userId(user.getId())
                                 .username(user.getUsername())
                                 .displayName(user.getDisplayName())
+                                .profilePictureFileName(user.getProfilePictureFileName())
                                 .build()
                 )
                 .datePosted(reply.getDatePosted())

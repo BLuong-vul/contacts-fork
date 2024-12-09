@@ -1,15 +1,21 @@
 'use client';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { FaPaperPlane, FaUser } from "react-icons/fa";
 import * as Fetch from "./Functions";
 
 const Comments = ({ initialComments, postId }) => {
   const [comments, setComments] = useState(initialComments);
+  const [profilePictures, setProfilePictures] = useState({});
+
   const [commentField, setCommentField] = useState("");
 
   const [replyField, setReplyField] = useState("");
   const [replyingTo, setReplyingTo] = useState(null); // State to track the comment being replied to
+
+  // useEffect(() => {
+  //   console.log(initialComments);
+  // }, [postId]);
 
   const handleCommentUpload = async (text) => {
     if (text.trim() !== "") {
@@ -38,6 +44,45 @@ const Comments = ({ initialComments, postId }) => {
       setReplyingTo(replyingTo === commentId ? null : commentId);
     };
 
+
+    const fetchProfilePicture = async (author) => {
+      if (author?.profilePictureFileName) {
+        const mediaBlob = await Fetch.getMedia(author.profilePictureFileName);
+        if (mediaBlob instanceof Blob) {
+          const mediaUrl = URL.createObjectURL(mediaBlob);
+          return mediaUrl;
+        }
+      }
+      return null;
+    };
+
+    useEffect(() => {
+      const fetchPictures = async () => {
+        const updatedProfilePictures = {};
+
+        const fetchProfilePicturesRecursively = async (comments) => {
+          for (const comment of comments) {
+            if (comment.author && !updatedProfilePictures[comment.id]) {
+              const pictureUrl = await fetchProfilePicture(comment.author);
+              updatedProfilePictures[comment.id] = pictureUrl;
+            }
+
+            if (comment.replies) {
+              await fetchProfilePicturesRecursively(comment.replies);
+            }
+          }
+        };
+
+        await fetchProfilePicturesRecursively(comments);
+
+        setProfilePictures(updatedProfilePictures);
+      };
+
+      fetchPictures();
+    }, [comments]); 
+
+
+
     const renderReplies = (replies, depth = 0) => {
         return replies.map((reply) => (
           <div
@@ -46,7 +91,18 @@ const Comments = ({ initialComments, postId }) => {
             className="border-b border-gray-600 pb-4"
           >
             <div className="flex gap-4 justify-between mt-4">
-              <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
+              {profilePictures[reply.id] ? (
+                <Image
+                  src={profilePictures[reply.id]}
+                  alt="Comment profile picture"
+                  width={100}
+                  height={100}
+                  className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"
+                />
+              ) : (
+                <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
+              )}
+
               <div className="flex flex-col gap-2 flex-1">
                 <span className="font-medium text-slate-200">
                   {reply.author.displayName || reply.author.username}
@@ -108,7 +164,18 @@ const Comments = ({ initialComments, postId }) => {
           <div className="border-b border-gray-600 pb-4" key={comment.id}>
           <div className="flex gap-4 justify-between mt-4">
             {/* Avatar */}
-            <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
+            {profilePictures[comment.id] ? (
+              <Image
+                src={profilePictures[comment.id]}
+                alt="Comment profile picture"
+                width={100}
+                height={100}
+                className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"
+              />
+            ) : (
+              <FaUser className="w-10 h-10 rounded-full bg-slate-600" />
+            )}
+
             {/* Description */}
             <div className="flex flex-col gap-2 flex-1">
               <span className="font-medium text-slate-200">
@@ -170,5 +237,5 @@ const Comments = ({ initialComments, postId }) => {
     </div>
   );
 };
-
+ 
 export default Comments;

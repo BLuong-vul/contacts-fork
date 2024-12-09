@@ -105,6 +105,8 @@ public class ReplyService {
         UserDTO author = UserDTO.builder()
                 .userId(reply.getAuthor().getId())
                 .username(reply.getAuthor().getUsername())
+                .displayName(reply.getAuthor().getDisplayName())
+                .profilePictureFileName(reply.getAuthor().getProfilePictureFileName())
                 .build();
 
         // Build the comment tree DTO
