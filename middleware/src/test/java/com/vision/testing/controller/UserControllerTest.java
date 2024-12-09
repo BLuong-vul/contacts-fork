@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -370,5 +370,23 @@ public class UserControllerTest {
                         .header("Authorization", token)
                         .param("birthdate", birthdate.toString()))
                 .andExpect(status().isOk());
+    }
+
+
+    @Test
+    public void testUpdateProfilePictureFileName() throws Exception {
+        String token = "validToken";
+        long userId = 1L;
+        String profilePictureFileName = "newProfilePicture.jpg";
+
+        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);
+
+        mockMvc.perform(post("/user/account/profile-picture-file-name")
+                        .header("Authorization", token)
+                        .param("profile-picture-file-name", profilePictureFileName))
+                .andExpect(status().isOk());
+
+        // Verify the service method was called with the correct parameters
+        verify(userService, times(1)).updateProfilePictureById(userId, profilePictureFileName);
     }
 }

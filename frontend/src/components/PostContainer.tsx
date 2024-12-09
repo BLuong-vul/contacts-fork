@@ -11,6 +11,7 @@ const PostContainer = ({ postData }) => {
     const [post, setPost] = useState({
         image: null,
     });
+    const [profilePicture, setProfilePicture] = useState(null);
     const[media, setMedia] = useState(null);
 
     const [likes, setLikes] = useState(postData.likeCount || 0);
@@ -41,11 +42,11 @@ const PostContainer = ({ postData }) => {
             const fetchMedia = async () => {
                 try {
                     const mediaBlob = await Fetch.getMedia(postData.mediaFileName);
-                    console.log("THE BLOB: ", mediaBlob);
+                    // console.log("THE BLOB: ", mediaBlob);
                     if (mediaBlob instanceof Blob){
                         const mediaUrl = URL.createObjectURL(mediaBlob);
                         setMedia(mediaUrl);
-                        console.log(mediaUrl);
+                        // console.log(mediaUrl);
                         setPost((prevPost) => ({ ...prevPost, image: mediaUrl }));
                     }
                 } catch (error) {
@@ -58,6 +59,19 @@ const PostContainer = ({ postData }) => {
         fetchUserVote();
         fetchComments();
     }, [postData.postId]); 
+
+    useEffect(()=> {
+        if (postData.postedBy?.profilePictureFileName){
+            const fetchProfilePicture = async () => {
+                const mediaBlob = await Fetch.getMedia(postData.postedBy.profilePictureFileName);
+                if (mediaBlob instanceof Blob){
+                    const mediaUrl = URL.createObjectURL(mediaBlob);
+                    setProfilePicture(mediaUrl);
+                }
+            }
+            fetchProfilePicture();
+        }
+    }, [postData?.postedBy?.profilePictureFileName]);
 
 
     const handleLike = () => {
@@ -100,7 +114,19 @@ const PostContainer = ({ postData }) => {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     {/* Profile image */}
-                    <FaUser className="w-10 h-10 rounded-full bg-slate-600"/>
+                    {profilePicture ? (
+                        <div className="w-10 h-10 rounded-full bg-slate-600">
+                            <Image
+                                src={profilePicture}
+                                alt="Post profile picture"
+                                width={100}
+                                height={100}
+                                className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"
+                            />
+                        </div>
+                    ) : (
+                        <FaUser className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"/>
+                    )}
                     {/* Name */}
                     <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">
                         {postData?.postedBy?.username || "Unknown User"}
@@ -113,7 +139,7 @@ const PostContainer = ({ postData }) => {
             )}
             {/* Body */}
             <div className="flex flex-col gap-4">
-                {post?.image ? (
+                {(post?.image) && (
                     <div className="w-full min-h-96 relative">
                         <Image
                             src={post?.image}
@@ -122,17 +148,6 @@ const PostContainer = ({ postData }) => {
                             className="object-cover rounded-md"
                         />
                     </div>
-                ) : (
-                    postData?.image && (
-                        <div className="w-full min-h-96 relative">
-                            <Image
-                                src={post.image}
-                                alt="Post image"
-                                fill
-                                className="object-cover rounded-md"
-                            />
-                        </div>
-                    )
                 )}
                 <p className="text-slate-200">{postData?.text}</p>
             </div>

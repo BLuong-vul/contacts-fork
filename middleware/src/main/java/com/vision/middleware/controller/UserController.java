@@ -110,6 +110,14 @@ public class UserController {
     }
 
     // Profile customization updates
+    // todo: potential improvement - make sure that image exists in s3 before approving the change
+    @PostMapping("/account/profile-picture-file-name")
+    public void updateProfilePictureFileName(@RequestHeader("Authorization") String token,
+                                                    @RequestParam(value = "profile-picture-file-name") String profilePictureFileName) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateProfilePictureById(id, profilePictureFileName);
+    }
+
     @PostMapping("/account/displayName")
     public void updateDisplayNameById(@RequestHeader("Authorization") String token,
                                       @RequestParam(value = "displayName", defaultValue = "") String displayName) {
@@ -158,6 +166,7 @@ public class UserController {
                 .location(userDetails.getLocation())
                 .birthdate(userDetails.getBirthdate())
                 .joinDate(userDetails.getJoinDate())
+                .profilePictureFileName(userDetails.getProfilePictureFileName())
                 .build();
     }
 
@@ -167,6 +176,7 @@ public class UserController {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .displayName(user.getDisplayName())
+                .profilePictureFileName(user.getProfilePictureFileName())
                 .build();
     }
 }

@@ -21,6 +21,11 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
 
     @Modifying
     @Transactional
+    @Query("UPDATE ApplicationUser u SET u.profilePictureFileName = :profilePictureFileName WHERE u.id = :id")
+    void updateProfilePictureFileNameById(Long id, String profilePictureFileName);
+
+    @Modifying
+    @Transactional
     @Query("UPDATE ApplicationUser u SET u.displayName = :displayName WHERE u.id = :id")
     void updateDisplayNameById(Long id, String displayName);
 

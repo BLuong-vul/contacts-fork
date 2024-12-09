@@ -27,4 +27,7 @@ public class UserDTO {
     private String location;
     private Date birthdate;
     private Date joinDate;
+
+    private String profilePictureFileName;
+    private String bannerPictureFileName;
 }
