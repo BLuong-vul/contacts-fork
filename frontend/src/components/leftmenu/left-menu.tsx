@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ProfileCard from "@/components/leftmenu/profile-card";
 
-const LeftMenu = ({ type }: { type: "home" | "profile" }) => {
+const LeftMenu = ({ type, onFilterChange }) => {
   // State for sorting and filtering options
   const [sortOption, setSortOption] = useState("new");
   const [filterOption, setFilterOption] = useState({
@@ -13,19 +13,23 @@ const LeftMenu = ({ type }: { type: "home" | "profile" }) => {
   });
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOption(e.target.value);
+  	const newSortOption = e.target.value;
+    setSortOption(newSortOption);
+    onFilterChange({sortBy: newSortOption, filterOption})
   };
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFilterOption((prevState) => ({
-      ...prevState,
+    const newFilterOption = {
+      ...filterOption,
       [name]: type === "checkbox" ? checked : value,
-    }));
+    };
+    setFilterOption(newFilterOption);
+    onFilterChange({ sortBy: sortOption, filterOption: newFilterOption });
   };
 
   return (
-    <div className="flex flex-col gap-6 sticky top-10">
+    <div className="flex flex-col gap-4 sticky top-10">
       {type === "home" && <ProfileCard />}
 
       <div className="p-4 bg-slate-600 rounded-lg shadow-md text-sm text-gray-500 flex flex-col h-auto">

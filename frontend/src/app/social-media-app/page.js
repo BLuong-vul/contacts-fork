@@ -60,6 +60,20 @@ export default function Projects() {
 	const [posts, setPosts] = useState([]);
 	const [numPosts, setNumPosts] = useState(10)
 	const numPostsRef = useRef(numPosts);
+
+	const [filterOptions, setFilterOptions] = useState({
+	    sortBy: 'new',
+	    filterOption: {
+	      beforeDate: '',
+	      afterDate: '',
+	      followingOnly: false,
+	    }
+	  });
+
+	const handleFilterChange = (newFilterOptions) => {
+	    setFilterOptions(newFilterOptions);
+	    console.log(newFilterOptions);
+	  };
 	
 
 	const toggleCreatePost = async () => {
@@ -143,7 +157,7 @@ export default function Projects() {
 		<>
 		<div className="flex gap-6 pt-6">
 			<div className="hidden xl:block w-[20%]">
-				<LeftMenu type="home"/>
+				<LeftMenu onFilterChange={handleFilterChange} type="home"/>
 			</div>
 			<main className={styles.mainContainer}>
 				<div className={homepagestyles.contentContainer} style={{ marginRight: setSidebarWidth}}>
