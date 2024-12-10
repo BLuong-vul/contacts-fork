@@ -55,6 +55,10 @@ public class UserService implements UserDetailsService {
         userRepository.updateProfilePictureFileNameById(id, profilePictureFileName);
     }
 
+    public void updateBannerPictureById(long id, String bannerPictureFileName) {
+        userRepository.updateBannerPictureFileNameById(id, bannerPictureFileName);
+    }
+
     public void updateDisplayNameById(Long id, String displayName){
         userRepository.updateDisplayNameById(id, displayName);
     }

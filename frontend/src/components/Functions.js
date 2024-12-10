@@ -76,6 +76,10 @@ export async function updateProfilePictureFileName(filename){
 	return (await updateProfileInfo("profile-picture-file-name", filename));
 }
 
+export async function updateProfileBannerFileName(filename){
+	return (await updateProfileInfo("banner-picture-file-name", filename));
+}
+
 /* ===== ACCOUNT MANAGEMENT ===== */
 
 export async function createAccount(userData){

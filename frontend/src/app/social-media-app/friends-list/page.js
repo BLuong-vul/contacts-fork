@@ -86,7 +86,7 @@ export default function FollowersListPage() {
                             ) : (
                                 <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
                             )}
-                            <a className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
+                            <a href={`./profile/${user.username}`} className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
                             <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}
@@ -107,7 +107,7 @@ export default function FollowersListPage() {
                             ) : (
                                 <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
                             )}
-                            <a className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
+                            <a href={`./profile/${user.username}`} className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
                             <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}
@@ -128,7 +128,7 @@ export default function FollowersListPage() {
                             ) : (
                                 <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
                             )}
-                            <a className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
+                            <a href={`./profile/${user.username}`} className="mr-4 text-slate-200"> {user.displayName || user.username} </a>
                             <a className="text-slate-400"> @{user.username} </a>
                         </li>
                     ))}

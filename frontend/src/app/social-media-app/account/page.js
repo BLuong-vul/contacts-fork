@@ -150,8 +150,8 @@ function GeneralContent() {
 
   const handleBannerSave = async () => {
     console.log(selectedBanner);
-    // const bannerFileName = await Fetch.uploadMedia(selectedBanner);
-    // console.log(await Fetch.updateProfileBannerFileName(bannerFileName));
+    const bannerFileName = await Fetch.uploadMedia(selectedBanner);
+    console.log(await Fetch.updateProfileBannerFileName(bannerFileName));
   }
 
   // TODO: Change this to actually removing the user's banner picture instead of just clearing it
@@ -351,7 +351,7 @@ function GeneralContent() {
                     <img
                       src={URL.createObjectURL(selectedBanner)}
                       alt="Preview"
-                      className="w-24 h-24 rounded-full object-cover"
+                      className="w-96 h-48 rounded-sm object-cover"
                     />
                   </div>
                 ) : (
@@ -369,7 +369,7 @@ function GeneralContent() {
                   className="mt-3 mr-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
                   onClick={() => {
                     handleBannerSave();
-                    setShowProfileBannerMenu(false);
+                    setShowBannerMenu(false);
                   }}
                 >
                   Save
