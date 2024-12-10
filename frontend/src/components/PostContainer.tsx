@@ -128,14 +128,16 @@ const PostContainer = ({ postData }) => {
                         <FaUser className="w-10 h-10 rounded-full bg-slate-600 ring-1 ring-slate-900"/>
                     )}
                     {/* Name */}
-                    <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200">
-                        {postData?.postedBy?.username || "Unknown User"}
+                    <Link href={`/social-media-app/profile/${postData?.postedBy?.username}`} className="text-slate-200 hover:text-slate-400">
+                        {postData?.postedBy?.displayName || postData?.postedBy?.username}
                     </Link>
                 </div>
                 {/*<Image src="/more.png" alt="More options" width={16} height={16} />*/}
             </div>
             {postData?.title && (
-                <h2 className="text-3xl font-semibold text-slate-100">{postData.title}</h2>
+                <Link href={`/social-media-app/posts/${postData.postId}`}>
+                    <h2 className="text-3xl font-semibold text-slate-100 hover:text-slate-400">{postData.title}</h2>
+                </Link>
             )}
             {/* Body */}
             <div className="flex flex-col gap-4">

@@ -11,6 +11,7 @@ const ProfileCard = () => {
   const [followerCount, setFollowerCount] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
+  const [bannerPicture, setBannerPicture] = useState(null);
 
   useEffect(() => {
     const init = async() => {
@@ -22,11 +23,19 @@ const ProfileCard = () => {
           setFollowerCount(userInfo.followerCount);
 
           // set profile picture
-          const mediaBlob = await Fetch.getMedia(userInfo.profilePictureFileName);
-          if (mediaBlob instanceof Blob){
-              const mediaUrl = URL.createObjectURL(mediaBlob);
+          const avatarBlob = await Fetch.getMedia(userInfo.profilePictureFileName);
+          if (avatarBlob instanceof Blob){
+              const mediaUrl = URL.createObjectURL(avatarBlob);
               setProfilePicture(mediaUrl);
           }
+
+          // set banner
+          const bannerBlob = await Fetch.getMedia(userInfo.bannerPictureFileName);
+          if (bannerBlob instanceof Blob){
+              const mediaUrl = URL.createObjectURL(bannerBlob);
+              setBannerPicture(mediaUrl);
+          }
+
         } else {
           setIsLoggedIn(false);
         }
@@ -40,12 +49,20 @@ const ProfileCard = () => {
         <div className='h-20 relative'>
           {isLoggedIn ? (
             <>
-              <Image 
-                src="https://images.pexels.com/photos/26125152/pexels-photo-26125152/free-photo-of-the-milky-way-over-the-lake-at-night.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-                alt="" 
-                fill 
-                className="rounded-md"
-              />
+              {/* BANNER */}
+              {bannerPicture ? (
+                  <div>
+                      <Image
+                          src={bannerPicture}
+                          alt="Post banner picture"
+                          fill
+                          className="rounded-md object-cover"
+                      />
+                  </div>
+              ) : (
+                  <div className="w-full h-full bg-slate-900 rounded-md object-cover" />
+              )}
+              {/* PROFILE PICTURE */}
               {(profilePicture!=null) ? (
                   <div className="w-10 h-10 rounded-full bg-slate-600">
                       <Image

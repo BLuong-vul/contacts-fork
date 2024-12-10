@@ -29,6 +29,7 @@ const DirectMessages = () => {
     const [following, setFollowing] = useState([]);
 
     const [selectedUserData, setSelectedUserData] = useState(null);
+    const [avatars, setAvatars] = useState({});
 
     // Fetch User ID and username when the component mounts
     // and friend categories
@@ -52,12 +53,27 @@ const DirectMessages = () => {
             // Mutuals list
             const mutualsFilter = followingRes.filter(user => followersRes.some(follower => follower.userId===user.userId));
             setMutuals(mutualsFilter);
+
+            await fetchAvatars([...followingRes, ...followersRes]);
         }
 
         fetchUserId();
         fetchFriends();
     }, []);
 
+    const fetchAvatars = async (users) => {
+        const updatedAvatars = {};
+        for (const user of users) {
+            if (user.profilePictureFileName && !avatars[user.userId]) {
+                const mediaBlob = await Fetch.getMedia(user.profilePictureFileName);
+                if (mediaBlob instanceof Blob) {
+                    const mediaUrl = URL.createObjectURL(mediaBlob);
+                    updatedAvatars[user.userId] = mediaUrl;
+                }
+            }
+        }
+        setAvatars((prev) => ({ ...prev, ...updatedAvatars }));
+    };
 
     // websocket connection and subscription
     useEffect(() => {
@@ -197,7 +213,15 @@ const DirectMessages = () => {
                             <ul>
                                 {mutuals.map(user => (
                                 <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
-                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    {avatars[user.userId] ? (
+                                        <img
+                                            src={avatars[user.userId]}
+                                            alt={`${user.username}'s profile`}
+                                            className="w-8 h-8 rounded-full ml-2 mr-4"
+                                        />
+                                    ) : (
+                                        <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
+                                    )}
                                     <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
                                     <a className="text-slate-400"> @{user.username} </a>
                                 </li>
@@ -209,7 +233,15 @@ const DirectMessages = () => {
                             <ul>
                                 {followers.map(user => (
                                 <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
-                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    {avatars[user.userId] ? (
+                                        <img
+                                            src={avatars[user.userId]}
+                                            alt={`${user.username}'s profile`}
+                                            className="w-8 h-8 rounded-full ml-2 mr-4"
+                                        />
+                                    ) : (
+                                        <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
+                                    )}
                                     <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
                                     <a className="text-slate-400"> @{user.username} </a>
                                 </li>
@@ -221,7 +253,15 @@ const DirectMessages = () => {
                             <ul>
                                 {following.map(user => (
                                 <li key={user.id} className="mt-4 flex text-xl bg-slate-900 rounded-md p-2 cursor-pointer hover:bg-slate-950 transition duration-100 mr-2" onClick={() => setInputUsername(user.username)}>
-                                    <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4"/>
+                                    {avatars[user.userId] ? (
+                                        <img
+                                            src={avatars[user.userId]}
+                                            alt={`${user.username}'s profile`}
+                                            className="w-8 h-8 rounded-full ml-2 mr-4"
+                                        />
+                                    ) : (
+                                        <FaUser className="w-8 h-8 rounded-full bg-slate-600 ml-2 mr-4" />
+                                    )}
                                     <a className="mr-4 text-slate-200"> {user.displayName ? user.displayName : user.username} </a>
                                     <a className="text-slate-400"> @{user.username} </a>
                                 </li>

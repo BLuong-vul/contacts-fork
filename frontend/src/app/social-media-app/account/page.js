@@ -77,8 +77,10 @@ function GeneralContent() {
   });
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // For preview
+  const [selectedImage, setSelectedImage] = useState(null);
 
+  const [showBannerMenu, setShowBannerMenu] = useState(false);
+  const [selectedBanner, setSelectedBanner] = useState(null);
 
   // Fetch user data on mount
   useEffect(() => {
@@ -114,6 +116,7 @@ function GeneralContent() {
     }));
   };
 
+  /* ===== PROFILE PICTURE UPDATES ===== */
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -127,13 +130,40 @@ function GeneralContent() {
     console.log(await Fetch.updateProfilePictureFileName(imageFileName));
   }
 
+  // TODO: Change this to actually removing the user's profile picture instead of just clearing it
   const handleImageRemove = () => {
-    console.log('Image removed');
+    setSelectedImage(null);
   }
 
   const handleMenuToggle = () => {
     setShowProfileMenu(!showProfileMenu);
+    setShowBannerMenu(false);
   };
+
+  /* ===== PROFILE BANNER UPDATES ===== */
+  const handleBannerChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedBanner(file); // Generates preview URL
+    }
+  };
+
+  const handleBannerSave = async () => {
+    console.log(selectedBanner);
+    const bannerFileName = await Fetch.uploadMedia(selectedBanner);
+    console.log(await Fetch.updateProfileBannerFileName(bannerFileName));
+  }
+
+  // TODO: Change this to actually removing the user's banner picture instead of just clearing it
+  const handleBannerRemove = () => {
+    setSelectedBanner(null);
+  }
+
+  const handleBannerMenuToggle = () => {
+    setShowBannerMenu(!showBannerMenu);
+    setShowProfileMenu(false);
+  };
+
 
   // Toggle for checkboxes
   const toggleShow = (field) => {
@@ -252,65 +282,115 @@ function GeneralContent() {
 
       {/* Profile picture / banner */}
       <div className="relative flex gap-4 mb-5">
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-          onClick={handleMenuToggle}
-        >
-          Change Profile Picture
-        </button>
-        {showProfileMenu && (
-          <div className="absolute top-full mt-2 bg-slate-500 p-4 rounded-lg shadow-lg z-10">
-            <h4 className="text-lg text-center text-slate-300 mb-3">Select New Profile Picture</h4>
-            <div className="flex flex-col items-center">
-              {selectedImage ? (
-                <div className="mb-3 mr-4">
-                  <img
-                    src={URL.createObjectURL(selectedImage)}
-                    alt="Preview"
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                </div>
-              ) : (
-                <p className="text-slate-300 mb-3">No image selected</p>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="block w-32 mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
-            <div className="flex">
-              <button
-                className="mt-3 ml-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
-                onClick={() => {
-                  // TODO: Implement save functionality here
-                  handleImageSave();
-                  setShowProfileMenu(false);
-                }}
-              >
-                Save
-              </button>
-              <button
-                className="mt-3 ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                onClick={() => {
-                  // TODO: Implement save functionality here
-                  handleImageRemove();
-                }}
-              >
-                Reset Profile Picture
-              </button>
+        {/* CHANGE PROFILE PICTURE */}
+        <div className="flex">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+            onClick={handleMenuToggle}
+          >
+            Change Profile Picture
+          </button>
+          {showProfileMenu && (
+            <div className="absolute top-full mt-2 bg-slate-500 p-4 rounded-lg shadow-lg z-10">
+              <h4 className="text-lg text-center text-slate-300 mb-3">Select New Profile Picture</h4>
+              <div className="flex flex-col items-center">
+                {selectedImage ? (
+                  <div className="mb-3 mr-4">
+                    <img
+                      src={URL.createObjectURL(selectedImage)}
+                      alt="Preview"
+                      className="w-24 h-24 rounded-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-slate-300 mb-3">No image selected</p>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block w-32 mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
               </div>
-          </div>
-        )}
-        <button className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none">
-          Change Profile Banner
-        </button>
+              <div className="flex justify-center">
+                <button
+                  className="mt-3 mr-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+                  onClick={() => {
+                    handleImageSave();
+                    setShowProfileMenu(false);
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  className="mt-3 ml-2 mr-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+                  onClick={() => {
+                    handleImageRemove();
+                  }}
+                >
+                  Clear
+                </button>
+                </div>
+            </div>
+          )}
+        </div>
+        {/* CHANGE PROFILE BANNER */}
+        <div className="flex">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+            onClick={handleBannerMenuToggle}
+          >
+            Change Profile Banner
+          </button>
+          {showBannerMenu && (
+            <div className="absolute top-full mt-2 bg-slate-500 p-4 rounded-lg shadow-lg z-10">
+              <h4 className="text-lg text-center text-slate-300 mb-3">Select New Banner Picture</h4>
+              <div className="flex flex-col items-center">
+                {selectedBanner ? (
+                  <div className="mb-3 mr-4">
+                    <img
+                      src={URL.createObjectURL(selectedBanner)}
+                      alt="Preview"
+                      className="w-96 h-48 rounded-sm object-cover"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-slate-300 mb-3">No image selected</p>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerChange}
+                  className="block w-32 mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+              <div className="flex justify-center">
+                <button
+                  className="mt-3 mr-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none"
+                  onClick={() => {
+                    handleBannerSave();
+                    setShowBannerMenu(false);
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  className="mt-3 ml-2 mr-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+                  onClick={() => {
+                    handleBannerRemove();
+                  }}
+                >
+                  Clear
+                </button>
+                </div>
+            </div>
+          )}
+        </div>
       </div>
 
 
       {/* Logout button */}
-      <div className="mt-5">
+      <div className="mt-5 w-24 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none">
         <button onClick={handleLogout}>Log Out</button>
       </div>
     </div>

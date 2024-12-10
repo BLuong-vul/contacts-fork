@@ -15,6 +15,7 @@ export default function ProfilePage({ params }) {
   const { username } = params;
   const [profileData, setProfileData] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
+  const [bannerPicture, setBannerPicture] = useState(null);
   const [error, setError] = useState(null);
   const [postCount, setPostCount] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
@@ -33,10 +34,17 @@ export default function ProfilePage({ params }) {
         setFollowingCount(data.followingCount);
 
         // set profile picture
-        const mediaBlob = await Fetch.getMedia(data.profilePictureFileName);
-        if (mediaBlob instanceof Blob){
-            const mediaUrl = URL.createObjectURL(mediaBlob);
+        const avatarBlob = await Fetch.getMedia(data.profilePictureFileName);
+        if (avatarBlob instanceof Blob){
+            const mediaUrl = URL.createObjectURL(avatarBlob);
             setProfilePicture(mediaUrl);
+        }
+
+        // set banner
+        const bannerBlob = await Fetch.getMedia(data.bannerPictureFileName);
+        if (bannerBlob instanceof Blob){
+            const mediaUrl = URL.createObjectURL(bannerBlob);
+            setBannerPicture(mediaUrl);
         }
 
         // Handle posts
@@ -95,14 +103,23 @@ export default function ProfilePage({ params }) {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center justify-center">
             <div className="w-full h-64 relative">
-              <Image
-                src="https://images.pexels.com/photos/28551762/pexels-photo-28551762/free-photo-of-stunning-italian-alps-mountain-landscape-at-sunset.jpeg?auto=compress&cs=tinysrgb&w=1200&lazy=load"
-                alt=""
-                fill
-                className="rounded-md object-cover"
-              />
-              {(profilePicture!=null) ? (
-                  <div className="w-10 h-10 rounded-full bg-slate-600">
+
+              {/* BANNER */}
+              {bannerPicture ? (
+                  <div>
+                      <Image
+                          src={bannerPicture}
+                          alt="Post banner picture"
+                          fill
+                          className="rounded-md object-cover"
+                      />
+                  </div>
+              ) : (
+                  <div className="w-full h-full bg-slate-900 rounded-md object-cover" />
+              )}
+              {/* PROFILE PICTURE */}
+              {profilePicture ? (
+                  <div className="w-10 h-10">
                       <Image
                           src={profilePicture}
                           alt="Post profile picture"

@@ -118,6 +118,13 @@ public class UserController {
         userService.updateProfilePictureById(id, profilePictureFileName);
     }
 
+    @PostMapping("/account/banner-picture-file-name")
+    public void updateBannerPictureFileName(@RequestHeader("Authorization") String token,
+                                                    @RequestParam(value = "banner-picture-file-name") String bannerPictureFileName) {
+        long id = jwtUtil.checkJwtAuthAndGetUserId(token);
+        userService.updateBannerPictureById(id, bannerPictureFileName);
+    }
+
     @PostMapping("/account/displayName")
     public void updateDisplayNameById(@RequestHeader("Authorization") String token,
                                       @RequestParam(value = "displayName", defaultValue = "") String displayName) {
@@ -167,6 +174,7 @@ public class UserController {
                 .birthdate(userDetails.getBirthdate())
                 .joinDate(userDetails.getJoinDate())
                 .profilePictureFileName(userDetails.getProfilePictureFileName())
+                .bannerPictureFileName(userDetails.getBannerPictureFileName())
                 .build();
     }
 
