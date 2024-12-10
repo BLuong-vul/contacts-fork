@@ -40,6 +40,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,19 +60,31 @@ public class AuthenticationControllerTest {
     @Autowired
     private JwtUtil jwtUtil;
 
+    private static RegistrationDTO validUserDTO;
+
     @BeforeEach
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(authenticationController).build();
         objectMapper = new ObjectMapper();
+
+        validUserDTO = RegistrationDTO.builder()
+                .username("testUser")
+                .password("testPassword")
+                .email("test@example.com")
+                .city("somewhere")
+                .state("ca")
+                .country("nowhere")
+                .zipCode("11111")
+                .phoneNumber("1234567890")
+                .fullName("test User")
+                .address("place at place 111")
+                .build();
     }
 
     @Test
     public void testRegisterUser_Success() throws Exception {
         // Arrange
-        RegistrationDTO registrationDTO = new RegistrationDTO();
-        registrationDTO.setUsername("testUser");
-        registrationDTO.setPassword("testPassword");
-        registrationDTO.setEmail("test@example.com");
+        RegistrationDTO registrationDTO = validUserDTO;
 
         ApplicationUser user = new ApplicationUser();
         user.setId(1L);
@@ -81,7 +94,7 @@ public class AuthenticationControllerTest {
         when(authenticationService.registerUser(any(RegistrationDTO.class))).thenReturn(user);
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registrationDTO)))
                 .andDo(print())
@@ -94,20 +107,89 @@ public class AuthenticationControllerTest {
     @Test
     public void testRegisterUser_Failure() throws Exception {
         // Arrange
-        RegistrationDTO registrationDTO = new RegistrationDTO();
-        registrationDTO.setUsername("testUser");
-        registrationDTO.setPassword("testPassword");
-        registrationDTO.setEmail("test@example.com");
+        RegistrationDTO registrationDTO = validUserDTO;
 
         when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Account creation failed."));
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registrationDTO)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.content().string("Account creation failed."));
+    }
+
+    @Test
+    public void testRegisterUser_Failure_DuplicateUsername() throws Exception {
+        // Arrange
+        RegistrationDTO registrationDTO = validUserDTO;
+
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate username."));
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registrationDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("Username already exists\n"));
+    }
+
+    @Test
+    public void testRegisterUser_Failure_DuplicateEmail() throws Exception {
+        // Arrange
+        RegistrationDTO registrationDTO = validUserDTO;
+
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate email."));
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registrationDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("Email already registered\n"));
+    }
+
+    @Test
+    public void testRegisterUser_Failure_DuplicatePhoneNumber() throws Exception {
+        // Arrange
+        RegistrationDTO registrationDTO = validUserDTO;
+
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate phone_number."));
+
+        // Act & Assert
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registrationDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("Phone number already in use\n"));
+    }
+
+    @Test
+    public void testRegisterUser_DTOBindFailure() throws Exception {
+        // Create an invalid DTO with missing/invalid fields
+        String invalidRegistrationJson = "{" +
+                "\"username\": \"\"," +
+                "\"password\": \"short\"," +
+                "\"email\": \"invalid-email\"," +
+                "\"phoneNumber\": \"123\"" +
+                "}";
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRegistrationJson))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> {
+                    String responseBody = result.getResponse().getContentAsString();
+                    assert responseBody.contains("Username is required");
+                    assert responseBody.contains("Password must be at least 8 characters");
+                    assert responseBody.contains("Invalid email format");
+                    assert responseBody.contains("Invalid phone number");
+                });
     }
 
     @Test
@@ -121,7 +203,7 @@ public class AuthenticationControllerTest {
         when(authenticationService.loginUser("testUser", "testPassword")).thenReturn(loginResponseDTO);
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDTO)))
                 .andDo(print())
@@ -136,7 +218,7 @@ public class AuthenticationControllerTest {
         when(authenticationService.loginUser("testUser", "testPassword")).thenThrow(new AuthenticationException("Login failed.") {});
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDTO)))
                 .andDo(print())
