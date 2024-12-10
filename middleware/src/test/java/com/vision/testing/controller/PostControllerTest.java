@@ -350,6 +350,26 @@ class PostControllerTest {
         verify(postService).getAllPosts(page, size);
     }
 
+    @Test
+    void testGetPostById_Success() throws Exception {
+        // Arrange
+        long postId = 1L;
+        Post post = createSamplePosts().get(0);
+
+        when(postService.loadPostById(postId)).thenReturn(post);
+
+        // Act & Assert
+        mockMvc.perform(get("/post/by-id")
+                        .param("id", String.valueOf(postId)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.postId").value(post.getId()))
+                .andExpect(jsonPath("$.title").value(post.getTitle()))
+                .andExpect(jsonPath("$.text").value(post.getText()));
+
+        verify(postService).loadPostById(postId);
+    }
+
     // Helper methods to create sample objects for testing
     private PostDTO createSamplePostDTO() {
         UserDTO user = UserDTO.builder()
