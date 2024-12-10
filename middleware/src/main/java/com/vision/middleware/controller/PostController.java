@@ -60,6 +60,13 @@ public class PostController {
         return ResponseEntity.ok(postsDTO);
     }
 
+    @GetMapping("/by-id")
+    public ResponseEntity<PostDTO> getPostById(@RequestParam(value = "id") long postId) {
+        Post post = postService.loadPostById(postId);
+        PostDTO postDTO = this.buildDTOFromPost(post);
+        return ResponseEntity.ok(postDTO);
+    }
+
     @PostMapping("/vote")
     public VoteDTO voteOnPost(@RequestHeader("Authorization") String token, @RequestBody VoteDTO voteDTO) {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);

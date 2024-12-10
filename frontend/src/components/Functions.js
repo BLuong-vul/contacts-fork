@@ -231,6 +231,16 @@ export async function searchPost(query){
 	}
 }
 
+export async function searchUser(query){
+	try {
+		const response = await fetchFromApi(`${baseURL}/user/search?query=${query}`);
+		return await response.json();
+	} catch (error){
+		console.error("Failed to search users: ", error);
+		return [];
+	}
+}
+
 // Uploads a post to the database
 // postDTO should be in this format:
 			// const newPost = {
@@ -265,18 +275,27 @@ export async function fetchAllPosts(page=0, size=10){
 	
 }
 
-
 // Fetches all posts made by a certain user
 // 4 November: This now only returns the data and not actual post components.
 export async function getPostsByUser(username, page=0, size=10){
 	try {
-		const response = await authFetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
+		const response = await fetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
 		const pagedData = await response.json();
 		return pagedData.content;
 	} catch (error){
 		console.error("Failed to fetch user posts: ", error);
 		return [];
 	}	
+}
+
+export async function getPostById(postId){
+	try {
+		const response = await fetchFromApi(`${baseURL}/post/by-id?id=${postId}`);
+		return await response.json();
+	} catch (error){
+		console.error("Failed to fetch post: ", error);
+		return null;
+	}
 }
 
 // voteType should be "LIKE" or "DISLIKE"
