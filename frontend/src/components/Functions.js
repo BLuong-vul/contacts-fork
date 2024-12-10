@@ -221,6 +221,16 @@ export async function uploadMedia(file){
 
 /* ===== POSTS ===== */
 
+export async function searchPost(query){
+	try {
+		const response = await fetchFromApi(`${baseURL}/post/search?query=${query}`);
+		return await response.json();
+	} catch (error){
+		console.error("Failed to search posts: ", error);
+		return [];
+	}
+}
+
 // Uploads a post to the database
 // postDTO should be in this format:
 			// const newPost = {
