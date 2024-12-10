@@ -4,7 +4,7 @@ import Image from "next/image";
 import Comments from "./Comments";
 import Link from 'next/link';
 import * as Fetch from './Functions';
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaArrowUp, FaArrowDown, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 
 const PostContainer = ({ postData }) => {
     // state variables for dynamic content
@@ -155,26 +155,22 @@ const PostContainer = ({ postData }) => {
             </div>
             {/* Interaction */}
             <div className="flex items-center justify-between text-sm rounded-xl">
-                <div className="flex gap-6">
+                <div className="flex gap-2">
                     <div onClick={handleLike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Likes */}
-                        <Image src="/like.png" alt="Like" width={16} height={16} className="cursor-pointer" />
-                        {/* <span className="text-slate-300">|</span> */}
+                        <FaThumbsUp width={16} height={16} className={`cursor-pointer ${userRating === "LIKE" ? "text-blue-500" : "text-slate-300"}`}  />
                         <span className="text-slate-300">
                             {likes}
-                            <span className="hidden md:inline"> Likes</span>
                         </span>
                     </div>
                     <div onClick={handleDislike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Dislikes */}
-                        <Image src="/dislike.png" alt="Dislike" width={16} height={16} className="cursor-pointer" />
-                        {/* <span className="text-slate-300">|</span> */}
+                        <FaThumbsDown width={16} height={16} className={`cursor-pointer ${userRating === "DISLIKE" ? "text-blue-500" : "text-slate-300"}`} />
                         <span className="text-slate-300">
                             {dislikes}
-                            <span className="hidden md:inline"> Dislikes</span>
                         </span>
                     </div>
-                    <div onClick={toggleComments} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
+                    <div onClick={toggleComments} className="ml-4 cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Comments */}
                         <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
                         {/* <span className="text-slate-300">|</span> */}
