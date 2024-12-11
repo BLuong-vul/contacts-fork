@@ -7,33 +7,33 @@ import styles from '../styles/app.layout.css';
 import Link from 'next/link';
 
 export default function RootLayout({ children }) {
-  useEffect(() => {
-    const container = document.createElement('div');
-    container.className = 'shooting-stars-container';
-    document.body.appendChild(container);
+  // useEffect(() => {
+  //   const container = document.createElement('div');
+  //   container.className = 'shooting-stars-container';
+  //   document.body.appendChild(container);
 
-    // Create and append each shooting star
-    for (let i = 1; i <= 10; i++) {
-      const star = document.createElement('div');
-      star.className = 'shooting-star';
+  //   // Create and append each shooting star
+  //   for (let i = 1; i <= 10; i++) {
+  //     const star = document.createElement('div');
+  //     star.className = 'shooting-star';
       
-      // Randomize position within the viewport
-      const randomTop = 'vh';
-      const randomRight = Math.random() * 100 + 'vw';
-      star.style.top = randomTop;
-      star.style.right = randomRight;
+  //     // Randomize position within the viewport
+  //     const randomTop = 'vh';
+  //     const randomRight = Math.random() * 100 + 'vw';
+  //     star.style.top = randomTop;
+  //     star.style.right = randomRight;
 
-      // Add random animation delay and duration
-      star.style.animationDelay = `${Math.random() * 3}s`;
-      star.style.animationDuration = `${1 + Math.random() * 2}s`;
+  //     // Add random animation delay and duration
+  //     star.style.animationDelay = `${Math.random() * 3}s`;
+  //     star.style.animationDuration = `${1 + Math.random() * 2}s`;
       
-      container.appendChild(star);
-    }
-    // Cleanup on unmount
-    return () => {
-      container.remove();
-    };
-  }, []);
+  //     container.appendChild(star);
+  //   }
+  //   // Cleanup on unmount
+  //   return () => {
+  //     container.remove();
+  //   };
+  // }, []);
   return (
     <>
       <Navbar/>
