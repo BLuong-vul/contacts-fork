@@ -1,6 +1,7 @@
 #! /bin/bash
 
 calculate_contributions() {
+  # https://stackoverflow.com/questions/4592866/git-how-to-estimate-a-contribution-of-a-person-to-my-project-in-terms-of-added
   local user="$1"
   local aliases="${user_aliases[$user]}"
 
