@@ -21,15 +21,33 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller handling authentication-related endpoints.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin("*") // todo: update this later
 public class AuthenticationController {
 
+    /**
+     * Service layer dependency for authentication operations.
+     */
     @Autowired
     private AuthenticationService authenticationService;
 
+    /**
+     * Registers a new user with the provided registration details.
+     * RegistrationDTO must be valid, and the validation is checked at time of binding
+     * when JSON is deserialized.
+     *
+     * @param body        Validated RegistrationDTO containing user registration details
+     * @param bindingResult Binding result for validation errors
+     * @return ResponseEntity with:
+     *         - created UserDTO on successful registration (HTTP 200 OK)
+     *         - error message on validation failure (HTTP 400 Bad Request)
+     *         - error response on registration failure (HTTP 400 Bad Request)
+     */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegistrationDTO body, BindingResult bindingResult) {
         // when binding input json -> RegistrationDTO as specified by @Valid, some errors can be thrown:
@@ -63,6 +81,13 @@ public class AuthenticationController {
         }
     }
 
+
+    /**
+     * Converts a constraint violation exception to a human-readable error message.
+     *
+     * @param e the exception containing the error message
+     * @return a string representing the error message, tailored for known constraint violations
+     */
     private static String constraintErrorToMessage(Exception e) {
         // not the greatest way to handle this, an exceptionHandler would be better. But whatever.
         // another better way to do this would be to have the service class check for these things explicitly,
@@ -88,6 +113,14 @@ public class AuthenticationController {
         return errorBuilder.toString();
     }
 
+    /**
+     * Authenticates a user based on the provided login credentials.
+     *
+     * @param body LoginDTO containing the username and password
+     * @return ResponseEntity with:
+     *         - LoginResponseDTO on successful authentication (HTTP 200 OK)
+     *         - null on authentication failure (HTTP 401 Unauthorized)
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> loginUser(@RequestBody LoginDTO body) {
         try {
@@ -99,6 +132,14 @@ public class AuthenticationController {
         }
     }
 
+    /**
+     * Validates the provided authentication token.
+     *
+     * <p>Note: This endpoint is only accessible if the token is already validated by the SecurityConfig.</p>
+     *
+     * @param token the Authorization token to validate (included in the 'Authorization' header)
+     * @return a simple "Token is valid" message (HTTP 200 OK) if the token is valid
+     */
     @GetMapping("/validate")
     public ResponseEntity<String> validateToken(@RequestHeader("Authorization") String token) {
         // This is only reached if the token is valid
