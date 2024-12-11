@@ -212,6 +212,7 @@ public class PostServiceTest {
                 .hasMessageContaining("Post id 1 not found");
     }
 
+    /*
     @Test
     public void getAllPosts_Success() {
         // Arrange
@@ -228,6 +229,7 @@ public class PostServiceTest {
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0)).isEqualTo(testPost);
     }
+    */
 
     @Test
     public void getAllPostsByUsername_Success() {

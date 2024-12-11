@@ -10,6 +10,16 @@ import java.util.Date;
 
 public class PostSearchSpecification {
 
+    public static Specification<Post> filterByBeforeDate(Date beforeDate) {
+        return (root, query, builder) -> 
+            builder.lessThanOrEqualTo(root.get("datePosted"), beforeDate);
+    }
+
+    public static Specification<Post> filterByAfterDate(Date afterDate) {
+        return (root, query, builder) -> 
+            builder.greaterThanOrEqualTo(root.get("datePosted"), afterDate);
+    }
+
     public static Specification<Post> searchPosts(String query, ApplicationUser user) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             if (!StringUtils.hasText(query)) {

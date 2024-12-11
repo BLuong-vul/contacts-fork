@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Service
@@ -89,10 +92,19 @@ public class PostService {
         return votingService.getUserVoteOnVotable(user, post);
     }
 
+    // Default sort by new
+    public Page<Post> getAllPosts(int page, int size, String sortBy, Date beforeDate, Date afterDate) {
+        Pageable pageable;
+        if ("popularity".equals(sortBy)) {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("datePosted")));
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("datePosted")));
+        }
 
-    public Page<Post> getAllPosts(int page, int size) {
-        return postRepository.findAll(PageRequest.of(page, size, Sort.by("datePosted")));
+        return postRepository.findAllPostsWithFilters(pageable, beforeDate, afterDate);
     }
+
+
 
     public Page<Post> getAllPostsByUsername(String username, int page, int size) {
         ApplicationUser user = userService.loadUserByUsername(username); 

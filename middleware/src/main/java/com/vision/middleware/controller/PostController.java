@@ -44,10 +44,16 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Page<PostDTO>> getPostPage(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                     @RequestParam(value = "size", defaultValue = "10") int size) {
-        Page<Post> posts = postService.getAllPosts(page, size);
+    public ResponseEntity<Page<PostDTO>> getPostPage(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort-by", defaultValue = "date") String sortBy,
+            @RequestParam(value = "before-date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beforeDate,
+            @RequestParam(value = "after-date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date afterDate) {
+        
+        Page<Post> posts = postService.getAllPosts(page, size, sortBy, beforeDate, afterDate);
         Page<PostDTO> postsDTO = posts.map(this::buildDTOFromPost);
+        
         return ResponseEntity.ok(postsDTO);
     }
 

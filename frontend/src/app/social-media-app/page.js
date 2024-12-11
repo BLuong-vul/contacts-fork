@@ -17,33 +17,7 @@ import Post from '../../components/PostContainer';
 
 
 export default function Projects() {
-	{/*Adjustable sidebar function section*/}
-	const [sidebarWidth, setSidebarWidth] = useState(250); //initial width of the sidebar
-	const minWidth = 5; //minimum width for sidebar
-	const maxWidth = 600; //maximum width
-	
-	const handleMouseDown = (e) => {
-		const startX = e.clientX; //get starting X position
-
-		const onMouseMove = (moveEvent) => {
-			
-			const newWidth = window.innerWidth - moveEvent.clientX;
-			const dragSpeedMultiplier = 2.0;
-			if (newWidth > minWidth && newWidth < maxWidth) {
-				setSidebarWidth(newWidth * dragSpeedMultiplier);
-			}
-		};
-		
-		const onMouseUp = () => {
-			window.removeEventListener('mousemove', onMouseMove);
-			window.removeEventListener('mouseup', onMouseUp);
-		};
-		window.addEventListener('mousemove', onMouseMove);
-		window.addEventListener('mouseup', onMouseUp);
-	};
-	{/*Adjustable sidebar function end*/}
-
-	// Track like, dislike, and comment countd for each post
+	// Track like, dislike, and comment count for each post
 	const [likes, setLikes] = useState({});
 	const [dislikes, setDislikes] = useState({});
 	const [comments, setComments] = useState({});
@@ -62,17 +36,22 @@ export default function Projects() {
 	const numPostsRef = useRef(numPosts);
 
 	const [filterOptions, setFilterOptions] = useState({
-	    sortBy: 'new',
+	    sortBy: 'date',
 	    filterOption: {
 	      beforeDate: '',
 	      afterDate: '',
-	      followingOnly: false,
 	    }
 	  });
+
+	const clearPosts = async () => {
+		setPosts([]);
+		setNumPosts(0);
+	}
 
 	const handleFilterChange = (newFilterOptions) => {
 	    setFilterOptions(newFilterOptions);
 	    console.log(newFilterOptions);
+	    clearPosts();
 	  };
 	
 
@@ -119,9 +98,9 @@ export default function Projects() {
 	}, [numPosts]);
 	useEffect(() => {
 	  	const handleScroll = async () => {
-		    if (window.innerHeight + window.scrollY + 30 >= document.body.offsetHeight) {
-		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 5);
-		      setNumPosts(numPostsRef.current + 5);
+		    if (window.innerHeight + window.scrollY + 20 >= document.body.offsetHeight) {
+		      const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 10, filterOptions.sortBy, filterOptions.filterOption.beforeDate, filterOptions.filterOption.afterDate);
+		      setNumPosts(numPostsRef.current + 10);
 		      setPosts(fetchedPosts);
 		    }
   		};
@@ -129,7 +108,7 @@ export default function Projects() {
 		window.addEventListener('scroll', handleScroll);
 		// Clean up listener on unmount
 		return () => { window.removeEventListener('scroll', handleScroll); };
-	}, []);
+	}, [filterOptions]);
 
 
 	
@@ -137,7 +116,7 @@ export default function Projects() {
 	useEffect(() => {
 	    const fetchAndSetPosts = async () => {
 	        try {
-	            const fetchedPosts = await Fetch.fetchAllPosts();
+	            const fetchedPosts = await Fetch.fetchAllPosts(0, 10, filterOptions.sortBy, filterOptions.filterOption.beforeDate, filterOptions.filterOption.afterDate);
 	            console.log(fetchedPosts);
 	            setPosts(fetchedPosts); 
 	        } catch (error) {
@@ -147,7 +126,7 @@ export default function Projects() {
 	    };
 
 	    fetchAndSetPosts();
-	}, []); 
+	}, [filterOptions]); 
 	
 
 
@@ -160,7 +139,7 @@ export default function Projects() {
 				<LeftMenu onFilterChange={handleFilterChange} type="home"/>
 			</div>
 			<main className={styles.mainContainer}>
-				<div className={homepagestyles.contentContainer} style={{ marginRight: setSidebarWidth}}>
+				<div className={homepagestyles.contentContainer}>
 					{/*button for creating post*/}
 					<div className={homepagestyles.createPostContainer}>
 						<button onClick={toggleCreatePost} className="text-white text-l p-2 rounded-md bg-blue-500 hover:bg-blue-700 transition duration-100">

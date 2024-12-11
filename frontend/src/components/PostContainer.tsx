@@ -4,7 +4,13 @@ import Image from "next/image";
 import Comments from "./Comments";
 import Link from 'next/link';
 import * as Fetch from './Functions';
-import { FaUser, FaArrowUp, FaArrowDown, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { FaUser, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+
+// Function to format date (you can customize the format)
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+    return new Date(date).toLocaleDateString(undefined, options);
+};
 
 const PostContainer = ({ postData }) => {
     // state variables for dynamic content
@@ -21,7 +27,6 @@ const PostContainer = ({ postData }) => {
     const [commentData, setCommentData] = useState([]);
     const [commentsVisible, setCommentsVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-
 
     useEffect(() => {
         // fetch the user's vote on the post
@@ -72,7 +77,6 @@ const PostContainer = ({ postData }) => {
             fetchProfilePicture();
         }
     }, [postData?.postedBy?.profilePictureFileName]);
-
 
     const handleLike = () => {
         if (userRating === "LIKE") {
@@ -132,7 +136,10 @@ const PostContainer = ({ postData }) => {
                         {postData?.postedBy?.displayName || postData?.postedBy?.username}
                     </Link>
                 </div>
-                {/*<Image src="/more.png" alt="More options" width={16} height={16} />*/}
+                {/* Post Date */}
+                <div className="text-slate-400 text-sm overflow-hidden text-ellipsis whitespace-nowrap ml-8">
+                    {postData?.datePosted ? formatDate(postData.datePosted) : 'Date not available'}
+                </div>
             </div>
             {postData?.title && (
                 <Link href={`/social-media-app/posts/${postData.postId}`}>
@@ -173,7 +180,6 @@ const PostContainer = ({ postData }) => {
                     <div onClick={toggleComments} className="ml-4 cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Comments */}
                         <Image src="/comment.png" alt="Comment" width={16} height={16} className="cursor-pointer" />
-                        {/* <span className="text-slate-300">|</span> */}
                         <span className="text-slate-300">
                             {commentData.length}
                             <span className="hidden md:inline"> Comments</span>

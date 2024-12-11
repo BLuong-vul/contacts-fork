@@ -5,11 +5,10 @@ import ProfileCard from "@/components/leftmenu/profile-card";
 
 const LeftMenu = ({ type, onFilterChange }) => {
   // State for sorting and filtering options
-  const [sortOption, setSortOption] = useState("new");
+  const [sortOption, setSortOption] = useState("date");
   const [filterOption, setFilterOption] = useState({
     beforeDate: "",
     afterDate: "",
-    followingOnly: false,
   });
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -47,8 +46,8 @@ const LeftMenu = ({ type, onFilterChange }) => {
             onChange={handleSortChange}
             className="bg-slate-500 text-white rounded-md px-2 py-1 transition-colors duration-100 hover:bg-slate-700"
           >
-            <option value="new">New</option>
-            <option value="popularity">Popularity</option>
+            <option value="date">New</option>
+            <option value="popularity">Popular</option>
           </select>
         </div>
 
@@ -85,19 +84,6 @@ const LeftMenu = ({ type, onFilterChange }) => {
             />
           </div>
 
-          <div className="flex items-center justify-end">
-            <input
-              type="checkbox"
-              id="followingOnly"
-              name="followingOnly"
-              checked={filterOption.followingOnly}
-              onChange={handleFilterChange}
-              className="mr-2"
-            />
-            <label htmlFor="followingOnly" className="text-gray-300 hover:text-slate-400">
-              Following Only
-            </label>
-          </div>
         </div>
       </div>
     </div>

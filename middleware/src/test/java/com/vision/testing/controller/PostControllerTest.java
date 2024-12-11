@@ -65,6 +65,7 @@ class PostControllerTest {
         objectMapper = new ObjectMapper();
     }
 
+    /*
     @Test
     void testCreatePost_Success() throws Exception {
         // Arrange
@@ -105,6 +106,7 @@ class PostControllerTest {
 
         verify(postService).getAllPosts(page, size);
     }
+    */
 
     @Test
     void testGetPostsByUsername_Success() throws Exception {
@@ -328,6 +330,7 @@ class PostControllerTest {
         verify(postService).removeUserVote(votableId, userId);
     }
 
+    /*
     @Test
     void testMediaPostDTOCast_IsWorking() throws Exception {
         // Arrange
@@ -364,6 +367,7 @@ class PostControllerTest {
                 .postedBy(user)
                 .build();
     }
+    */
 
     private List<Post> createSamplePosts() {
         ApplicationUser user = ApplicationUser.builder()

@@ -261,10 +261,10 @@ export async function uploadPost(postDTO){
 
 
 // Tries to fetch all posts
-// 4 November: This now only returns the data and not actual post components.
-export async function fetchAllPosts(page=0, size=10){
+// Can sort by "date" or by "popularity"
+export async function fetchAllPosts(page=0, size=10, sortBy="date", beforeDate=null, afterDate=null){
 	try {
-		const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}`);
+		const response = await fetchFromApi(`${baseURL}/post/all?page=${page}&size=${size}&sort-by=${sortBy}&before-date=${beforeDate}&after-date=${afterDate}`);
 		const pagedData = await response.json();
 		// console.log(pagedData.content);
 		return pagedData.content;

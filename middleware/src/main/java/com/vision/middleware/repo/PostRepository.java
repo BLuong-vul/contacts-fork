@@ -4,8 +4,10 @@ import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.domain.Post;
 import com.vision.middleware.repo.searchspec.PostSearchSpecification;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,23 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
     Optional<Post> findById(long id);
     Page<Post> findByPostedBy(ApplicationUser postedBy, Pageable pageable);
+
+    default Page<Post> findAllPostsWithFilters(Pageable pageable, Date beforeDate, Date afterDate) {
+        Specification<Post> spec = Specification.where(null);
+        
+        if (beforeDate != null) {
+            spec = spec.and(PostSearchSpecification.filterByBeforeDate(beforeDate));
+        }
+        
+        if (afterDate != null) {
+            spec = spec.and(PostSearchSpecification.filterByAfterDate(afterDate));
+        }
+
+        return findAll(spec, pageable);
+    }
+
+
+
 
     // searching methods
     default List<Post> searchPosts(String query, ApplicationUser user) {
