@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MediaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware.controller</a> &gt; <span class="el_source">MediaController.java</span></div><h1>MediaController.java</h1><pre class="source lang-java linenums">package com.vision.middleware.controller;
+
+import com.amazonaws.services.s3.model.S3Object;
+import com.vision.middleware.exceptions.InvalidFileException;
+import com.vision.middleware.exceptions.MediaNotFoundException;
+import com.vision.middleware.exceptions.MediaUploadException;
+import com.vision.middleware.service.MediaService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping(&quot;/media&quot;)
+@CrossOrigin(&quot;*&quot;)
+<span class="fc" id="L19">public class MediaController {</span>
+
+    @Autowired
+    private MediaService mediaService;
+
+    @PostMapping(&quot;/upload&quot;)
+    public ResponseEntity&lt;String&gt; uploadMedia(@RequestParam(&quot;file&quot;) MultipartFile file) {
+        try {
+<span class="fc" id="L27">            String fileName = mediaService.uploadMedia(file);</span>
+<span class="fc" id="L28">            return ResponseEntity.ok(fileName);</span>
+<span class="fc" id="L29">        } catch (InvalidFileException e) {</span>
+<span class="fc" id="L30">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="fc" id="L31">        } catch (MediaUploadException e) {</span>
+<span class="fc" id="L32">            return ResponseEntity.internalServerError().body(e.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/{fileName}&quot;)
+    public ResponseEntity&lt;InputStreamResource&gt; getMedia(@PathVariable String fileName) {
+        try {
+<span class="fc" id="L39">            S3Object s3Object = mediaService.getMedia(fileName);</span>
+
+<span class="fc" id="L41">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L42">            headers.setContentType(MediaType.parseMediaType(s3Object.getObjectMetadata().getContentType()));</span>
+<span class="fc" id="L43">            headers.setContentLength(s3Object.getObjectMetadata().getContentLength());</span>
+
+<span class="fc" id="L45">            return ResponseEntity.ok()</span>
+<span class="fc" id="L46">                    .headers(headers)</span>
+<span class="fc" id="L47">                    .body(new InputStreamResource(s3Object.getObjectContent()));</span>
+<span class="fc" id="L48">        } catch (MediaNotFoundException e) {</span>
+<span class="fc" id="L49">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

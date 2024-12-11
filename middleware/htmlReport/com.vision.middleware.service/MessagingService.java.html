@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessagingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware.service</a> &gt; <span class="el_source">MessagingService.java</span></div><h1>MessagingService.java</h1><pre class="source lang-java linenums">package com.vision.middleware.service;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Message;
+import com.vision.middleware.dto.MessageDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
+import com.vision.middleware.repo.MessageRepository;
+import com.vision.middleware.repo.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+@Service
+@RequiredArgsConstructor
+public class MessagingService {
+
+    @Autowired
+    private final MessageRepository messageRepository;
+
+    @Autowired
+    private final UserService userService;
+
+
+    public void sendMessage(long senderId, MessageDTO messageDTO) {
+        /*Design Pattern: Builder*/
+<span class="fc" id="L28">        Message message = Message.builder()</span>
+<span class="fc" id="L29">                .messageBody(messageDTO.getBody())</span>
+<span class="fc" id="L30">                .sendingUserId(senderId)</span>
+<span class="fc" id="L31">                .receivingUserId(messageDTO.getRecipientId())</span>
+<span class="fc" id="L32">                .dateSent(new Date())</span>
+<span class="fc" id="L33">                .build();</span>
+        /*Design Pattern: Builder*/
+<span class="fc" id="L35">        messageRepository.save(message);</span>
+<span class="fc" id="L36">    }</span>
+
+    public List&lt;Message&gt; getChatBetween(long user1Id, long user2Id) {
+<span class="fc" id="L39">        ApplicationUser user1 = userService.loadUserById(user1Id);</span>
+<span class="fc" id="L40">        ApplicationUser user2 = userService.loadUserById(user2Id);</span>
+
+        // lists retrieved from repository are immutable, need new list to join them.
+<span class="fc" id="L43">        List&lt;Message&gt; chat = messageRepository.findBySendingUserIdAndReceivingUserId(user1, user2);</span>
+<span class="fc" id="L44">        List&lt;Message&gt; u2SentTou1 = messageRepository.findBySendingUserIdAndReceivingUserId(user2, user1);</span>
+<span class="fc" id="L45">        List&lt;Message&gt; retList = new ArrayList&lt;&gt;(chat.size() + u2SentTou1.size());</span>
+
+<span class="fc" id="L47">        retList.addAll(chat);</span>
+<span class="fc" id="L48">        retList.addAll(u2SentTou1);</span>
+<span class="fc" id="L49">        retList.sort(Comparator.comparing(Message::getDateSent));</span>
+
+<span class="fc" id="L51">        return retList;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

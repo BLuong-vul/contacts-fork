@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostRepositoryTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.repo</a> &gt; <span class="el_source">PostRepositoryTest.java</span></div><h1>PostRepositoryTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.repo;
+
+import com.vision.middleware.Application;
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.baseentities.VotableEntity;
+import com.vision.middleware.repo.PostRepository;
+import com.vision.middleware.repo.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Testcontainers
+@SpringBootTest(classes = Application.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+<span class="fc" id="L32">public class PostRepositoryTest {</span>
+
+    @Container
+<span class="fc" id="L35">    private static final PostgreSQLContainer&lt;?&gt; postgresContainer = new PostgreSQLContainer&lt;&gt;(&quot;postgres:13&quot;)</span>
+<span class="fc" id="L36">            .withDatabaseName(&quot;testdb&quot;)</span>
+<span class="fc" id="L37">            .withUsername(&quot;username&quot;)</span>
+<span class="fc" id="L38">            .withPassword(&quot;password&quot;);</span>
+
+    @DynamicPropertySource
+    static void postgresqlProperties(DynamicPropertyRegistry registry) {
+<span class="fc" id="L42">        registry.add(&quot;spring.datasource.url&quot;, postgresContainer::getJdbcUrl);</span>
+<span class="fc" id="L43">        registry.add(&quot;spring.datasource.username&quot;, postgresContainer::getUsername);</span>
+<span class="fc" id="L44">        registry.add(&quot;spring.datasource.password&quot;, postgresContainer::getPassword);</span>
+<span class="fc" id="L45">        registry.add(&quot;spring.jpa.hibernate.ddl-auto&quot;, () -&gt; &quot;create-drop&quot;);</span>
+<span class="fc" id="L46">    }</span>
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private static ApplicationUser testUser;
+
+    @BeforeEach
+    void setUp() {
+        // Create a test user
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (testUser == null) {</span>
+<span class="fc" id="L60">            testUser = ApplicationUser.builder()</span>
+<span class="fc" id="L61">                    .username(&quot;testuser&quot;)</span>
+<span class="fc" id="L62">                    .password(&quot;testpassword&quot;)</span>
+<span class="fc" id="L63">                    .fullName(&quot;hello world&quot;)</span>
+<span class="fc" id="L64">                    .email(&quot;test@example.com&quot;)</span>
+<span class="fc" id="L65">                    .phoneNumber(&quot;1234567890&quot;)</span>
+<span class="fc" id="L66">                    .build();</span>
+<span class="fc" id="L67">            testUser = userRepository.save(testUser);</span>
+        }
+<span class="fc" id="L69">    }</span>
+
+    @AfterEach
+    void tearDown() {
+<span class="fc" id="L73">        postRepository.deleteAll();</span>
+<span class="fc" id="L74">    }</span>
+
+    @Test
+    void testSaveAndFindPost() {
+        // Create a test post
+<span class="fc" id="L79">        Post post = new Post();</span>
+<span class="fc" id="L80">        post.setText(&quot;Test Post Content&quot;);</span>
+<span class="fc" id="L81">        post.setPostedBy(testUser);</span>
+<span class="fc" id="L82">        post.setDatePosted(new Date());</span>
+
+        // Save the post
+<span class="fc" id="L85">        Post savedPost = postRepository.save(post);</span>
+
+        // Find the post by ID
+<span class="fc" id="L88">        Optional&lt;Post&gt; foundPost = postRepository.findById(savedPost.getId());</span>
+
+        // Assertions
+<span class="fc" id="L91">        assertThat(foundPost).isPresent();</span>
+<span class="fc" id="L92">        assertThat(foundPost.get().getText()).isEqualTo(&quot;Test Post Content&quot;);</span>
+<span class="fc" id="L93">        assertThat(foundPost.get().getPostedBy().getId()).isEqualTo(testUser.getId());</span>
+<span class="fc" id="L94">    }</span>
+
+    @Test
+    void testFindByPostedBy() {
+        // Create multiple posts by the test user
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        for (int i = 0; i &lt; 10; i++) {</span>
+<span class="fc" id="L100">            Post post = Post.builder()</span>
+<span class="fc" id="L101">                    .text(&quot;Test Post Content &quot; + i)</span>
+<span class="fc" id="L102">                    .postedBy(testUser)</span>
+<span class="fc" id="L103">                    .datePosted(new Date())</span>
+<span class="fc" id="L104">                    .build();</span>
+<span class="fc" id="L105">            postRepository.save(post);</span>
+        }
+
+        // Retrieve posts with pagination
+<span class="fc" id="L109">        Page&lt;Post&gt; userPosts = postRepository.findByPostedBy(testUser, PageRequest.of(0, 5));</span>
+
+        // Assertions
+<span class="fc" id="L112">        assertThat(userPosts).hasSize(5);</span>
+<span class="fc" id="L113">        assertThat(userPosts.getTotalElements()).isEqualTo(10);</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        assertThat(userPosts.getContent()).allMatch(post -&gt; post.getPostedBy().getId() == testUser.getId());</span>
+<span class="fc" id="L115">    }</span>
+
+    @Test
+    void testSearchPosts() {
+        // Create posts with different contents
+<span class="fc" id="L120">        Post post1 = createPost(&quot;Hello World Java Test&quot;, testUser);</span>
+<span class="fc" id="L121">        Post post2 = createPost(&quot;Another Java Test Post&quot;, testUser);</span>
+<span class="fc" id="L122">        Post post3 = createPost(&quot;Unrelated Content&quot;, testUser);</span>
+
+        // Search posts containing &quot;Java&quot;
+<span class="fc" id="L125">        List&lt;Post&gt; searchResults = postRepository.searchPosts(&quot;Java&quot;, testUser);</span>
+
+        // Assertions
+<span class="fc" id="L128">        assertThat(searchResults).hasSize(2);</span>
+<span class="fc" id="L129">        assertThat(searchResults.stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());</span>
+<span class="fc" id="L130">        assertThat(searchResults.stream().map(VotableEntity::getId)).doesNotContain(post3.getId());</span>
+<span class="fc" id="L131">    }</span>
+
+    @Test
+    void testSearchPosts_NoUser() {
+        // Create posts with different contents
+<span class="fc" id="L136">        Post post1 = createPost(&quot;Hello World Java Test&quot;, testUser);</span>
+<span class="fc" id="L137">        Post post2 = createPost(&quot;Another Java Test Post&quot;, testUser);</span>
+<span class="fc" id="L138">        Post post3 = createPost(&quot;Unrelated Content&quot;, testUser);</span>
+
+        // Search posts containing &quot;Java&quot;
+<span class="fc" id="L141">        List&lt;Post&gt; searchResults = postRepository.searchPosts(&quot;Java&quot;, null);</span>
+
+        // Assertions
+<span class="fc" id="L144">        assertThat(searchResults).hasSize(2);</span>
+<span class="fc" id="L145">        assertThat(searchResults.stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());</span>
+<span class="fc" id="L146">        assertThat(searchResults.stream().map(VotableEntity::getId)).doesNotContain(post3.getId());</span>
+<span class="fc" id="L147">    }</span>
+
+    @Test
+    void testSearchPostsByDateRange() {
+        // Create posts with different dates
+<span class="fc" id="L152">        Date now = new Date();</span>
+<span class="fc" id="L153">        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);</span>
+<span class="fc" id="L154">        Date twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000L);</span>
+
+<span class="fc" id="L156">        Post post1 = createPost(&quot;Recent Post&quot;, testUser, now);</span>
+<span class="fc" id="L157">        Post post2 = createPost(&quot;One Week Ago Post&quot;, testUser, oneWeekAgo);</span>
+<span class="fc" id="L158">        Post post3 = createPost(&quot;Two Weeks Ago Post&quot;, testUser, twoWeeksAgo);</span>
+
+        // Search posts within the last week
+<span class="fc" id="L161">        List&lt;Post&gt; searchResults = postRepository.searchPostsByDateAndQuery(</span>
+                null, testUser, oneWeekAgo, now
+        );
+
+        // Assertions
+<span class="fc" id="L166">        assertThat(searchResults).hasSize(2);</span>
+<span class="fc" id="L167">        assertThat(searchResults.stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());</span>
+<span class="fc" id="L168">        assertThat(searchResults.stream().map(VotableEntity::getId)).doesNotContain(post3.getId());</span>
+<span class="fc" id="L169">    }</span>
+
+    @Test
+    void testSearchPostsByDateRange_NoUser() {
+        // Create posts with different dates
+<span class="fc" id="L174">        Date now = new Date();</span>
+<span class="fc" id="L175">        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);</span>
+<span class="fc" id="L176">        Date twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000L);</span>
+
+<span class="fc" id="L178">        Post post1 = createPost(&quot;Recent Post&quot;, testUser, now);</span>
+<span class="fc" id="L179">        Post post2 = createPost(&quot;One Week Ago Post&quot;, testUser, oneWeekAgo);</span>
+<span class="fc" id="L180">        Post post3 = createPost(&quot;Two Weeks Ago Post&quot;, testUser, twoWeeksAgo);</span>
+
+        // Search posts within the last week
+<span class="fc" id="L183">        List&lt;Post&gt; searchResults = postRepository.searchPostsByDateAndQuery(</span>
+                null, null, oneWeekAgo, now
+        );
+
+        // Assertions
+<span class="fc" id="L188">        assertThat(searchResults).hasSize(2);</span>
+<span class="fc" id="L189">        assertThat(searchResults.stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());</span>
+<span class="fc" id="L190">        assertThat(searchResults.stream().map(VotableEntity::getId)).doesNotContain(post3.getId());</span>
+<span class="fc" id="L191">    }</span>
+
+    @Test
+    void testSearchPostsByDateRange_NoDate() {
+        // Create posts with different dates
+<span class="fc" id="L196">        Date now = new Date();</span>
+<span class="fc" id="L197">        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);</span>
+<span class="fc" id="L198">        Date twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000L);</span>
+
+<span class="fc" id="L200">        Post post1 = createPost(&quot;Recent Post&quot;, testUser, now);</span>
+<span class="fc" id="L201">        Post post2 = createPost(&quot;One Week Ago Post&quot;, testUser, oneWeekAgo);</span>
+<span class="fc" id="L202">        Post post3 = createPost(&quot;Two Weeks Ago Post&quot;, testUser, twoWeeksAgo);</span>
+
+        // Search posts within the last week
+<span class="fc" id="L205">        List&lt;Post&gt; searchResults = postRepository.searchPostsByDateAndQuery(</span>
+                null, null, null, null
+        );
+
+        // Assertions
+<span class="fc" id="L210">        assertThat(searchResults).hasSize(3);</span>
+<span class="fc" id="L211">    }</span>
+
+    // Helper method to create a post with specific content and user
+    private Post createPost(String content, ApplicationUser user) {
+<span class="fc" id="L215">        return postRepository.save(Post.builder()</span>
+<span class="fc" id="L216">                .text(content)</span>
+<span class="fc" id="L217">                .postedBy(user)</span>
+<span class="fc" id="L218">                .datePosted(new Date())</span>
+<span class="fc" id="L219">                .build());</span>
+    }
+
+    // Overloaded helper method to create a post with specific date
+    private Post createPost(String content, ApplicationUser user, Date createdAt) {
+<span class="fc" id="L224">        return postRepository.save(Post.builder()</span>
+<span class="fc" id="L225">                .text(content)</span>
+<span class="fc" id="L226">                .postedBy(user)</span>
+<span class="fc" id="L227">                .datePosted(createdAt)</span>
+<span class="fc" id="L228">                .build());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

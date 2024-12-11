@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VotableEntityTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.domain.baseentities</a> &gt; <span class="el_source">VotableEntityTest.java</span></div><h1>VotableEntityTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.domain.baseentities;
+
+import com.vision.middleware.domain.baseentities.VotableEntity;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+<span class="fc" id="L17">class VotableEntityTest {</span>
+
+    @Table(name = &quot;test_votable_entity&quot;)
+    @SequenceGenerator(name = &quot;id_generator&quot;, sequenceName = &quot;test_votable_entity_seq&quot;, allocationSize = 1)
+    @SuperBuilder
+    @NoArgsConstructor
+    public static class TestVotableEntity extends VotableEntity {
+        // This class is used solely for testing purposes
+    }
+
+    private TestVotableEntity votableEntity;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L31">        MockitoAnnotations.openMocks(this);</span>
+<span class="fc" id="L32">        votableEntity = new TestVotableEntity();</span>
+<span class="fc" id="L33">    }</span>
+
+    @Test
+    void testInitialState() {
+<span class="fc" id="L37">        assertEquals(0, votableEntity.getLikeCount());</span>
+<span class="fc" id="L38">        assertEquals(0, votableEntity.getDislikeCount());</span>
+<span class="fc" id="L39">        assertEquals(0, votableEntity.getVoteScore());</span>
+<span class="fc" id="L40">    }</span>
+
+    @Test
+    void testUpdateDerivedFields() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L44">        votableEntity = TestVotableEntity.builder()</span>
+<span class="fc" id="L45">                .id(1)</span>
+<span class="fc" id="L46">                .likeCount(5)</span>
+<span class="fc" id="L47">                .dislikeCount(3)</span>
+<span class="fc" id="L48">                .build();</span>
+
+<span class="fc" id="L50">        Method updateDerivedFieldsMethod = VotableEntity.class.getDeclaredMethod(&quot;updateDerivedFields&quot;);</span>
+<span class="fc" id="L51">        updateDerivedFieldsMethod.setAccessible(true);</span>
+<span class="fc" id="L52">        updateDerivedFieldsMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L54">        assertEquals(2, votableEntity.getVoteScore());</span>
+<span class="fc" id="L55">    }</span>
+
+    @Test
+    void testOnPrePersist() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L59">        votableEntity.setLikeCount(10);</span>
+<span class="fc" id="L60">        votableEntity.setDislikeCount(4);</span>
+
+<span class="fc" id="L62">        Method onPrePersistMethod = VotableEntity.class.getDeclaredMethod(&quot;onPrePersist&quot;);</span>
+<span class="fc" id="L63">        onPrePersistMethod.setAccessible(true);</span>
+<span class="fc" id="L64">        onPrePersistMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L66">        assertEquals(6, votableEntity.getVoteScore());</span>
+<span class="fc" id="L67">    }</span>
+
+    @Test
+    void testOnPreUpdate() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L71">        votableEntity.setLikeCount(7);</span>
+<span class="fc" id="L72">        votableEntity.setDislikeCount(2);</span>
+
+<span class="fc" id="L74">        Method onPreUpdateMethod = VotableEntity.class.getDeclaredMethod(&quot;onPreUpdate&quot;);</span>
+<span class="fc" id="L75">        onPreUpdateMethod.setAccessible(true);</span>
+<span class="fc" id="L76">        onPreUpdateMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L78">        assertEquals(5, votableEntity.getVoteScore());</span>
+<span class="fc" id="L79">    }</span>
+
+    @Test
+    void testVoteScoreCalculation() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L83">        votableEntity.setLikeCount(15);</span>
+<span class="fc" id="L84">        votableEntity.setDislikeCount(8);</span>
+
+<span class="fc" id="L86">        Method updateDerivedFieldsMethod = VotableEntity.class.getDeclaredMethod(&quot;updateDerivedFields&quot;);</span>
+<span class="fc" id="L87">        updateDerivedFieldsMethod.setAccessible(true);</span>
+<span class="fc" id="L88">        updateDerivedFieldsMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L90">        assertEquals(7, votableEntity.getVoteScore());</span>
+<span class="fc" id="L91">    }</span>
+
+    @Test
+    void testNegativeVoteScore() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L95">        votableEntity.setLikeCount(3);</span>
+<span class="fc" id="L96">        votableEntity.setDislikeCount(5);</span>
+
+<span class="fc" id="L98">        Method updateDerivedFieldsMethod = VotableEntity.class.getDeclaredMethod(&quot;updateDerivedFields&quot;);</span>
+<span class="fc" id="L99">        updateDerivedFieldsMethod.setAccessible(true);</span>
+<span class="fc" id="L100">        updateDerivedFieldsMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L102">        assertEquals(-2, votableEntity.getVoteScore());</span>
+<span class="fc" id="L103">    }</span>
+
+    @Test
+    void testZeroVoteScore() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+<span class="fc" id="L107">        votableEntity.setLikeCount(5);</span>
+<span class="fc" id="L108">        votableEntity.setDislikeCount(5);</span>
+
+<span class="fc" id="L110">        Method updateDerivedFieldsMethod = VotableEntity.class.getDeclaredMethod(&quot;updateDerivedFields&quot;);</span>
+<span class="fc" id="L111">        updateDerivedFieldsMethod.setAccessible(true);</span>
+<span class="fc" id="L112">        updateDerivedFieldsMethod.invoke(votableEntity);</span>
+
+<span class="fc" id="L114">        assertEquals(0, votableEntity.getVoteScore());</span>
+<span class="fc" id="L115">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

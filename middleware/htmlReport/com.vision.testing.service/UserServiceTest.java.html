@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.service</a> &gt; <span class="el_source">UserServiceTest.java</span></div><h1>UserServiceTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.service;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.relations.UserFollows;
+import com.vision.middleware.exceptions.IdNotFoundException;
+import com.vision.middleware.repo.UserFollowsRepository;
+import com.vision.middleware.repo.UserRepository;
+import com.vision.middleware.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L27">public class UserServiceTest {</span>
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserFollowsRepository userFollowsRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    private ApplicationUser testUser;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L45">        testUser = new ApplicationUser();</span>
+<span class="fc" id="L46">        testUser.setId(1L);</span>
+<span class="fc" id="L47">        testUser.setUsername(&quot;testUser&quot;);</span>
+<span class="fc" id="L48">        testUser.setPassword(&quot;encodedPassword&quot;);</span>
+<span class="fc" id="L49">    }</span>
+
+    @Test
+    public void testLoadUserByUsername_UserExists() {
+<span class="fc" id="L53">        when(userRepository.findByUsername(&quot;testUser&quot;)).thenReturn(Optional.of(testUser));</span>
+
+<span class="fc" id="L55">        ApplicationUser foundUser = userService.loadUserByUsername(&quot;testUser&quot;);</span>
+
+<span class="fc" id="L57">        assertThat(foundUser).isNotNull();</span>
+<span class="fc" id="L58">        assertThat(foundUser.getUsername()).isEqualTo(&quot;testUser&quot;);</span>
+<span class="fc" id="L59">        verify(userRepository, times(1)).findByUsername(&quot;testUser&quot;);</span>
+<span class="fc" id="L60">    }</span>
+
+    @Test
+    public void testLoadUserByUsername_UserNotFound() {
+<span class="fc" id="L64">        when(userRepository.findByUsername(&quot;nonExistentUser&quot;)).thenReturn(Optional.empty());</span>
+
+<span class="pc" id="L66">        assertThatThrownBy(() -&gt; userService.loadUserByUsername(&quot;nonExistentUser&quot;))</span>
+<span class="fc" id="L67">                .isInstanceOf(UsernameNotFoundException.class)</span>
+<span class="fc" id="L68">                .hasMessage(&quot;user nonExistentUser not found&quot;);</span>
+
+<span class="fc" id="L70">        verify(userRepository, times(1)).findByUsername(&quot;nonExistentUser&quot;);</span>
+<span class="fc" id="L71">    }</span>
+
+    @Test
+    public void testLoadUserById_UserExists() {
+<span class="fc" id="L75">        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));</span>
+
+<span class="fc" id="L77">        ApplicationUser foundUser = userService.loadUserById(1L);</span>
+
+<span class="fc" id="L79">        assertThat(foundUser).isNotNull();</span>
+<span class="fc" id="L80">        assertThat(foundUser.getId()).isEqualTo(1L);</span>
+<span class="fc" id="L81">        verify(userRepository, times(1)).findById(1L);</span>
+<span class="fc" id="L82">    }</span>
+
+    @Test
+    public void testLoadUserById_UserNotFound() {
+<span class="fc" id="L86">        when(userRepository.findById(2L)).thenReturn(Optional.empty());</span>
+
+<span class="pc" id="L88">        assertThatThrownBy(() -&gt; userService.loadUserById(2L))</span>
+<span class="fc" id="L89">                .isInstanceOf(IdNotFoundException.class)</span>
+<span class="fc" id="L90">                .hasMessage(&quot;id 2 not found&quot;);</span>
+
+<span class="fc" id="L92">        verify(userRepository, times(1)).findById(2L);</span>
+<span class="fc" id="L93">    }</span>
+
+    @Test
+    public void testGetAuthorities() {
+<span class="fc" id="L97">        Collection&lt;GrantedAuthority&gt; authorities = userService.getAuthorities(&quot;ROLE_USER&quot;);</span>
+
+<span class="fc" id="L99">        assertThat(authorities).isNotNull();</span>
+<span class="fc" id="L100">        assertThat(authorities).hasSize(1);</span>
+<span class="fc" id="L101">        assertThat(authorities.iterator().next().getAuthority()).isEqualTo(&quot;ROLE_USER&quot;);</span>
+<span class="fc" id="L102">    }</span>
+
+
+    @Test
+    public void testGetFollowerCount() {
+        // Prepare test user
+<span class="fc" id="L108">        ApplicationUser user = new ApplicationUser();</span>
+<span class="fc" id="L109">        user.setId(1L);</span>
+<span class="fc" id="L110">        user.setUsername(&quot;testUser&quot;);</span>
+
+        // Create mock list of UserFollows
+<span class="fc" id="L113">        Set&lt;UserFollows&gt; followers = new HashSet&lt;&gt;(Arrays.asList(</span>
+                new UserFollows(),
+                new UserFollows()
+        ));
+<span class="fc" id="L117">        user.setFollowers(followers);</span>
+
+        // Test the getFollowerCount method
+<span class="fc" id="L120">        int followerCount = userService.getFollowerCount(user);</span>
+
+<span class="fc" id="L122">        assertThat(followerCount).isEqualTo(2);</span>
+<span class="fc" id="L123">    }</span>
+
+    @Test
+    public void testGetFollowingCount() {
+        // Prepare test user
+<span class="fc" id="L128">        ApplicationUser user = new ApplicationUser();</span>
+<span class="fc" id="L129">        user.setId(1L);</span>
+<span class="fc" id="L130">        user.setUsername(&quot;testUser&quot;);</span>
+
+        // Create mock list of UserFollows
+<span class="fc" id="L133">        Set&lt;UserFollows&gt; following = new HashSet&lt;&gt;(Arrays.asList(</span>
+                new UserFollows(),
+                new UserFollows(),
+                new UserFollows()
+        ));
+<span class="fc" id="L138">        user.setFollowing(following);</span>
+
+        // Test the getFollowingCount method
+<span class="fc" id="L141">        int followingCount = userService.getFollowingCount(user);</span>
+
+<span class="fc" id="L143">        assertThat(followingCount).isEqualTo(3);</span>
+<span class="fc" id="L144">    }</span>
+
+    @Test
+    public void testUpdateDisplayNameById() {
+<span class="fc" id="L148">        Long userId = 1L;</span>
+<span class="fc" id="L149">        String newDisplayName = &quot;New Display Name&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L152">        userService.updateDisplayNameById(userId, newDisplayName);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L155">        verify(userRepository, times(1)).updateDisplayNameById(userId, newDisplayName);</span>
+<span class="fc" id="L156">    }</span>
+
+    @Test
+    public void testUpdateBioById() {
+<span class="fc" id="L160">        Long userId = 1L;</span>
+<span class="fc" id="L161">        String newBio = &quot;Updated personal bio&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L164">        userService.updateBioById(userId, newBio);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L167">        verify(userRepository, times(1)).updateBioById(userId, newBio);</span>
+<span class="fc" id="L168">    }</span>
+
+    @Test
+    public void testUpdateOccupationById() {
+<span class="fc" id="L172">        Long userId = 1L;</span>
+<span class="fc" id="L173">        String newOccupation = &quot;Software Engineer&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L176">        userService.updateOccupationById(userId, newOccupation);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L179">        verify(userRepository, times(1)).updateOccupationById(userId, newOccupation);</span>
+<span class="fc" id="L180">    }</span>
+
+    @Test
+    public void testUpdateLocationById() {
+<span class="fc" id="L184">        Long userId = 1L;</span>
+<span class="fc" id="L185">        String newLocation = &quot;San Francisco, CA&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L188">        userService.updateLocationById(userId, newLocation);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L191">        verify(userRepository, times(1)).updateLocationById(userId, newLocation);</span>
+<span class="fc" id="L192">    }</span>
+
+    @Test
+    public void testUpdateBirthdateById() {
+<span class="fc" id="L196">        long userId = 1L;</span>
+<span class="fc" id="L197">        Date newBirthdate = new Date();</span>
+
+        // Call the method
+<span class="fc" id="L200">        userService.updateBirthdateById(userId, newBirthdate);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L203">        verify(userRepository, times(1)).updateBirthdateById(userId, newBirthdate);</span>
+<span class="fc" id="L204">    }</span>
+
+    @Test
+    public void testSearchUsers() {
+        // Prepare test data
+<span class="fc" id="L209">        String searchQuery = &quot;john&quot;;</span>
+<span class="fc" id="L210">        List&lt;ApplicationUser&gt; mockUsers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L211">        ApplicationUser user1 = new ApplicationUser();</span>
+<span class="fc" id="L212">        user1.setUsername(&quot;johndoe&quot;);</span>
+<span class="fc" id="L213">        ApplicationUser user2 = new ApplicationUser();</span>
+<span class="fc" id="L214">        user2.setUsername(&quot;johnsmith&quot;);</span>
+<span class="fc" id="L215">        mockUsers.add(user1);</span>
+<span class="fc" id="L216">        mockUsers.add(user2);</span>
+
+        // Mock the repository method
+<span class="fc" id="L219">        when(userRepository.findAllByUsernameContainingIgnoreCase(searchQuery))</span>
+<span class="fc" id="L220">                .thenReturn(mockUsers);</span>
+
+        // Call the method
+<span class="fc" id="L223">        List&lt;ApplicationUser&gt; foundUsers = userService.searchUsers(searchQuery);</span>
+
+        // Verify results
+<span class="fc" id="L226">        assertThat(foundUsers).isNotNull();</span>
+<span class="fc" id="L227">        assertThat(foundUsers).hasSize(2);</span>
+<span class="fc" id="L228">        assertThat(foundUsers.get(0).getUsername()).isEqualTo(&quot;johndoe&quot;);</span>
+<span class="fc" id="L229">        assertThat(foundUsers.get(1).getUsername()).isEqualTo(&quot;johnsmith&quot;);</span>
+
+        // Verify repository method was called
+<span class="fc" id="L232">        verify(userRepository, times(1)).findAllByUsernameContainingIgnoreCase(searchQuery);</span>
+<span class="fc" id="L233">    }</span>
+
+
+    @Test
+    public void testUpdateProfilePictureById() {
+<span class="fc" id="L238">        long userId = 1L;</span>
+<span class="fc" id="L239">        String newProfilePictureFileName = &quot;newProfilePicture.jpg&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L242">        userService.updateProfilePictureById(userId, newProfilePictureFileName);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L245">        verify(userRepository, times(1)).updateProfilePictureFileNameById(userId, newProfilePictureFileName);</span>
+<span class="fc" id="L246">    }</span>
+
+    @Test
+    public void testUpdateBannerPictureById() {
+<span class="fc" id="L250">        long userId = 1L;</span>
+<span class="fc" id="L251">        String newBannerPictureFileName = &quot;newBannerPicture.jpg&quot;;</span>
+
+        // Call the method
+<span class="fc" id="L254">        userService.updateBannerPictureById(userId, newBannerPictureFileName);</span>
+
+        // Verify that the repository method was called with correct parameters
+<span class="fc" id="L257">        verify(userRepository, times(1)).updateBannerPictureFileNameById(userId, newBannerPictureFileName);</span>
+<span class="fc" id="L258">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

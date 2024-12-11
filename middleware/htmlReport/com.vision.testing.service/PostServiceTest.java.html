@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.service</a> &gt; <span class="el_source">PostServiceTest.java</span></div><h1>PostServiceTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.service;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.MediaPost;
+import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.relations.UserVote;
+import com.vision.middleware.dto.PostDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
+import com.vision.middleware.repo.PostRepository;
+import com.vision.middleware.service.PostService;
+import com.vision.middleware.service.UserService;
+import com.vision.middleware.service.VotingService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+<span class="fc" id="L35">public class PostServiceTest {</span>
+
+    @Mock
+    private PostRepository postRepository;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private VotingService votingService;
+
+    @InjectMocks
+    private PostService postService;
+
+    private ApplicationUser testUser;
+    private PostDTO testPostDTO;
+    private Post testPost;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L55">        testUser = new ApplicationUser();</span>
+<span class="fc" id="L56">        testUser.setId(1L);</span>
+<span class="fc" id="L57">        testUser.setUsername(&quot;testuser&quot;);</span>
+
+<span class="fc" id="L59">        testPostDTO = new PostDTO();</span>
+<span class="fc" id="L60">        testPostDTO.setTitle(&quot;Test Post&quot;);</span>
+<span class="fc" id="L61">        testPostDTO.setText(&quot;Test Content&quot;);</span>
+
+<span class="fc" id="L63">        testPost = Post.builder()</span>
+<span class="fc" id="L64">                .id(1L)</span>
+<span class="fc" id="L65">                .postedBy(testUser)</span>
+<span class="fc" id="L66">                .title(&quot;Test Post&quot;)</span>
+<span class="fc" id="L67">                .text(&quot;Test Content&quot;)</span>
+<span class="fc" id="L68">                .datePosted(new Date())</span>
+<span class="fc" id="L69">                .build();</span>
+<span class="fc" id="L70">    }</span>
+
+    @Test
+    public void createPost_TextPost_Success() {
+        // Arrange
+<span class="fc" id="L75">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+<span class="fc" id="L76">        when(postRepository.save(any(Post.class))).thenReturn(testPost);</span>
+
+        // Act
+<span class="fc" id="L79">        Post createdPost = postService.createPost(testPostDTO, testUser.getId());</span>
+
+        // Assert
+<span class="fc" id="L82">        assertThat(createdPost).isNotNull();</span>
+<span class="fc" id="L83">        assertThat(createdPost.getPostedBy()).isEqualTo(testUser);</span>
+<span class="fc" id="L84">        assertThat(createdPost.getTitle()).isEqualTo(testPostDTO.getTitle());</span>
+<span class="fc" id="L85">        verify(postRepository).save(any(Post.class));</span>
+<span class="fc" id="L86">    }</span>
+
+    @Test
+    public void createPost_MediaPost_Success() {
+        // Arrange
+<span class="fc" id="L91">        testPostDTO.setMediaFileName(&quot;test-media.jpg&quot;);</span>
+<span class="fc" id="L92">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+
+<span class="fc" id="L94">        MediaPost mediaPost = MediaPost.builder()</span>
+<span class="fc" id="L95">                .postedBy(testUser)</span>
+<span class="fc" id="L96">                .title(testPostDTO.getTitle())</span>
+<span class="fc" id="L97">                .mediaFileName(testPostDTO.getMediaFileName())</span>
+<span class="fc" id="L98">                .build();</span>
+<span class="fc" id="L99">        when(postRepository.save(any(MediaPost.class))).thenReturn(mediaPost);</span>
+
+        // Act
+<span class="fc" id="L102">        Post createdPost = postService.createPost(testPostDTO, testUser.getId());</span>
+
+        // Assert
+<span class="fc" id="L105">        assertThat(createdPost).isInstanceOf(MediaPost.class);</span>
+<span class="fc" id="L106">        assertThat(((MediaPost)createdPost).getMediaFileName()).isEqualTo(&quot;test-media.jpg&quot;);</span>
+<span class="fc" id="L107">        verify(postRepository).save(any(MediaPost.class));</span>
+<span class="fc" id="L108">    }</span>
+
+    @Test
+    public void userVoteOnPost_Success() {
+        // Arrange
+<span class="fc" id="L113">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+<span class="fc" id="L114">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+
+        // Act
+<span class="fc" id="L117">        postService.userVoteOnPost(1L, testUser.getId(), UserVote.VoteType.LIKE);</span>
+
+        // Assert
+<span class="fc" id="L120">        verify(votingService).voteOnVotable(testUser, testPost, UserVote.VoteType.LIKE);</span>
+<span class="fc" id="L121">    }</span>
+
+    @Test
+    public void userVoteOnPost_PostNotFound_ThrowsException() {
+        // Arrange
+<span class="fc" id="L126">        when(postRepository.findById(1L)).thenReturn(Optional.empty());</span>
+
+        // Assert
+<span class="fc" id="L129">        assertThatThrownBy(() -&gt;</span>
+<span class="nc" id="L130">                postService.userVoteOnPost(1L, testUser.getId(), UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L131">        ).isInstanceOf(IdNotFoundException.class);</span>
+<span class="fc" id="L132">    }</span>
+
+    @Test
+    public void removeUserVote_Success() {
+        // Arrange
+<span class="fc" id="L137">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+<span class="fc" id="L138">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+
+        // Act
+<span class="fc" id="L141">        postService.removeUserVote(1L, testUser.getId());</span>
+
+        // Assert
+<span class="fc" id="L144">        verify(votingService).deleteVote(testUser, testPost);</span>
+<span class="fc" id="L145">    }</span>
+
+    @Test
+    public void removeUserVote_NoExistingVote_ShouldNotThrowException() {
+        // Arrange
+<span class="fc" id="L150">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+<span class="fc" id="L151">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+
+        // Act &amp; Assert (should not throw any exception)
+<span class="fc" id="L154">        assertThatNoException().isThrownBy(() -&gt;</span>
+<span class="fc" id="L155">                postService.removeUserVote(1L, testUser.getId())</span>
+        );
+
+        // Verify voting service was called
+<span class="fc" id="L159">        verify(votingService).deleteVote(testUser, testPost);</span>
+<span class="fc" id="L160">    }</span>
+
+    @Test
+    public void removeUserVote_PostNotFound_ThrowsIdNotFoundException() {
+        // Arrange
+<span class="fc" id="L165">        when(postRepository.findById(1L)).thenReturn(Optional.empty());</span>
+
+        // Assert
+<span class="pc" id="L168">        assertThatThrownBy(() -&gt; postService.removeUserVote(1L, testUser.getId()))</span>
+<span class="fc" id="L169">                .isInstanceOf(IdNotFoundException.class)</span>
+<span class="fc" id="L170">                .hasMessageContaining(&quot;Post id 1 not found&quot;);</span>
+<span class="fc" id="L171">    }</span>
+
+    @Test
+    public void getUserVote_Success() {
+        // Arrange
+<span class="fc" id="L176">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+<span class="fc" id="L177">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+<span class="fc" id="L178">        when(votingService.getUserVoteOnVotable(testUser, testPost))</span>
+<span class="fc" id="L179">                .thenReturn(Optional.of(UserVote.VoteType.LIKE));</span>
+
+        // Act
+<span class="fc" id="L182">        Optional&lt;UserVote.VoteType&gt; vote = postService.getUserVote(1L, testUser.getId());</span>
+
+        // Assert
+<span class="fc" id="L185">        assertThat(vote).isPresent();</span>
+<span class="fc" id="L186">        assertThat(vote.get()).isEqualTo(UserVote.VoteType.LIKE);</span>
+<span class="fc" id="L187">    }</span>
+
+    @Test
+    public void getUserVote_NoExistingVote_ShouldReturnEmptyOptional() {
+        // Arrange
+<span class="fc" id="L192">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+<span class="fc" id="L193">        when(userService.loadUserById(testUser.getId())).thenReturn(testUser);</span>
+<span class="fc" id="L194">        when(votingService.getUserVoteOnVotable(testUser, testPost))</span>
+<span class="fc" id="L195">                .thenReturn(Optional.empty());</span>
+
+        // Act
+<span class="fc" id="L198">        Optional&lt;UserVote.VoteType&gt; vote = postService.getUserVote(1L, testUser.getId());</span>
+
+        // Assert
+<span class="fc" id="L201">        assertThat(vote).isEmpty();</span>
+<span class="fc" id="L202">    }</span>
+
+    @Test
+    public void getUserVote_PostNotFound_ThrowsIdNotFoundException() {
+        // Arrange
+<span class="fc" id="L207">        when(postRepository.findById(1L)).thenReturn(Optional.empty());</span>
+
+        // Assert
+<span class="pc" id="L210">        assertThatThrownBy(() -&gt; postService.getUserVote(1L, testUser.getId()))</span>
+<span class="fc" id="L211">                .isInstanceOf(IdNotFoundException.class)</span>
+<span class="fc" id="L212">                .hasMessageContaining(&quot;Post id 1 not found&quot;);</span>
+<span class="fc" id="L213">    }</span>
+
+    @Test
+    public void getAllPosts_Success() {
+        // Arrange
+<span class="fc" id="L218">        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(&quot;datePosted&quot;));</span>
+<span class="fc" id="L219">        List&lt;Post&gt; postList = Collections.singletonList(testPost);</span>
+<span class="fc" id="L220">        Page&lt;Post&gt; postPage = new PageImpl&lt;&gt;(postList, pageRequest, postList.size());</span>
+
+<span class="fc" id="L222">        when(postRepository.findAll(pageRequest)).thenReturn(postPage);</span>
+
+        // Act
+<span class="fc" id="L225">        Page&lt;Post&gt; result = postService.getAllPosts(0, 10);</span>
+
+        // Assert
+<span class="fc" id="L228">        assertThat(result.getContent()).hasSize(1);</span>
+<span class="fc" id="L229">        assertThat(result.getContent().get(0)).isEqualTo(testPost);</span>
+<span class="fc" id="L230">    }</span>
+
+    @Test
+    public void getAllPostsByUsername_Success() {
+        // Arrange
+<span class="fc" id="L235">        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(&quot;datePosted&quot;));</span>
+<span class="fc" id="L236">        List&lt;Post&gt; postList = Collections.singletonList(testPost);</span>
+<span class="fc" id="L237">        Page&lt;Post&gt; postPage = new PageImpl&lt;&gt;(postList, pageRequest, postList.size());</span>
+
+<span class="fc" id="L239">        when(userService.loadUserByUsername(&quot;testuser&quot;)).thenReturn(testUser);</span>
+<span class="fc" id="L240">        when(postRepository.findByPostedBy(testUser, pageRequest)).thenReturn(postPage);</span>
+
+        // Act
+<span class="fc" id="L243">        Page&lt;Post&gt; result = postService.getAllPostsByUsername(&quot;testuser&quot;, 0, 10);</span>
+
+        // Assert
+<span class="fc" id="L246">        assertThat(result.getContent()).hasSize(1);</span>
+<span class="fc" id="L247">        assertThat(result.getContent().get(0)).isEqualTo(testPost);</span>
+<span class="fc" id="L248">    }</span>
+
+    @Test
+    public void loadPostById_Success() {
+        // Arrange
+<span class="fc" id="L253">        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));</span>
+
+        // Act
+<span class="fc" id="L256">        Post retrievedPost = postService.loadPostById(1L);</span>
+
+        // Assert
+<span class="fc" id="L259">        assertThat(retrievedPost).isEqualTo(testPost);</span>
+<span class="fc" id="L260">    }</span>
+
+    @Test
+    public void loadPostById_NotFound_ThrowsException() {
+        // Arrange
+<span class="fc" id="L265">        when(postRepository.findById(1L)).thenReturn(Optional.empty());</span>
+
+        // Assert
+<span class="fc" id="L268">        assertThatThrownBy(() -&gt;</span>
+<span class="nc" id="L269">                postService.loadPostById(1L)</span>
+<span class="fc" id="L270">        ).isInstanceOf(NoSuchElementException.class);</span>
+<span class="fc" id="L271">    }</span>
+
+    @Test
+    public void searchPosts_Success() {
+        // Arrange
+<span class="fc" id="L276">        List&lt;Post&gt; postList = Collections.singletonList(testPost);</span>
+<span class="fc" id="L277">        when(postRepository.searchPosts(&quot;test&quot;, null)).thenReturn(postList);</span>
+
+        // Act
+<span class="fc" id="L280">        List&lt;Post&gt; result = postService.searchPosts(&quot;test&quot;);</span>
+
+        // Assert
+<span class="fc" id="L283">        assertThat(result).hasSize(1);</span>
+<span class="fc" id="L284">        assertThat(result.get(0)).isEqualTo(testPost);</span>
+<span class="fc" id="L285">    }</span>
+
+    @Test
+    public void searchPostsByUser_Success() {
+        // Arrange
+<span class="fc" id="L290">        List&lt;Post&gt; postList = Collections.singletonList(testPost);</span>
+<span class="fc" id="L291">        when(postRepository.searchPosts(&quot;test&quot;, testUser)).thenReturn(postList);</span>
+
+        // Act
+<span class="fc" id="L294">        List&lt;Post&gt; result = postService.searchPostsByUser(&quot;test&quot;, testUser);</span>
+
+        // Assert
+<span class="fc" id="L297">        assertThat(result).hasSize(1);</span>
+<span class="fc" id="L298">        assertThat(result.get(0)).isEqualTo(testPost);</span>
+<span class="fc" id="L299">    }</span>
+
+    @Test
+    public void searchPostsByDateRange_Success() {
+        // Arrange
+<span class="fc" id="L304">        Date startDate = new Date();</span>
+<span class="fc" id="L305">        Date endDate = new Date();</span>
+<span class="fc" id="L306">        List&lt;Post&gt; postList = Collections.singletonList(testPost);</span>
+
+<span class="fc" id="L308">        when(postRepository.searchPostsByDateAndQuery(&quot;test&quot;, testUser, startDate, endDate))</span>
+<span class="fc" id="L309">                .thenReturn(postList);</span>
+
+        // Act
+<span class="fc" id="L312">        List&lt;Post&gt; result = postService.searchPostsByDateRange(&quot;test&quot;, testUser, startDate, endDate);</span>
+
+        // Assert
+<span class="fc" id="L315">        assertThat(result).hasSize(1);</span>
+<span class="fc" id="L316">        assertThat(result.get(0)).isEqualTo(testPost);</span>
+<span class="fc" id="L317">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
