@@ -32,7 +32,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegistrationDTO body, BindingResult bindingResult) {
-        // when binding input json -> RegistrationDTO, some errors can be thrown:
+        // when binding input json -> RegistrationDTO as specified by @Valid, some errors can be thrown:
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getAllErrors()
                     .stream()
@@ -65,21 +65,23 @@ public class AuthenticationController {
 
     private static String constraintErrorToMessage(Exception e) {
         // not the greatest way to handle this, an exceptionHandler would be better. But whatever.
-        // todo: better type signature for this method
+        // another better way to do this would be to have the service class check for these things explicitly,
+        // and then raise an error that contains a message specifying what went wrong.
+        // This is something that
         String errorMessage = e.getMessage();
         StringBuilder errorBuilder = new StringBuilder();
-        if (errorMessage.contains("username")) {
+        if (errorMessage.contains("Key (username)")) {
             errorBuilder.append("Username already exists\n");
         }
-        if (errorMessage.contains("email")) {
+        if (errorMessage.contains("Key (email)")) {
             errorBuilder.append("Email already registered\n");
         }
-        if (errorMessage.contains("phone_number")) {
+        if (errorMessage.contains("Key (phone_number)")) {
             errorBuilder.append("Phone number already in use\n");
         }
 
         if (errorBuilder.isEmpty()) {
-            // if there is no specific message to cast, then just return whatever message was provided.
+            // if there is no specific message we are looking for to convert, then just return whatever message was provided.
             errorBuilder.append(e.getMessage());
         }
 

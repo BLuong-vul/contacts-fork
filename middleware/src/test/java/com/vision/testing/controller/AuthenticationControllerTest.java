@@ -125,7 +125,7 @@ public class AuthenticationControllerTest {
         // Arrange
         RegistrationDTO registrationDTO = validUserDTO;
 
-        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate username."));
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate Key (username)."));
 
         // Act & Assert
         mockMvc.perform(post("/auth/register")
@@ -141,7 +141,7 @@ public class AuthenticationControllerTest {
         // Arrange
         RegistrationDTO registrationDTO = validUserDTO;
 
-        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate email."));
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate Key (email)."));
 
         // Act & Assert
         mockMvc.perform(post("/auth/register")
@@ -157,7 +157,7 @@ public class AuthenticationControllerTest {
         // Arrange
         RegistrationDTO registrationDTO = validUserDTO;
 
-        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate phone_number."));
+        when(authenticationService.registerUser(any(RegistrationDTO.class))).thenThrow(new RuntimeException("Duplicate Key (phone_number)."));
 
         // Act & Assert
         mockMvc.perform(post("/auth/register")
