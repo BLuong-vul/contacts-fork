@@ -1,6 +1,5 @@
 .container {
 	display: flex;
-	height: 100vh;
 }
 
 .asideContainer {
@@ -13,6 +12,7 @@
 	border: 1px solid white;
 	color: white;
 	background-color: transparent;
+	height: 600px;
 }
 
 .chatHeader {
@@ -22,13 +22,13 @@
 }
 
 .conversationArea {
-    height: calc(100vh - 120px); /* Adjust the height dynamically */
+    height: calc(100vh - 120px); 
     padding: 20px;
     border: 1px solid white;
-    height: 300px; /* Example height */
-    overflow-y: auto; /* Enable scrolling if the content overflows vertically */
-    word-wrap: break-word; /* Ensure long words wrap to the next line */
-    white-space: pre-wrap; /* Preserve spaces and line breaks */
+    height: 80%; 
+    overflow-y: auto; 
+    word-wrap: break-word; 
+    white-space: pre-wrap; 
 }
 
 .chatPlaceholder {

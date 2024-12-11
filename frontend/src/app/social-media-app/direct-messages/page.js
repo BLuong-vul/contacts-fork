@@ -284,14 +284,13 @@ const DirectMessages = () => {
                 </h2>
                 <div className={styles.conversationArea}>
                     {conversation.map((msg, index) => (
-                        <div 
-                            key={index} 
-                            className={`${styles.messageBubble} ${
-                                msg.senderId === userId ? styles.sentBubble : styles.receivedBubble
-                            }`} 
-                        >
-                            <strong>{msg.senderId === userId ? currentUsername : inputUsername}: </strong>
-                            {msg.body}
+                        <div key={index} className={`mb-4 w-6/12 ${msg.senderId === userId ? 'ml-auto self-end' : 'mr-auto self-start'}`}>
+                            <div className={`font-semibold text-gray-200 ${msg.senderId === userId ? 'text-start' : 'text-end'}`}>
+                                @{msg.senderId === userId ? currentUsername : inputUsername}
+                            </div>
+                            <div className={`p-3 rounded-lg ${msg.senderId === userId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
+                                {msg.body}
+                            </div>
                         </div>
                     ))}
                 </div>

@@ -7,8 +7,6 @@ import { FaEdit, FaCheck } from 'react-icons/fa';
 export default function Account() {
 	const [activeSection, setActiveSection] = useState('General');
 
-
-
 	// Function to render content based on active section
 	const renderContent = () => {
 	  switch (activeSection) {
@@ -29,15 +27,9 @@ export default function Account() {
 		  {/* navigation sidebar */}
 		  <div style={{ width: '200px', padding: '20px', backgroundColor: '#223344' }}>
 		    <ul style={{ listStyle: 'none', padding: 0 }}>
-		      <li onClick={() => setActiveSection('General')} style={{ cursor: 'pointer', marginBottom: '10px' }}>
-		        General
-		      </li>
-		      <li onClick={() => setActiveSection('Privacy')} style={{ cursor: 'pointer', marginBottom: '10px' }}>
-		        Privacy
-		      </li>
-		      <li onClick={() => setActiveSection('Settings')} style={{ cursor: 'pointer', marginBottom: '10px' }}>
-		        Settings
-		      </li>
+		      <li onClick={() => setActiveSection('General')} style={{ cursor: 'pointer', marginBottom: '10px' }}> General </li>
+		      {/*<li onClick={() => setActiveSection('Privacy')} style={{ cursor: 'pointer', marginBottom: '10px' }}> Privacy </li>*/}
+		      {/*<li onClick={() => setActiveSection('Settings')} style={{ cursor: 'pointer', marginBottom: '10px' }}> Settings </li>*/}
 		    </ul>
 		  </div>
 
@@ -269,6 +261,7 @@ function GeneralContent() {
       </div>
 
       {/* Birthday display checkbox */}
+      {/*
       <div style={{ marginTop: '20px', marginBottom: '20px' }}>
         <label style={{ display: 'block' }}>
           <input
@@ -279,9 +272,10 @@ function GeneralContent() {
           Display birthdate on profile
         </label>
       </div>
+      */}
 
       {/* Profile picture / banner */}
-      <div className="relative flex gap-4 mb-5">
+      <div className="relative flex gap-4 mb-5 mt-8">
         {/* CHANGE PROFILE PICTURE */}
         <div className="flex">
           <button
