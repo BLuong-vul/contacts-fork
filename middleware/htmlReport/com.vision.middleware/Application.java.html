@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Application.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware</a> &gt; <span class="el_source">Application.java</span></div><h1>Application.java</h1><pre class="source lang-java linenums">package com.vision.middleware;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Role;
+import com.vision.middleware.repo.RoleRepository;
+import com.vision.middleware.repo.UserRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@SpringBootApplication
+<span class="fc" id="L17">public class Application {</span>
+
+	public static void main(String[] args) {
+<span class="fc" id="L20">		SpringApplication.run(Application.class, args);</span>
+<span class="fc" id="L21">	}</span>
+
+	// setup function, run each time the application is started.
+	@Bean
+	CommandLineRunner run(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+<span class="fc" id="L26">		return args -&gt; {</span>
+			// make a user with the Role of ADMIN if the role ADMIN does not exist
+			// ADMIN existing -&gt; USER exists and admin user exists as well
+<span class="fc bfc" id="L29" title="All 2 branches covered.">			if (roleRepository.findByAuthority(&quot;ADMIN&quot;).isPresent()) return;</span>
+
+<span class="fc" id="L31">			Role adminRole = roleRepository.save(new Role(&quot;ADMIN&quot;));</span>
+<span class="fc" id="L32">			roleRepository.save(new Role(&quot;USER&quot;));</span>
+
+<span class="fc" id="L34">			Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L35">			roles.add(adminRole);</span>
+
+			// todo: factor out the password to probably an env var.
+<span class="fc" id="L38">			ApplicationUser admin = ApplicationUser.builder()</span>
+<span class="fc" id="L39">					.id(1)</span>
+<span class="fc" id="L40">					.username(&quot;admin&quot;)</span>
+<span class="fc" id="L41">					.fullName(&quot;Admin&quot;)</span>
+<span class="fc" id="L42">					.email(&quot;N/A&quot;)</span>
+<span class="fc" id="L43">					.phoneNumber(&quot;N/A&quot;)</span>
+<span class="fc" id="L44">					.address(&quot;N/A&quot;)</span>
+<span class="fc" id="L45">					.city(&quot;N/A&quot;)</span>
+<span class="fc" id="L46">					.state(&quot;N/A&quot;)</span>
+<span class="fc" id="L47">					.zipCode(&quot;N/A&quot;)</span>
+<span class="fc" id="L48">					.country(&quot;N/A&quot;)</span>
+<span class="fc" id="L49">					.password(passwordEncoder.encode(&quot;password&quot;))</span>
+<span class="fc" id="L50">					.authorities(roles)</span>
+<span class="fc" id="L51">					.build();</span>
+
+<span class="fc" id="L53">			userRepository.save(admin);</span>
+<span class="fc" id="L54">		};</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

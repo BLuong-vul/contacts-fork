@@ -244,4 +244,16 @@ public class UserServiceTest {
         // Verify that the repository method was called with correct parameters
         verify(userRepository, times(1)).updateProfilePictureFileNameById(userId, newProfilePictureFileName);
     }
+
+    @Test
+    public void testUpdateBannerPictureById() {
+        long userId = 1L;
+        String newBannerPictureFileName = "newBannerPicture.jpg";
+
+        // Call the method
+        userService.updateBannerPictureById(userId, newBannerPictureFileName);
+
+        // Verify that the repository method was called with correct parameters
+        verify(userRepository, times(1)).updateBannerPictureFileNameById(userId, newBannerPictureFileName);
+    }
 }

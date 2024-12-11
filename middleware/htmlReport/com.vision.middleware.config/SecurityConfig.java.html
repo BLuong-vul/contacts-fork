@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.vision.middleware.config;
+
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.vision.middleware.service.UserService;
+import com.vision.middleware.utils.RSAKeyProperties;
+import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@AllArgsConstructor
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Autowired
+    private final RSAKeyProperties keys;
+
+    @Autowired
+    private final UserService userService;
+
+    @Autowired
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
+
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+<span class="fc" id="L53">        return new BCryptPasswordEncoder();</span>
+    }
+
+    @PostConstruct
+    public void setSecurityContextHolderStrategy() {
+<span class="fc" id="L58">        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_THREADLOCAL);</span>
+        // SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+<span class="fc" id="L60">    }</span>
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+<span class="fc" id="L64">        return authenticationConfiguration.getAuthenticationManager();</span>
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+<span class="fc" id="L69">        DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();</span>
+<span class="fc" id="L70">        daoProvider.setUserDetailsService(userService);</span>
+<span class="fc" id="L71">        daoProvider.setPasswordEncoder(passwordEncoder());</span>
+<span class="fc" id="L72">        return daoProvider;</span>
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="fc" id="L77">        return http</span>
+<span class="fc" id="L78">            .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L79">            .cors(cors -&gt; cors.configure(http))</span>
+<span class="fc" id="L80">            .authorizeHttpRequests(auth -&gt; {</span>
+                // by default, spring boot will lock down everything.
+                // We can change what endpoints are available to what users here.
+<span class="fc" id="L83">                auth.requestMatchers(&quot;/auth/validate&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;); //this endpoint is used for lazy validation</span>
+<span class="fc" id="L84">                auth.requestMatchers(&quot;/auth/**&quot;).permitAll(); //allow any user to access /auth/** to be able to sign up.</span>
+<span class="fc" id="L85">                auth.requestMatchers(&quot;/exampledata/**&quot;).permitAll(); //allow any user to access /auth/** to be able to sign up.</span>
+<span class="fc" id="L86">                auth.requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;);</span>
+<span class="fc" id="L87">                auth.requestMatchers(&quot;/user/id/**&quot;).permitAll();</span>
+<span class="fc" id="L88">                auth.requestMatchers(&quot;/user/public-info&quot;).permitAll();</span>
+<span class="fc" id="L89">                auth.requestMatchers(&quot;/user/following/list&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;); //probably very unnecessary</span>
+<span class="fc" id="L90">                auth.requestMatchers(&quot;/user/account/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L91">                auth.requestMatchers(&quot;/user/search&quot;).permitAll(); // allow searching by anyone</span>
+<span class="fc" id="L92">                auth.requestMatchers(&quot;/user/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L93">                auth.requestMatchers(&quot;/chat/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;); // is this being used?</span>
+<span class="fc" id="L94">                auth.requestMatchers(&quot;/replies/post/**&quot;).permitAll();</span>
+<span class="fc" id="L95">                auth.requestMatchers(&quot;/post/new&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L96">                auth.requestMatchers(&quot;/post/all&quot;).permitAll();</span>
+<span class="fc" id="L97">                auth.requestMatchers(&quot;/post/search**&quot;).permitAll(); // anyone is allowed to search i guess</span>
+<span class="fc" id="L98">                auth.requestMatchers(&quot;/ws/notifications/testCreate&quot;).denyAll();</span>
+<span class="fc" id="L99">                auth.requestMatchers(&quot;/ws/**&quot;, &quot;/ws/notifications/**&quot;).permitAll(); // websocket</span>
+
+<span class="fc" id="L101">                auth.requestMatchers(&quot;/media/upload&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;);</span>
+<span class="fc" id="L102">                auth.requestMatchers(&quot;/media/**&quot;).permitAll();</span>
+
+                // todo: remove this after testing
+<span class="fc" id="L105">                auth.requestMatchers(&quot;/notifications/**&quot;).permitAll(); // websocket</span>
+
+<span class="fc" id="L107">                auth.anyRequest().permitAll(); // some changes for the demo</span>
+
+                // auth.anyRequest().authenticated(); // authentication required for all queries
+<span class="fc" id="L110">            })</span>
+<span class="fc" id="L111">            .oauth2ResourceServer(oauth2 -&gt;</span>
+<span class="fc" id="L112">                oauth2.jwt(jwt -&gt; jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))</span>
+            ) // tell jwt to use oauth2 resource server and use our jwtAuthenticationConverter defined in this class
+<span class="fc" id="L114">            .sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // stateless because we are using JWT</span>
+<span class="fc" id="L115">            .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="fc" id="L116">            .build();</span>
+    }
+
+    // unbundles data
+    @Bean
+    public JwtDecoder jwtDecoder() {
+<span class="fc" id="L122">        return NimbusJwtDecoder.withPublicKey(keys.getPublicKey()).build();</span>
+    }
+
+    // bundles data and signs it with private key.
+    @Bean
+    public JwtEncoder jwtEncoder() {
+<span class="fc" id="L128">        JWK jwk = new RSAKey.Builder(keys.getPublicKey()).privateKey(keys.getPrivateKey()).build();</span>
+<span class="fc" id="L129">        JWKSource&lt;SecurityContext&gt; jwks = new ImmutableJWKSet&lt;&gt;(new JWKSet(jwk));</span>
+<span class="fc" id="L130">        return new NimbusJwtEncoder(jwks);</span>
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        // convert roles from form USER -&gt; ROLE_USER for Spring Security matching users against roles from converted JWT tokens.
+<span class="fc" id="L136">        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();</span>
+<span class="fc" id="L137">        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName(&quot;roles&quot;); // as defined in the TokenService</span>
+<span class="fc" id="L138">        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(&quot;ROLE_&quot;);</span>
+
+<span class="fc" id="L140">        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();</span>
+<span class="fc" id="L141">        jwtConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);</span>
+
+<span class="fc" id="L143">        return jwtConverter;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

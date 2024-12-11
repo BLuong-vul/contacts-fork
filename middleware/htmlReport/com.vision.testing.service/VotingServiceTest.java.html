@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VotingServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.service</a> &gt; <span class="el_source">VotingServiceTest.java</span></div><h1>VotingServiceTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.service;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.Reply;
+import com.vision.middleware.domain.enums.VotableType;
+import com.vision.middleware.domain.relations.UserVote;
+import com.vision.middleware.exceptions.DuplicateVoteException;
+import com.vision.middleware.repo.PostRepository;
+import com.vision.middleware.repo.ReplyRepository;
+import com.vision.middleware.repo.UserVoteRepository;
+import com.vision.middleware.service.VotingService;
+import com.vision.testing.testingutil.UnsupportedVotable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L27">public class VotingServiceTest {</span>
+
+    @Mock
+    private UserVoteRepository userVoteRepository;
+
+    @Mock
+    private PostRepository postRepository;
+
+    @Mock
+    private ReplyRepository replyRepository;
+
+    @InjectMocks
+    private VotingService votingService;
+
+    private ApplicationUser testUser;
+    private Post testPost;
+    private Reply testReply;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L47">        testUser = new ApplicationUser();</span>
+<span class="fc" id="L48">        testUser.setId(1L);</span>
+
+<span class="fc" id="L50">        testPost = new Post();</span>
+<span class="fc" id="L51">        testPost.setId(1L);</span>
+<span class="fc" id="L52">        testPost.setLikeCount(0);</span>
+<span class="fc" id="L53">        testPost.setDislikeCount(0);</span>
+
+<span class="fc" id="L55">        testReply = new Reply();</span>
+<span class="fc" id="L56">        testReply.setId(2L);</span>
+<span class="fc" id="L57">        testReply.setLikeCount(0);</span>
+<span class="fc" id="L58">        testReply.setDislikeCount(0);</span>
+<span class="fc" id="L59">    }</span>
+
+    @Test
+    void voteOnPost_FirstLike_ShouldIncreasePostLikeCount() {
+        // Arrange
+<span class="fc" id="L64">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L65">                .thenReturn(Optional.empty());</span>
+
+        // Act
+<span class="fc" id="L68">        votingService.voteOnVotable(testUser, testPost, UserVote.VoteType.LIKE);</span>
+
+        // Assert
+<span class="fc" id="L71">        verify(postRepository).save(testPost);</span>
+<span class="fc" id="L72">        assertThat(testPost.getLikeCount()).isEqualTo(1);</span>
+<span class="fc" id="L73">        verify(userVoteRepository).save(any(UserVote.class));</span>
+<span class="fc" id="L74">    }</span>
+
+    @Test
+    void voteOnReply_FirstDislike_ShouldIncreaseReplyDislikeCount() {
+        // Arrange
+<span class="fc" id="L79">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))</span>
+<span class="fc" id="L80">                .thenReturn(Optional.empty());</span>
+
+        // Act
+<span class="fc" id="L83">        votingService.voteOnVotable(testUser, testReply, UserVote.VoteType.DISLIKE);</span>
+
+        // Assert
+<span class="fc" id="L86">        verify(replyRepository).save(testReply);</span>
+<span class="fc" id="L87">        assertThat(testReply.getDislikeCount()).isEqualTo(1);</span>
+<span class="fc" id="L88">        verify(userVoteRepository).save(any(UserVote.class));</span>
+<span class="fc" id="L89">    }</span>
+
+    @Test
+    void changeVote_FromLikeToDislike_ShouldUpdateCounts() {
+        // Arrange
+<span class="fc" id="L94">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L95">                .user(testUser)</span>
+<span class="fc" id="L96">                .votable(testPost)</span>
+<span class="fc" id="L97">                .votableType(VotableType.POST)</span>
+<span class="fc" id="L98">                .voteType(UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L99">                .build();</span>
+<span class="fc" id="L100">        testPost.setLikeCount(1L); // user liked post already</span>
+
+
+<span class="fc" id="L103">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L104">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L107">        votingService.voteOnVotable(testUser, testPost, UserVote.VoteType.DISLIKE);</span>
+
+        // Assert
+<span class="fc" id="L110">        verify(postRepository).save(testPost);</span>
+<span class="fc" id="L111">        assertThat(testPost.getLikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L112">        assertThat(testPost.getDislikeCount()).isEqualTo(1);</span>
+<span class="fc" id="L113">        verify(userVoteRepository).save(existingVote);</span>
+<span class="fc" id="L114">    }</span>
+
+    @Test
+    void changeVote_FromDislikeToLike_ShouldUpdateCounts() {
+        // Arrange
+<span class="fc" id="L119">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L120">                .user(testUser)</span>
+<span class="fc" id="L121">                .votable(testPost)</span>
+<span class="fc" id="L122">                .votableType(VotableType.POST)</span>
+<span class="fc" id="L123">                .voteType(UserVote.VoteType.DISLIKE)</span>
+<span class="fc" id="L124">                .build();</span>
+<span class="fc" id="L125">        testPost.setDislikeCount(1L); // user disliked post already</span>
+
+
+<span class="fc" id="L128">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L129">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L132">        votingService.voteOnVotable(testUser, testPost, UserVote.VoteType.LIKE);</span>
+
+        // Assert
+<span class="fc" id="L135">        verify(postRepository).save(testPost);</span>
+<span class="fc" id="L136">        assertThat(testPost.getLikeCount()).isEqualTo(1);</span>
+<span class="fc" id="L137">        assertThat(testPost.getDislikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L138">        verify(userVoteRepository).save(existingVote);</span>
+<span class="fc" id="L139">    }</span>
+
+    @Test
+    void duplicateVote_ShouldThrowException() {
+        // Arrange
+<span class="fc" id="L144">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L145">                .user(testUser)</span>
+<span class="fc" id="L146">                .votable(testPost)</span>
+<span class="fc" id="L147">                .votableType(VotableType.POST)</span>
+<span class="fc" id="L148">                .voteType(UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L149">                .build();</span>
+
+<span class="fc" id="L151">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L152">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act &amp; Assert
+<span class="fc" id="L155">        assertThatThrownBy(() -&gt;</span>
+<span class="nc" id="L156">                votingService.voteOnVotable(testUser, testPost, UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L157">        ).isInstanceOf(DuplicateVoteException.class);</span>
+<span class="fc" id="L158">    }</span>
+
+    @Test
+    void deleteVoteLikePost_ShouldDecreaseVoteCount() {
+        // Arrange
+<span class="fc" id="L163">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L164">                .user(testUser)</span>
+<span class="fc" id="L165">                .votable(testPost)</span>
+<span class="fc" id="L166">                .votableType(VotableType.POST)</span>
+<span class="fc" id="L167">                .voteType(UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L168">                .build();</span>
+<span class="fc" id="L169">        testPost.setLikeCount(1);</span>
+
+<span class="fc" id="L171">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L172">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L175">        votingService.deleteVote(testUser, testPost);</span>
+
+        // Assert
+<span class="fc" id="L178">        verify(postRepository).save(testPost);</span>
+<span class="fc" id="L179">        assertThat(testPost.getLikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L180">        verify(userVoteRepository).deleteByVotableIdAndUserId(testPost.getId(), testUser.getId());</span>
+<span class="fc" id="L181">    }</span>
+
+
+    @Test
+    void deleteVoteDislikePost_ShouldDecreaseVoteCount() {
+        // Arrange
+<span class="fc" id="L187">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L188">                .user(testUser)</span>
+<span class="fc" id="L189">                .votable(testPost)</span>
+<span class="fc" id="L190">                .votableType(VotableType.POST)</span>
+<span class="fc" id="L191">                .voteType(UserVote.VoteType.DISLIKE)</span>
+<span class="fc" id="L192">                .build();</span>
+<span class="fc" id="L193">        testPost.setDislikeCount(1);</span>
+
+<span class="fc" id="L195">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testPost, VotableType.POST))</span>
+<span class="fc" id="L196">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L199">        votingService.deleteVote(testUser, testPost);</span>
+
+        // Assert
+<span class="fc" id="L202">        verify(postRepository).save(testPost);</span>
+<span class="fc" id="L203">        assertThat(testPost.getDislikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L204">        verify(userVoteRepository).deleteByVotableIdAndUserId(testPost.getId(), testUser.getId());</span>
+<span class="fc" id="L205">    }</span>
+
+    @Test
+    void deleteVoteLikeReply_ShouldDecreaseVoteCount() {
+        // Arrange
+<span class="fc" id="L210">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L211">                .user(testUser)</span>
+<span class="fc" id="L212">                .votable(testReply)</span>
+<span class="fc" id="L213">                .votableType(VotableType.REPLY)</span>
+<span class="fc" id="L214">                .voteType(UserVote.VoteType.LIKE)</span>
+<span class="fc" id="L215">                .build();</span>
+<span class="fc" id="L216">        testReply.setLikeCount(1);</span>
+
+<span class="fc" id="L218">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))</span>
+<span class="fc" id="L219">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L222">        votingService.deleteVote(testUser, testReply);</span>
+
+        // Assert
+<span class="fc" id="L225">        verify(replyRepository).save(testReply);</span>
+<span class="fc" id="L226">        assertThat(testReply.getLikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L227">        verify(userVoteRepository).deleteByVotableIdAndUserId(testReply.getId(), testUser.getId());</span>
+<span class="fc" id="L228">    }</span>
+
+
+    @Test
+    void deleteVoteDislikeReply_ShouldDecreaseVoteCount() {
+        // Arrange
+<span class="fc" id="L234">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L235">                .user(testUser)</span>
+<span class="fc" id="L236">                .votable(testReply)</span>
+<span class="fc" id="L237">                .votableType(VotableType.REPLY)</span>
+<span class="fc" id="L238">                .voteType(UserVote.VoteType.DISLIKE)</span>
+<span class="fc" id="L239">                .build();</span>
+<span class="fc" id="L240">        testReply.setDislikeCount(1);</span>
+
+<span class="fc" id="L242">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))</span>
+<span class="fc" id="L243">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L246">        votingService.deleteVote(testUser, testReply);</span>
+
+        // Assert
+<span class="fc" id="L249">        verify(replyRepository).save(testReply);</span>
+<span class="fc" id="L250">        assertThat(testReply.getDislikeCount()).isEqualTo(0);</span>
+<span class="fc" id="L251">        verify(userVoteRepository).deleteByVotableIdAndUserId(testReply.getId(), testUser.getId());</span>
+<span class="fc" id="L252">    }</span>
+
+    @Test
+    void getUserVoteOnVotable_ShouldReturnVoteType() {
+        // Arrange
+<span class="fc" id="L257">        UserVote existingVote = UserVote.builder()</span>
+<span class="fc" id="L258">                .user(testUser)</span>
+<span class="fc" id="L259">                .votable(testReply)</span>
+<span class="fc" id="L260">                .votableType(VotableType.REPLY)</span>
+<span class="fc" id="L261">                .voteType(UserVote.VoteType.DISLIKE)</span>
+<span class="fc" id="L262">                .build();</span>
+
+<span class="fc" id="L264">        when(userVoteRepository.findByUserAndVotableAndVotableType(testUser, testReply, VotableType.REPLY))</span>
+<span class="fc" id="L265">                .thenReturn(Optional.of(existingVote));</span>
+
+        // Act
+<span class="fc" id="L268">        Optional&lt;UserVote.VoteType&gt; result = votingService.getUserVoteOnVotable(testUser, testReply);</span>
+
+        // Assert
+<span class="fc" id="L271">        assertThat(result).contains(UserVote.VoteType.DISLIKE);</span>
+<span class="fc" id="L272">    }</span>
+
+    @Test
+    void voteOnUnsupportedVotable_ShouldThrowException() {
+<span class="fc" id="L276">        UnsupportedVotable unvotable = new UnsupportedVotable();</span>
+
+<span class="pc" id="L278">        assertThatThrownBy(() -&gt; votingService.voteOnVotable(testUser, unvotable, UserVote.VoteType.LIKE))</span>
+<span class="fc" id="L279">                .isInstanceOf(IllegalArgumentException.class);</span>
+<span class="fc" id="L280">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

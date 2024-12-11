@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.controller</a> &gt; <span class="el_source">NotificationControllerTest.java</span></div><h1>NotificationControllerTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.controller;
+
+import com.vision.middleware.controller.NotificationController;
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Notification;
+import com.vision.middleware.domain.enums.NotificationType;
+import com.vision.middleware.dto.NotificationDTO;
+import com.vision.middleware.service.NotificationService;
+import com.vision.middleware.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.security.Principal;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L25">public class NotificationControllerTest {</span>
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private UserService userService;
+
+    @InjectMocks
+    private NotificationController notificationController;
+
+    @Mock
+    private Principal principal;
+
+    @Mock
+    private ApplicationUser mockUser;
+
+    @BeforeEach
+    void setUp() {
+        // Reset SecurityContextHolder before each test
+<span class="fc" id="L45">        SecurityContextHolder.clearContext();</span>
+<span class="fc" id="L46">    }</span>
+
+    @Test
+    void testAcknowledgeNotification_WhenNotificationBelongsToUser() {
+        // Arrange
+<span class="fc" id="L51">        long notificationId = 1L;</span>
+<span class="fc" id="L52">        long userId = 100L;</span>
+
+        // Simulate principal with user ID
+<span class="fc" id="L55">        when(principal.getName()).thenReturn(String.valueOf(userId));</span>
+
+        // Mock user lookup
+<span class="fc" id="L58">        when(userService.loadUserById(userId)).thenReturn(mockUser);</span>
+
+        // Mock notification ownership check
+<span class="fc" id="L61">        when(notificationService.doesNotificationBelongToUser(notificationId, mockUser))</span>
+<span class="fc" id="L62">                .thenReturn(true);</span>
+
+        // Act
+<span class="fc" id="L65">        notificationController.acknowledgeNotification(principal, notificationId);</span>
+
+        // Assert
+<span class="fc" id="L68">        verify(userService).loadUserById(userId);</span>
+<span class="fc" id="L69">        verify(notificationService).doesNotificationBelongToUser(notificationId, mockUser);</span>
+<span class="fc" id="L70">        verify(notificationService).acknowledgeNotification(notificationId);</span>
+<span class="fc" id="L71">    }</span>
+
+    @Test
+    void testAcknowledgeNotification_WhenNotificationDoesNotBelongToUser() {
+        // Arrange
+<span class="fc" id="L76">        long notificationId = 1L;</span>
+<span class="fc" id="L77">        long userId = 100L;</span>
+
+        // Simulate principal with user ID
+<span class="fc" id="L80">        when(principal.getName()).thenReturn(String.valueOf(userId));</span>
+
+        // Mock user lookup
+<span class="fc" id="L83">        when(userService.loadUserById(userId)).thenReturn(mockUser);</span>
+
+        // Mock notification ownership check
+<span class="fc" id="L86">        when(notificationService.doesNotificationBelongToUser(notificationId, mockUser))</span>
+<span class="fc" id="L87">                .thenReturn(false);</span>
+
+        // Act
+<span class="fc" id="L90">        notificationController.acknowledgeNotification(principal, notificationId);</span>
+
+        // Assert
+<span class="fc" id="L93">        verify(userService).loadUserById(userId);</span>
+<span class="fc" id="L94">        verify(notificationService).doesNotificationBelongToUser(notificationId, mockUser);</span>
+<span class="fc" id="L95">        verify(notificationService, never()).acknowledgeNotification(notificationId);</span>
+<span class="fc" id="L96">    }</span>
+
+    @Test
+    void testGetUnreadNotifications_WhenPrincipalIsNotNull() {
+        // Arrange
+<span class="fc" id="L101">        long userId = 100L;</span>
+
+        // Simulate principal with user ID
+<span class="fc" id="L104">        when(principal.getName()).thenReturn(String.valueOf(userId));</span>
+
+        // Mock user lookup
+<span class="fc" id="L107">        when(userService.loadUserById(userId)).thenReturn(mockUser);</span>
+
+        // Act
+<span class="fc" id="L110">        notificationController.getUnreadNotifications(principal);</span>
+
+        // Assert
+<span class="fc" id="L113">        verify(userService).loadUserById(userId);</span>
+<span class="fc" id="L114">        verify(notificationService).sendUnreadNotifications(mockUser);</span>
+<span class="fc" id="L115">    }</span>
+
+    @Test
+    void testGetUnreadNotifications_WhenPrincipalIsNull() {
+        // Act
+<span class="fc" id="L120">        notificationController.getUnreadNotifications(null);</span>
+
+        // Assert
+<span class="fc" id="L123">        verify(userService, never()).loadUserById(anyLong());</span>
+<span class="fc" id="L124">        verify(notificationService, never()).sendUnreadNotifications(any());</span>
+<span class="fc" id="L125">    }</span>
+
+    @Test
+    void testCreateCustomNotification() {
+        // Arrange
+<span class="fc" id="L130">        NotificationDTO inputDto = new NotificationDTO();</span>
+<span class="fc" id="L131">        inputDto.setNotificationType(NotificationType.FOLLOW);</span>
+<span class="fc" id="L132">        inputDto.setNotificationBody(&quot;Test Notification&quot;);</span>
+<span class="fc" id="L133">        inputDto.setToUserId(100L);</span>
+
+        // Mock user lookup
+<span class="fc" id="L136">        when(userService.loadUserById(100L)).thenReturn(mockUser);</span>
+
+        // Act
+<span class="fc" id="L139">        NotificationDTO result = notificationController.createCustomNotification(inputDto);</span>
+
+        // Assert
+<span class="fc" id="L142">        verify(userService).loadUserById(100L);</span>
+<span class="fc" id="L143">        verify(notificationService).sendNotification(any(Notification.class));</span>
+
+<span class="fc" id="L145">        assertNotNull(result);</span>
+<span class="fc" id="L146">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

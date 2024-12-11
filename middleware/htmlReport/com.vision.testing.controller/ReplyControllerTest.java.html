@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReplyControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.controller</a> &gt; <span class="el_source">ReplyControllerTest.java</span></div><h1>ReplyControllerTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vision.middleware.controller.ReplyController;
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Post;
+import com.vision.middleware.domain.Reply;
+import com.vision.middleware.domain.relations.UserVote;
+import com.vision.middleware.dto.ReplyDTO;
+import com.vision.middleware.dto.ReplyRequest;
+import com.vision.middleware.dto.UserDTO;
+import com.vision.middleware.service.PostService;
+import com.vision.middleware.service.ReplyService;
+import com.vision.middleware.service.UserService;
+import com.vision.middleware.service.VotingService;
+import com.vision.middleware.utils.JwtUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L37">public class ReplyControllerTest {</span>
+
+    private MockMvc mockMvc;
+
+    @Mock
+    private ReplyService replyService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private PostService postService;
+
+    @Mock
+    private VotingService votingService;
+
+    @Mock
+    private JwtUtil jwtUtil;
+
+    @InjectMocks
+    private ReplyController replyController;
+
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L63">        mockMvc = MockMvcBuilders.standaloneSetup(replyController).build();</span>
+<span class="fc" id="L64">        objectMapper = new ObjectMapper();</span>
+<span class="fc" id="L65">    }</span>
+
+    @Test
+    public void testGetRepliesToPostNoAuth() throws Exception {
+<span class="fc" id="L69">        long postId = 1L;</span>
+<span class="fc" id="L70">        List&lt;ReplyDTO&gt; replyDTOs = Collections.singletonList(</span>
+<span class="fc" id="L71">                ReplyDTO.builder()</span>
+<span class="fc" id="L72">                        .id(1L)</span>
+<span class="fc" id="L73">                        .text(&quot;Test Reply&quot;)</span>
+<span class="fc" id="L74">                        .build()</span>
+        );
+
+<span class="fc" id="L77">        when(replyService.getCommentTreeForPost(postId, null)).thenReturn(replyDTOs);</span>
+
+<span class="fc" id="L79">        mockMvc.perform(get(&quot;/replies/post/{postId}&quot;, postId))</span>
+<span class="fc" id="L80">                .andExpect(status().isOk())</span>
+<span class="fc" id="L81">                .andExpect(content().json(objectMapper.writeValueAsString(replyDTOs)));</span>
+<span class="fc" id="L82">    }</span>
+
+    @Test
+    public void testCreateReplyWithParentReply() throws Exception {
+<span class="fc" id="L86">        long postId = 1L;</span>
+<span class="fc" id="L87">        long userId = 1L;</span>
+<span class="fc" id="L88">        long parentReplyId = 2L;</span>
+<span class="fc" id="L89">        String token = &quot;Bearer validToken&quot;;</span>
+<span class="fc" id="L90">        ReplyRequest request = ReplyRequest.builder().text(&quot;Test Reply&quot;).toReplyId(parentReplyId).build();</span>
+
+<span class="fc" id="L92">        ApplicationUser user = makeTestUser(userId, &quot;testuser&quot;);</span>
+<span class="fc" id="L93">        Post post = Post.builder().id(postId).build();</span>
+<span class="fc" id="L94">        Reply parentReply = Reply.builder().id(parentReplyId).build();</span>
+<span class="fc" id="L95">        Reply newReply = Reply.builder().id(3L).text(&quot;Test Reply&quot;).build();</span>
+<span class="fc" id="L96">        ReplyDTO expectedDTO = ReplyDTO.builder()</span>
+<span class="fc" id="L97">                .id(3L)</span>
+<span class="fc" id="L98">                .text(&quot;Test Reply&quot;)</span>
+<span class="fc" id="L99">                .author(</span>
+<span class="fc" id="L100">                        UserDTO.builder()</span>
+<span class="fc" id="L101">                                .userId(userId)</span>
+<span class="fc" id="L102">                                .username(&quot;testuser&quot;)</span>
+<span class="fc" id="L103">                                .build()</span>
+                )
+<span class="fc" id="L105">                .build();</span>
+
+<span class="fc" id="L107">        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);</span>
+<span class="fc" id="L108">        when(userService.loadUserById(userId)).thenReturn(user);</span>
+<span class="fc" id="L109">        when(postService.loadPostById(postId)).thenReturn(post);</span>
+<span class="fc" id="L110">        when(replyService.findReplyById(parentReplyId)).thenReturn(parentReply);</span>
+<span class="fc" id="L111">        when(replyService.createReply(post, user, request.getText(), parentReply)).thenReturn(newReply);</span>
+
+<span class="fc" id="L113">        mockMvc.perform(post(&quot;/replies/post/{postId}&quot;, postId)</span>
+<span class="fc" id="L114">                        .header(&quot;Authorization&quot;, token)</span>
+<span class="fc" id="L115">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L116">                        .content(objectMapper.writeValueAsString(request)))</span>
+<span class="fc" id="L117">                .andExpect(status().isOk())</span>
+<span class="fc" id="L118">                .andExpect(content().json(objectMapper.writeValueAsString(expectedDTO)));</span>
+<span class="fc" id="L119">    }</span>
+
+    @Test
+    public void testCreateReplyWithoutParentReply() throws Exception {
+<span class="fc" id="L123">        long postId = 1L;</span>
+<span class="fc" id="L124">        long userId = 1L;</span>
+<span class="fc" id="L125">        String token = &quot;Bearer validToken&quot;;</span>
+<span class="fc" id="L126">        ReplyRequest request = ReplyRequest.builder().text(&quot;Test Reply&quot;).toReplyId(0).build();</span>
+
+<span class="fc" id="L128">        ApplicationUser user = makeTestUser(userId, &quot;testuser&quot;);</span>
+<span class="fc" id="L129">        Post post = Post.builder().id(postId).build();</span>
+<span class="fc" id="L130">        Reply newReply = Reply.builder().id(3L).text(&quot;Test Reply&quot;).build();</span>
+<span class="fc" id="L131">        ReplyDTO expectedDTO = ReplyDTO.builder()</span>
+<span class="fc" id="L132">                .id(3L)</span>
+<span class="fc" id="L133">                .text(&quot;Test Reply&quot;)</span>
+<span class="fc" id="L134">                .author(</span>
+<span class="fc" id="L135">                        UserDTO.builder()</span>
+<span class="fc" id="L136">                                .userId(userId)</span>
+<span class="fc" id="L137">                                .username(&quot;testuser&quot;)</span>
+<span class="fc" id="L138">                                .build()</span>
+                )
+<span class="fc" id="L140">                .build();</span>
+
+<span class="fc" id="L142">        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);</span>
+<span class="fc" id="L143">        when(userService.loadUserById(userId)).thenReturn(user);</span>
+<span class="fc" id="L144">        when(postService.loadPostById(postId)).thenReturn(post);</span>
+<span class="fc" id="L145">        when(replyService.createReply(post, user, request.getText(), null)).thenReturn(newReply);</span>
+
+<span class="fc" id="L147">        mockMvc.perform(post(&quot;/replies/post/{postId}&quot;, postId)</span>
+<span class="fc" id="L148">                        .header(&quot;Authorization&quot;, token)</span>
+<span class="fc" id="L149">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L150">                        .content(objectMapper.writeValueAsString(request)))</span>
+<span class="fc" id="L151">                .andExpect(status().isOk())</span>
+<span class="fc" id="L152">                .andExpect(content().json(objectMapper.writeValueAsString(expectedDTO)));</span>
+<span class="fc" id="L153">    }</span>
+
+    @Test
+    public void testVoteOnReply() throws Exception {
+<span class="fc" id="L157">        long replyId = 1L;</span>
+<span class="fc" id="L158">        long userId = 1L;</span>
+<span class="fc" id="L159">        String token = &quot;Bearer validToken&quot;;</span>
+<span class="fc" id="L160">        UserVote.VoteType voteType = UserVote.VoteType.LIKE;</span>
+
+<span class="fc" id="L162">        ApplicationUser user = makeTestUser(userId, &quot;testuser&quot;);</span>
+<span class="fc" id="L163">        Reply reply = Reply.builder().id(replyId).build();</span>
+
+<span class="fc" id="L165">        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);</span>
+<span class="fc" id="L166">        when(userService.loadUserById(userId)).thenReturn(user);</span>
+<span class="fc" id="L167">        when(replyService.findReplyById(replyId)).thenReturn(reply);</span>
+
+<span class="fc" id="L169">        mockMvc.perform(post(&quot;/replies/vote/{replyId}&quot;, replyId)</span>
+<span class="fc" id="L170">                        .header(&quot;Authorization&quot;, token)</span>
+<span class="fc" id="L171">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L172">                        .content(objectMapper.writeValueAsString(voteType)))</span>
+<span class="fc" id="L173">                .andExpect(status().isOk())</span>
+<span class="fc" id="L174">                .andExpect(content().string(&quot;Vote created.&quot;));</span>
+<span class="fc" id="L175">    }</span>
+
+    private ApplicationUser makeTestUser(long userId, String username) {
+<span class="fc" id="L178">        return ApplicationUser.builder()</span>
+<span class="fc" id="L179">                .id(userId)</span>
+<span class="fc" id="L180">                .username(username)</span>
+<span class="fc" id="L181">                .password(&quot;testpassword&quot;)</span>
+<span class="fc" id="L182">                .fullName(&quot;hello world&quot;)</span>
+<span class="fc" id="L183">                .email(&quot;a@b.com&quot;)</span>
+<span class="fc" id="L184">                .phoneNumber(&quot;1234567890&quot;)</span>
+<span class="fc" id="L185">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

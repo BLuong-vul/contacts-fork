@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware.utils</a> &gt; <span class="el_source">JwtUtil.java</span></div><h1>JwtUtil.java</h1><pre class="source lang-java linenums">package com.vision.middleware.utils;
+
+
+import com.vision.middleware.config.Consts;
+import com.vision.middleware.exceptions.InvalidTokenException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.stream.Collectors;
+
+@Component
+@RequiredArgsConstructor
+public class JwtUtil {
+
+    @Autowired
+    private final RSAKeyProperties rsaKeyProperties;
+
+    @Autowired
+    private final JwtEncoder jwtEncoder;
+
+    @Autowired
+    private final JwtDecoder jwtDecoder;
+
+    public String generateToken(Authentication auth, long userId) {
+<span class="fc" id="L38">        Instant now = Instant.now(); // time token issued</span>
+<span class="fc" id="L39">        Instant expTime = now.plusMillis(Consts.SESSION_TIMEOUT_MILLIS); // time token should expire</span>
+
+        // go through all authorities in auth and map -&gt; granted authority. (Role implements GrantedAuthority)
+<span class="fc" id="L42">        String scope = auth.getAuthorities().stream()</span>
+<span class="fc" id="L43">                .map(GrantedAuthority::getAuthority)</span>
+<span class="fc" id="L44">                .collect(Collectors.joining(&quot; &quot;));</span>
+
+<span class="fc" id="L46">        JwtClaimsSet claims = JwtClaimsSet.builder()</span>
+<span class="fc" id="L47">                .issuer(&quot;self&quot;)</span>
+<span class="fc" id="L48">                .issuedAt(now)</span>
+<span class="fc" id="L49">                .subject(String.valueOf(userId))</span>
+<span class="fc" id="L50">                .claim(&quot;roles&quot;, scope) // can add more stuff here, we just need roles though.</span>
+<span class="fc" id="L51">                .expiresAt(expTime)</span>
+<span class="fc" id="L52">                .build();</span>
+
+<span class="fc" id="L54">        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();</span>
+    }
+
+    public Claims extractClaims(String token) {
+<span class="fc" id="L58">        return Jwts.parserBuilder()</span>
+<span class="fc" id="L59">                .setSigningKey(rsaKeyProperties.getPublicKey())</span>
+<span class="fc" id="L60">                .build()</span>
+<span class="fc" id="L61">                .parseClaimsJws(token)</span>
+<span class="fc" id="L62">                .getBody();</span>
+    }
+
+    // todo: error handling for these methods
+    public String extractUsername(String token) {
+<span class="fc" id="L67">        return extractClaims(token).getSubject();</span>
+    }
+
+    public boolean isTokenValid(String token) {
+        // note: this is where we would probably want to manually intervene
+        //       with a blacklist if we want to deny a token for whatever reason.
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        return !isTokenExpired(token);</span>
+    }
+
+    public boolean isTokenExpired(String token) {
+        try {
+<span class="fc" id="L78">            return extractClaims(token).getExpiration().before(new Date());</span>
+<span class="fc" id="L79">        } catch (ExpiredJwtException e) {</span>
+<span class="fc" id="L80">            return true;</span>
+        }
+    }
+
+    public long extractId(String token) {
+<span class="fc" id="L85">        String subject = extractClaims(token).getSubject();</span>
+<span class="fc" id="L86">        return Long.parseLong(subject);</span>
+    }
+
+    public long checkJwtAuthAndGetUserId(String jwt) {
+
+        try {
+<span class="pc bpc" id="L92" title="1 of 4 branches missed.">            if (jwt != null &amp;&amp; jwt.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L93">                jwt = jwt.substring(7);</span>
+<span class="fc" id="L94">                long id = this.extractId(jwt);</span>
+
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                if (this.isTokenValid(jwt)) {</span>
+<span class="fc" id="L97">                    return id;</span>
+                }
+            }
+<span class="fc" id="L100">        } catch (MalformedJwtException e) {</span>
+<span class="fc" id="L101">            throw new InvalidTokenException(&quot;Malformed JWT&quot;);</span>
+<span class="fc" id="L102">        } catch (ExpiredJwtException e) {</span>
+<span class="fc" id="L103">            throw new InvalidTokenException(&quot;Expired JWT&quot;);</span>
+<span class="fc" id="L104">        }</span>
+
+        // checks above failed, jwt is invalid.
+<span class="fc" id="L107">        throw new InvalidTokenException(&quot;Jwt not valid.&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

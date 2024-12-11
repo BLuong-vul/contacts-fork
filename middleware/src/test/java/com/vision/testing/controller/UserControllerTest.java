@@ -22,6 +22,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -388,5 +389,25 @@ public class UserControllerTest {
 
         // Verify the service method was called with the correct parameters
         verify(userService, times(1)).updateProfilePictureById(userId, profilePictureFileName);
+    }
+
+    @Test
+    void testUpdateBannerPictureFileName_Success() throws Exception {
+        // Arrange
+        String token = "validToken";
+        long userId = 1L;
+        String bannerPictureFileName = "new-banner.jpg";
+
+        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);
+
+        // Act & Assert
+        mockMvc.perform(post("/user/account/banner-picture-file-name")
+                        .header("Authorization", token)
+                        .param("banner-picture-file-name", bannerPictureFileName))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        // Verify that the service method was called with correct parameters
+        verify(userService, times(1)).updateBannerPictureById(userId, bannerPictureFileName);
     }
 }

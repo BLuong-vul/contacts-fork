@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExampleDataControllerTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.controller</a> &gt; <span class="el_source">ExampleDataControllerTest.java</span></div><h1>ExampleDataControllerTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.controller;
+
+import com.vision.middleware.controller.ExampleDataController;
+import com.vision.middleware.domain.ExampleData;
+import com.vision.middleware.service.ExampleDataService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L32">public class ExampleDataControllerTest {</span>
+
+    @Mock
+    private ExampleDataService exampleDataService;
+
+    @InjectMocks
+    private ExampleDataController exampleDataController;
+
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L44">        mockMvc = MockMvcBuilders.standaloneSetup(exampleDataController).build();</span>
+<span class="fc" id="L45">    }</span>
+
+    @Test
+    public void testCreateExampleData() throws Exception {
+<span class="fc" id="L49">        ExampleData exampleData = new ExampleData();</span>
+<span class="fc" id="L50">        exampleData.setId(&quot;uuid&quot;);</span>
+<span class="fc" id="L51">        exampleData.setName(&quot;Test Data&quot;);</span>
+
+<span class="fc" id="L53">        when(exampleDataService.createExampleData(any(ExampleData.class))).thenReturn(exampleData);</span>
+
+<span class="fc" id="L55">        mockMvc.perform(post(&quot;/exampledata&quot;)</span>
+<span class="fc" id="L56">                        .contentType(MediaType.APPLICATION_JSON)</span>
+<span class="fc" id="L57">                        .content(&quot;{\&quot;name\&quot;:\&quot;Test Data\&quot;}&quot;))</span>
+<span class="fc" id="L58">                .andExpect(status().isCreated())</span>
+<span class="fc" id="L59">                .andExpect(jsonPath(&quot;$.id&quot;).value(&quot;uuid&quot;))</span>
+<span class="fc" id="L60">                .andExpect(jsonPath(&quot;$.name&quot;).value(&quot;Test Data&quot;));</span>
+<span class="fc" id="L61">    }</span>
+
+    @Test
+    public void testGetExampleDataById() throws Exception {
+<span class="fc" id="L65">        ExampleData exampleData = new ExampleData();</span>
+<span class="fc" id="L66">        exampleData.setId(&quot;uuid&quot;);</span>
+<span class="fc" id="L67">        exampleData.setName(&quot;Test Data&quot;);</span>
+
+<span class="fc" id="L69">        when(exampleDataService.getExampleData(anyString())).thenReturn(exampleData);</span>
+
+<span class="fc" id="L71">        mockMvc.perform(get(&quot;/exampledata/uuid&quot;))</span>
+<span class="fc" id="L72">                .andExpect(status().isOk())</span>
+<span class="fc" id="L73">                .andExpect(jsonPath(&quot;$.id&quot;).value(&quot;uuid&quot;))</span>
+<span class="fc" id="L74">                .andExpect(jsonPath(&quot;$.name&quot;).value(&quot;Test Data&quot;));</span>
+<span class="fc" id="L75">    }</span>
+
+    @Test
+    public void testGetAllExampleData() throws Exception {
+<span class="fc" id="L79">        ExampleData exampleData = new ExampleData();</span>
+<span class="fc" id="L80">        exampleData.setId(&quot;uuid&quot;);</span>
+<span class="fc" id="L81">        exampleData.setName(&quot;Test Data&quot;);</span>
+
+<span class="fc" id="L83">        Pageable pageable = PageRequest.of(0, 10);</span>
+<span class="fc" id="L84">        Page&lt;ExampleData&gt; page = new PageImpl&lt;&gt;(Collections.singletonList(exampleData), pageable, 1);</span>
+
+<span class="fc" id="L86">        when(exampleDataService.getAllExampleData(0, 10)).thenReturn(page);</span>
+
+<span class="fc" id="L88">        mockMvc.perform(get(&quot;/exampledata&quot;)</span>
+<span class="fc" id="L89">                        .param(&quot;page&quot;, &quot;0&quot;)</span>
+<span class="fc" id="L90">                        .param(&quot;size&quot;, &quot;10&quot;))</span>
+<span class="fc" id="L91">                .andDo(print())</span>
+<span class="fc" id="L92">                .andExpect(status().isOk())</span>
+<span class="fc" id="L93">                .andExpect(jsonPath(&quot;$.content[0].id&quot;).value(&quot;uuid&quot;))</span>
+<span class="fc" id="L94">                .andExpect(jsonPath(&quot;$.content[0].name&quot;).value(&quot;Test Data&quot;));</span>
+<span class="fc" id="L95">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

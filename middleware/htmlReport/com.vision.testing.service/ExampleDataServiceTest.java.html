@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExampleDataServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.service</a> &gt; <span class="el_source">ExampleDataServiceTest.java</span></div><h1>ExampleDataServiceTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.service;
+
+import com.vision.middleware.domain.ExampleData;
+import com.vision.middleware.repo.ExampleDataRepository;
+import com.vision.middleware.service.ExampleDataService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L26">public class ExampleDataServiceTest {</span>
+
+    @Mock
+    private ExampleDataRepository exampleDataRepository;
+
+    @InjectMocks
+    private ExampleDataService exampleDataService;
+
+    private ExampleData exampleData;
+
+    @BeforeEach
+    public void setUp() {
+<span class="fc" id="L38">        exampleData = new ExampleData();</span>
+<span class="fc" id="L39">        exampleData.setId(&quot;1&quot;);</span>
+<span class="fc" id="L40">        exampleData.setName(&quot;Test Data&quot;);</span>
+<span class="fc" id="L41">    }</span>
+
+    @Test
+    public void testGetAllExampleData() {
+        // Arrange
+<span class="fc" id="L46">        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(&quot;name&quot;));</span>
+<span class="fc" id="L47">        Page&lt;ExampleData&gt; page = new PageImpl&lt;&gt;(List.of(exampleData));</span>
+<span class="fc" id="L48">        when(exampleDataRepository.findAll(pageRequest)).thenReturn(page);</span>
+
+        // Act
+<span class="fc" id="L51">        Page&lt;ExampleData&gt; result = exampleDataService.getAllExampleData(0, 10);</span>
+
+        // Assert
+<span class="fc" id="L54">        assertThat(result).isNotNull();</span>
+<span class="fc" id="L55">        assertThat(result.getContent()).hasSize(1);</span>
+<span class="fc" id="L56">        assertThat(result.getContent().get(0).getId()).isEqualTo(&quot;1&quot;);</span>
+<span class="fc" id="L57">    }</span>
+
+    @Test
+    public void testGetExampleData_Found() {
+        // Arrange
+<span class="fc" id="L62">        when(exampleDataRepository.findById(&quot;1&quot;)).thenReturn(Optional.of(exampleData));</span>
+
+        // Act
+<span class="fc" id="L65">        ExampleData result = exampleDataService.getExampleData(&quot;1&quot;);</span>
+
+        // Assert
+<span class="fc" id="L68">        assertThat(result).isNotNull();</span>
+<span class="fc" id="L69">        assertThat(result.getId()).isEqualTo(&quot;1&quot;);</span>
+<span class="fc" id="L70">    }</span>
+
+    @Test
+    public void testGetExampleData_NotFound() {
+        // Arrange
+<span class="fc" id="L75">        when(exampleDataRepository.findById(&quot;2&quot;)).thenReturn(Optional.empty());</span>
+
+        // Act &amp; Assert
+<span class="pc" id="L78">        assertThatThrownBy(() -&gt; exampleDataService.getExampleData(&quot;2&quot;))</span>
+<span class="fc" id="L79">                .isInstanceOf(RuntimeException.class)</span>
+<span class="fc" id="L80">                .hasMessage(&quot;Data not found.&quot;);</span>
+<span class="fc" id="L81">    }</span>
+
+    @Test
+    public void testCreateExampleData() {
+        // Arrange
+<span class="fc" id="L86">        when(exampleDataRepository.save(any(ExampleData.class))).thenReturn(exampleData);</span>
+
+        // Act
+<span class="fc" id="L89">        ExampleData result = exampleDataService.createExampleData(exampleData);</span>
+
+        // Assert
+<span class="fc" id="L92">        assertThat(result).isNotNull();</span>
+<span class="fc" id="L93">        assertThat(result.getId()).isEqualTo(&quot;1&quot;);</span>
+<span class="fc" id="L94">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

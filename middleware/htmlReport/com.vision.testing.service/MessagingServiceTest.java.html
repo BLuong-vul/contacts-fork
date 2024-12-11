@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessagingServiceTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.testing.service</a> &gt; <span class="el_source">MessagingServiceTest.java</span></div><h1>MessagingServiceTest.java</h1><pre class="source lang-java linenums">package com.vision.testing.service;
+
+import com.vision.middleware.domain.ApplicationUser;
+import com.vision.middleware.domain.Message;
+import com.vision.middleware.dto.MessageDTO;
+import com.vision.middleware.exceptions.IdNotFoundException;
+import com.vision.middleware.repo.MessageRepository;
+import com.vision.middleware.service.MessagingService;
+import com.vision.middleware.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+<span class="fc" id="L26">class MessagingServiceTest {</span>
+
+    @Mock
+    private MessageRepository messageRepository;
+
+    @Mock
+    private UserService userService;
+
+    @InjectMocks
+    private MessagingService messagingService;
+
+    private ApplicationUser sender;
+    private ApplicationUser recipient;
+    private MessageDTO messageDTO;
+
+    @BeforeEach
+    void setUp() {
+<span class="fc" id="L43">        sender = new ApplicationUser();</span>
+<span class="fc" id="L44">        sender.setId(1L);</span>
+
+<span class="fc" id="L46">        recipient = new ApplicationUser();</span>
+<span class="fc" id="L47">        recipient.setId(2L);</span>
+
+<span class="fc" id="L49">        messageDTO = new MessageDTO();</span>
+<span class="fc" id="L50">        messageDTO.setBody(&quot;Test message&quot;);</span>
+<span class="fc" id="L51">        messageDTO.setRecipientId(recipient.getId());</span>
+<span class="fc" id="L52">    }</span>
+
+    @Test
+    void sendMessage_ShouldSaveMessageCorrectly() {
+        // When
+<span class="fc" id="L57">        messagingService.sendMessage(sender.getId(), messageDTO);</span>
+
+        // Then
+<span class="fc" id="L60">        verify(messageRepository, times(1)).save(argThat(message -&gt;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                message.getMessageBody().equals(messageDTO.getBody()) &amp;&amp;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">                        message.getSendingUserId() == sender.getId() &amp;&amp;</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                        message.getReceivingUserId() == recipient.getId() &amp;&amp;</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                        message.getDateSent() != null</span>
+        ));
+<span class="fc" id="L66">    }</span>
+
+    @Test
+    void getChatBetween_ShouldReturnSortedMessages() {
+        // Given
+<span class="fc" id="L71">        when(userService.loadUserById(sender.getId())).thenReturn(sender);</span>
+<span class="fc" id="L72">        when(userService.loadUserById(recipient.getId())).thenReturn(recipient);</span>
+
+<span class="fc" id="L74">        Message message1 = Message.builder()</span>
+<span class="fc" id="L75">                .sendingUserId(sender.getId())</span>
+<span class="fc" id="L76">                .receivingUserId(recipient.getId())</span>
+<span class="fc" id="L77">                .messageBody(&quot;First message&quot;)</span>
+<span class="fc" id="L78">                .dateSent(new Date(System.currentTimeMillis() - 1000))</span>
+<span class="fc" id="L79">                .build();</span>
+
+<span class="fc" id="L81">        Message message2 = Message.builder()</span>
+<span class="fc" id="L82">                .sendingUserId(recipient.getId())</span>
+<span class="fc" id="L83">                .receivingUserId(sender.getId())</span>
+<span class="fc" id="L84">                .messageBody(&quot;Second message&quot;)</span>
+<span class="fc" id="L85">                .dateSent(new Date())</span>
+<span class="fc" id="L86">                .build();</span>
+
+<span class="fc" id="L88">        when(messageRepository.findBySendingUserIdAndReceivingUserId(sender, recipient))</span>
+<span class="fc" id="L89">                .thenReturn(Collections.singletonList(message1));</span>
+<span class="fc" id="L90">        when(messageRepository.findBySendingUserIdAndReceivingUserId(recipient, sender))</span>
+<span class="fc" id="L91">                .thenReturn(Collections.singletonList(message2));</span>
+
+        // When
+<span class="fc" id="L94">        List&lt;Message&gt; chatHistory = messagingService.getChatBetween(sender.getId(), recipient.getId());</span>
+
+        // Then
+<span class="fc" id="L97">        assertThat(chatHistory).hasSize(2);</span>
+<span class="fc" id="L98">        assertThat(chatHistory.get(0)).isEqualTo(message1);</span>
+<span class="fc" id="L99">        assertThat(chatHistory.get(1)).isEqualTo(message2);</span>
+<span class="fc" id="L100">    }</span>
+
+    @Test
+    void getChatBetween_WhenNoMessages_ReturnsEmptyList() {
+        // Given
+<span class="fc" id="L105">        when(userService.loadUserById(sender.getId())).thenReturn(sender);</span>
+<span class="fc" id="L106">        when(userService.loadUserById(recipient.getId())).thenReturn(recipient);</span>
+
+<span class="fc" id="L108">        when(messageRepository.findBySendingUserIdAndReceivingUserId(sender, recipient))</span>
+<span class="fc" id="L109">                .thenReturn(List.of());</span>
+<span class="fc" id="L110">        when(messageRepository.findBySendingUserIdAndReceivingUserId(recipient, sender))</span>
+<span class="fc" id="L111">                .thenReturn(List.of());</span>
+
+        // When
+<span class="fc" id="L114">        List&lt;Message&gt; chatHistory = messagingService.getChatBetween(sender.getId(), recipient.getId());</span>
+
+        // Then
+<span class="fc" id="L117">        assertThat(chatHistory).isEmpty();</span>
+<span class="fc" id="L118">    }</span>
+
+    @Test
+    void sendMessage_NullMessageDTO_ShouldThrowException() {
+        // When/Then
+<span class="pc" id="L123">        assertThatThrownBy(() -&gt; messagingService.sendMessage(sender.getId(), null))</span>
+<span class="fc" id="L124">                .isInstanceOf(NullPointerException.class);</span>
+<span class="fc" id="L125">    }</span>
+
+    @Test
+    void getChatBetween_InvalidUserId_ShouldThrowException() {
+        // Given
+<span class="fc" id="L130">        when(userService.loadUserById(anyLong())).thenThrow(new IdNotFoundException(&quot;User not found&quot;));</span>
+
+        // When/Then
+<span class="pc" id="L133">        assertThatThrownBy(() -&gt; messagingService.getChatBetween(sender.getId(), recipient.getId()))</span>
+<span class="fc" id="L134">                .isInstanceOf(IdNotFoundException.class)</span>
+<span class="fc" id="L135">                .hasMessageContaining(&quot;User not found&quot;);</span>
+<span class="fc" id="L136">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

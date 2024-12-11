@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VotableEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">java in middleware Coverage Results</a> &gt; <a href="index.source.html" class="el_package">com.vision.middleware.domain.baseentities</a> &gt; <span class="el_source">VotableEntity.java</span></div><h1>VotableEntity.java</h1><pre class="source lang-java linenums">package com.vision.middleware.domain.baseentities;
+
+import com.vision.middleware.domain.interfaces.Votable;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
+@SuperBuilder
+public abstract class VotableEntity implements Votable {
+    // there is a separate sequence for ids for each class that extends it.
+    // classes that extend votable should specify a @SequenceGenerator for themselves.
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = &quot;id_generator&quot;)
+    private long id;
+
+    private long likeCount;
+    private long dislikeCount;
+
+    // derived fields
+    @Column(name = &quot;vote_score&quot;)
+    private long voteScore;
+
+    @PrePersist
+    protected void onPrePersist() {
+<span class="fc" id="L32">        updateDerivedFields();</span>
+<span class="fc" id="L33">    }</span>
+
+    @PreUpdate
+    protected void onPreUpdate() {
+<span class="fc" id="L37">        updateDerivedFields();</span>
+<span class="fc" id="L38">    }</span>
+
+    private void updateDerivedFields() {
+<span class="fc" id="L41">        this.voteScore = this.getLikeCount() - this.getDislikeCount();</span>
+<span class="fc" id="L42">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

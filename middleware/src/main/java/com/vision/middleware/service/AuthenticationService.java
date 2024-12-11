@@ -68,8 +68,6 @@ public class AuthenticationService {
                 .followerCount(0)
                 .build();
 
-        // we have our constraints for unique properties defined in ApplicationUser:
-        // should they ever be violated, this will throw a ConstraintViolationException.
         return userRepository.save(newUser);
     }
 
