@@ -6,13 +6,20 @@ import com.vision.middleware.dto.LoginResponseDTO;
 import com.vision.middleware.dto.RegistrationDTO;
 import com.vision.middleware.dto.UserDTO;
 import com.vision.middleware.service.AuthenticationService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -24,7 +31,17 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegistrationDTO body) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegistrationDTO body, BindingResult bindingResult) {
+        // when binding input json -> RegistrationDTO as specified by @Valid, some errors can be thrown:
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors()
+                    .stream()
+                    .map(ObjectError::getDefaultMessage)
+                    .toList();
+            return ResponseEntity.badRequest().body(String.join("\n", errors));
+        }
+
+        // binding success, we can proceed.
         try {
             ApplicationUser user = authenticationService.registerUser(body);
             UserDTO dto = UserDTO.builder()
@@ -41,8 +58,34 @@ public class AuthenticationController {
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             log.error("Error registering user: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account creation failed.");
+            String errorMessage = constraintErrorToMessage(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
+    }
+
+    private static String constraintErrorToMessage(Exception e) {
+        // not the greatest way to handle this, an exceptionHandler would be better. But whatever.
+        // another better way to do this would be to have the service class check for these things explicitly,
+        // and then raise an error that contains a message specifying what went wrong.
+        // This is something that
+        String errorMessage = e.getMessage();
+        StringBuilder errorBuilder = new StringBuilder();
+        if (errorMessage.contains("Key (username)")) {
+            errorBuilder.append("Username already exists\n");
+        }
+        if (errorMessage.contains("Key (email)")) {
+            errorBuilder.append("Email already registered\n");
+        }
+        if (errorMessage.contains("Key (phone_number)")) {
+            errorBuilder.append("Phone number already in use\n");
+        }
+
+        if (errorBuilder.isEmpty()) {
+            // if there is no specific message we are looking for to convert, then just return whatever message was provided.
+            errorBuilder.append(e.getMessage());
+        }
+
+        return errorBuilder.toString();
     }
 
     @PostMapping("/login")
