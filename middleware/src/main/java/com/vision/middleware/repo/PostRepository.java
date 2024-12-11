@@ -27,7 +27,23 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
         if (beforeDate != null) {
             spec = spec.and(PostSearchSpecification.filterByBeforeDate(beforeDate));
         }
-        
+        if (afterDate != null) {
+            spec = spec.and(PostSearchSpecification.filterByAfterDate(afterDate));
+        }
+
+        return findAll(spec, pageable);
+    }
+
+    default Page<Post> findAllPostsByUserWithFilters(ApplicationUser user, Pageable pageable, Date beforeDate, Date afterDate) {
+        Specification<Post> spec = Specification.where(null);
+
+        if (user != null) {
+            spec = spec.and(PostSearchSpecification.filterByUser(user));
+        }
+
+        if (beforeDate != null) {
+            spec = spec.and(PostSearchSpecification.filterByBeforeDate(beforeDate));
+        }
         if (afterDate != null) {
             spec = spec.and(PostSearchSpecification.filterByAfterDate(afterDate));
         }

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import homepagestyles from '../../social-media-homepage.module.css'; 
 import LeftMenu from '../../../../components/leftmenu/left-menu';
 import UserInfo from '../../../../components/rightmenu/user-info';
@@ -17,11 +17,34 @@ export default function ProfilePage({ params }) {
   const [profilePicture, setProfilePicture] = useState(null);
   const [bannerPicture, setBannerPicture] = useState(null);
   const [error, setError] = useState(null);
-  const [postCount, setPostCount] = useState(0);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [postCount, setPostCount] = useState(0);
+
   const [posts, setPosts] = useState([]);
+  const [numPosts, setNumPosts] = useState(0);
+  const numPostsRef = useRef(numPosts);
+
   const [isFollowing, setIsFollowing] = useState(false);
+
+  const [filterOptions, setFilterOptions] = useState({
+      sortBy: 'date',
+      filterOption: {
+        beforeDate: '',
+        afterDate: '',
+      }
+    });
+
+  const clearPosts = async () => {
+    setPosts([]);
+    setNumPosts(0);
+  }
+
+  const handleFilterChange = (newFilterOptions) => {
+      setFilterOptions(newFilterOptions);
+      console.log(newFilterOptions);
+      clearPosts();
+    };
 
   // Fetch info for page
   // Also check if we are logged in. If we are, update isFollowing
@@ -66,6 +89,40 @@ export default function ProfilePage({ params }) {
     };
     init();
   }, [username]);
+
+    // If reach bottom of page, fetch some more posts
+    useEffect(()=> {
+      numPostsRef.current = numPosts;
+    }, [numPosts]);
+    useEffect(() => {
+        const handleScroll = async () => {
+          if (window.innerHeight + window.scrollY + 20 >= document.body.offsetHeight) {
+            const fetchedPosts = await Fetch.fetchAllPosts(0, numPostsRef.current + 10, filterOptions.sortBy, filterOptions.filterOption.beforeDate, filterOptions.filterOption.afterDate);
+            setNumPosts(numPostsRef.current + 10);
+            setPosts(fetchedPosts);
+          }
+        };
+      // Add scroll listener
+      window.addEventListener('scroll', handleScroll);
+      // Clean up listener on unmount
+      return () => { window.removeEventListener('scroll', handleScroll); };
+    }, [filterOptions]);
+
+  // Fetches posts from database and saves to "posts"
+  useEffect(() => {
+      const fetchAndSetPosts = async () => {
+          try {
+              const fetchedPosts = await Fetch.fetchAllPosts(0, 10, filterOptions.sortBy, filterOptions.filterOption.beforeDate, filterOptions.filterOption.afterDate);
+              console.log(fetchedPosts);
+              setPosts(fetchedPosts); 
+          } catch (error) {
+              console.error('Error fetching posts:', error);
+              setError('Failed to load posts.');
+          }
+      };
+
+      fetchAndSetPosts();
+  }, [filterOptions]); 
     
   // Handle follow button click
   const handleFollow = async () => {
@@ -97,7 +154,7 @@ export default function ProfilePage({ params }) {
   return (
     <div className="flex gap-6 pt-6">
       <div className="hidden xl:block w-[20%]">
-        <LeftMenu type="profile" />
+        <LeftMenu onFilterChange={handleFilterChange} type="profile" />
       </div>
       <div className="w-full lg:w-[70%] xl:w-[50%]">
         <div className="flex flex-col gap-6">

@@ -104,11 +104,18 @@ public class PostService {
         return postRepository.findAllPostsWithFilters(pageable, beforeDate, afterDate);
     }
 
-
-
-    public Page<Post> getAllPostsByUsername(String username, int page, int size) {
+    // Default sort by new
+    public Page<Post> getAllPostsByUsername(String username, int page, int size, String sortBy, Date beforeDate, Date afterDate) {
         ApplicationUser user = userService.loadUserByUsername(username); 
-        return postRepository.findByPostedBy(user, PageRequest.of(page, size, Sort.by("datePosted")));
+
+        Pageable pageable;
+        if ("popularity".equals(sortBy)) {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("datePosted")));
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("datePosted")));
+        }
+        
+        return postRepository.findAllPostsByUserWithFilters(user, pageable, beforeDate, afterDate);
     }
 
     public Post loadPostById(long postId) {

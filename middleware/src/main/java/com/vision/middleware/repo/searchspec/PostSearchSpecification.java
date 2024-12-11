@@ -20,6 +20,11 @@ public class PostSearchSpecification {
             builder.greaterThanOrEqualTo(root.get("datePosted"), afterDate);
     }
 
+    public static Specification<Post> filterByUser(ApplicationUser user) {
+        return (root, query, criteriaBuilder) -> 
+            criteriaBuilder.equal(root.get("user"), user);
+    }
+
     public static Specification<Post> searchPosts(String query, ApplicationUser user) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             if (!StringUtils.hasText(query)) {

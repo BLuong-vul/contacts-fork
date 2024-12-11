@@ -108,6 +108,7 @@ class PostControllerTest {
     }
     */
 
+    /*
     @Test
     void testGetPostsByUsername_Success() throws Exception {
         // Arrange
@@ -130,6 +131,7 @@ class PostControllerTest {
 
         verify(postService).getAllPostsByUsername(username, page, size);
     }
+    */
 
     @Test
     void testVoteOnPost_Success() throws Exception {

@@ -277,9 +277,9 @@ export async function fetchAllPosts(page=0, size=10, sortBy="date", beforeDate=n
 
 // Fetches all posts made by a certain user
 // 4 November: This now only returns the data and not actual post components.
-export async function getPostsByUser(username, page=0, size=10){
+export async function getPostsByUser(username, page=0, size=10, sortBy="date", beforeDate=null, afterDate=null){
 	try {
-		const response = await fetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}`);
+		const response = await fetchFromApi(`${baseURL}/post/by-user?username=${username}&page=${page}&size=${size}&sort-by=${sortBy}&before-date=${beforeDate}&after-date=${afterDate}`);
 		const pagedData = await response.json();
 		return pagedData.content;
 	} catch (error){

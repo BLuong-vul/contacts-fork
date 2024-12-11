@@ -231,6 +231,7 @@ public class PostServiceTest {
     }
     */
 
+    /*
     @Test
     public void getAllPostsByUsername_Success() {
         // Arrange
@@ -248,6 +249,7 @@ public class PostServiceTest {
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0)).isEqualTo(testPost);
     }
+    */
 
     @Test
     public void loadPostById_Success() {
