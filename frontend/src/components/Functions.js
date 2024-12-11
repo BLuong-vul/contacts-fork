@@ -349,6 +349,56 @@ export async function getVoteOnVotable(votableId){
 	}
 }
 
+async function _voteReply(replyVotableId, replyVoteType) {
+	await validateTokenWithRedirect();
+	const voteDTO = {
+	  votableId: replyVotableId,
+	  voteType: replyVoteType, 
+	};
+	try { 
+		const response = await authFetchFromApi(`${baseURL}/replies/vote`, 'POST', voteDTO);
+		return true;
+	} catch (error){
+		console.error("Error voting: ", error);
+		return false;
+	}
+}
+
+export async function likeReply(votableId){
+	return await _voteReply(votableId, "LIKE");
+}
+
+export async function dislikeReply(votableId){
+	return await _voteReply(votableId, "DISLIKE");
+}
+
+export async function unvoteReply(votableId){
+	if(!(await validateTokenWithRedirect())) return null;
+	try{
+		const response = await authFetchFromApi(`${baseURL}/replies/unvote?votableId=${votableId}`, 'DELETE');
+		return true;
+	} catch (error){
+		console.error("Error unvoting: ", error);
+		return false;
+	}
+}
+
+export async function getVoteOnReply(votableId){
+	if (!(await validateToken())) return null;
+	try {
+		const response = await authFetchFromApi(`${baseURL}/replies/get-vote?votableId=${votableId}`);
+		if (response.ok) {
+            // Check if there is content before parsing JSON
+            if (response.status === 200) {
+                return await response.json(); // Return the vote type
+            }
+            return null; // No vote exists
+        }
+	} catch (error){
+		console.error("Error checking vote: ", error);
+	}
+}
+
 export async function uploadReply(postId, textContent, parentId=0){
 	if(!(await validateTokenWithRedirect())) return null;
 	if (textContent=="" || textContent==null) return null;

@@ -30,6 +30,9 @@ public class ReplyService {
     private final ReplyRepository replyRepository;
 
     @Autowired
+    private final UserService userService;
+
+    @Autowired
     private final VotingService votingService;
 
     // null parent reply if this is supposed to be a root reply.
@@ -64,6 +67,33 @@ public class ReplyService {
 
     public void voteOnReply(ApplicationUser user, Reply reply, UserVote.VoteType voteType) {
         votingService.voteOnVotable(user, reply, voteType);
+    }
+
+    public void userVoteOnReply(long replyId, long userId, UserVote.VoteType voteType) {
+        Reply reply = replyRepository.findById(replyId).orElseThrow(
+                () -> new IdNotFoundException("Reply id " + replyId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        votingService.voteOnVotable(user, reply, voteType);
+    }
+
+    public void removeUserVoteOnReply(long replyId, long userId) {
+        Reply reply = replyRepository.findById(replyId).orElseThrow(
+                () -> new IdNotFoundException("Reply id " + replyId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        votingService.deleteVote(user, reply);
+    }
+
+    public Optional<UserVote.VoteType> getUserVoteOnReply(long replyId, long userId) {
+        Reply reply = replyRepository.findById(replyId).orElseThrow(
+                () -> new IdNotFoundException("Reply id " + replyId + " not found.")
+        );
+        ApplicationUser user = userService.loadUserById(userId);
+
+        return votingService.getUserVoteOnVotable(user, reply);
     }
 
     @Transactional

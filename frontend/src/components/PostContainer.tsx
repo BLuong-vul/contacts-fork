@@ -163,19 +163,15 @@ const PostContainer = ({ postData }) => {
             {/* Interaction */}
             <div className="flex items-center justify-between text-sm rounded-xl">
                 <div className="flex gap-2">
+                    {/* Likes */}
                     <div onClick={handleLike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
-                        {/* Likes */}
                         <FaThumbsUp width={16} height={16} className={`cursor-pointer ${userRating === "LIKE" ? "text-blue-500" : "text-slate-300"}`}  />
-                        <span className="text-slate-300">
-                            {likes}
-                        </span>
+                        <span className="text-slate-300"> {likes} </span>
                     </div>
                     <div onClick={handleDislike} className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Dislikes */}
                         <FaThumbsDown width={16} height={16} className={`cursor-pointer ${userRating === "DISLIKE" ? "text-blue-500" : "text-slate-300"}`} />
-                        <span className="text-slate-300">
-                            {dislikes}
-                        </span>
+                        <span className="text-slate-300"> {dislikes} </span>
                     </div>
                     <div onClick={toggleComments} className="ml-4 cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-900 transition duration-100 active:bg-slate-950 p-2 rounded-xl">
                         {/* Comments */}

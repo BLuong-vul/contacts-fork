@@ -7,6 +7,7 @@ import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.dto.ReplyRequest;
 import com.vision.middleware.dto.UserDTO;
+import com.vision.middleware.dto.VoteDTO;
 import com.vision.middleware.service.PostService;
 import com.vision.middleware.service.ReplyService;
 import com.vision.middleware.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/replies")
@@ -67,19 +69,28 @@ public class ReplyController {
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/vote/{replyId}")
-    public ResponseEntity<?> voteOnReply(
-            @RequestHeader("Authorization") String token,
-            @PathVariable long replyId,
-            @RequestBody UserVote.VoteType voteType
-    ) {
+    @PostMapping("/vote")
+    public VoteDTO voteOnReply(@RequestHeader("Authorization") String token, @RequestBody VoteDTO voteDTO) {
         long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
-        ApplicationUser user = userService.loadUserById(userId);
-        Reply reply = replyService.findReplyById(replyId);
+        replyService.userVoteOnReply(voteDTO.getVotableId(), userId, voteDTO.getVoteType());
+        return voteDTO;
+    }
 
-        votingService.voteOnVotable(user, reply, voteType);
+    @DeleteMapping("/unvote")
+    public ResponseEntity<Void> unvoteOnReply(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        replyService.removeUserVoteOnReply(votableId, userId);
+        return ResponseEntity.noContent().build();
+    }
 
-        return ResponseEntity.ok("Vote created.");
+    @GetMapping("/get-vote")
+    public ResponseEntity<UserVote.VoteType> checkUserVote(@RequestHeader("Authorization") String token, @RequestParam long votableId) {
+        long userId = jwtUtil.checkJwtAuthAndGetUserId(token);
+        Optional<UserVote.VoteType> voteType = replyService.getUserVoteOnReply(votableId, userId);
+
+        return voteType
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     private ReplyDTO buildReplyDTO(Reply reply, ApplicationUser user) {
