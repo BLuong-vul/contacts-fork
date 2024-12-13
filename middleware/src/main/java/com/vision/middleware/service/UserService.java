@@ -6,17 +6,15 @@ import com.vision.middleware.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Service class responsible for managing user-related operations.
@@ -25,12 +23,6 @@ import java.util.Date;
  */
 @Service
 public class UserService implements UserDetailsService {
-
-    /**
-     * Password encoder instance for secure password handling.
-     */
-    @Autowired
-    private PasswordEncoder encoder;
 
     /**
      * Repository instance for user data access.
@@ -169,7 +161,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Returns a collection of GrantedAuthority instances for the given role.
-     * Currently returns a single SimpleGrantedAuthority for the provided role.
+     * Currently, returns a single SimpleGrantedAuthority for the provided role.
      *
      * @param role the role to generate authorities for
      * @return a collection of GrantedAuthority instances

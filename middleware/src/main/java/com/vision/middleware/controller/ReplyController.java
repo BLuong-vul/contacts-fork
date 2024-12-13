@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * RESTful API controller for managing replies to posts.
+ * REST API controller for managing replies to posts.
  *
  * This controller handles requests related to replies, including creating new replies,
  * voting on existing replies, and retrieving reply information.
  *
- * All endpoints require authentication, with the exception of
+ * All endpoints require authentication, except
  * {@link #getRepliesToPostNoAuth(long) retrieving replies to a post}.
  */
 @RestController
