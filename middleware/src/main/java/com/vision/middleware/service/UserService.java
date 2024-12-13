@@ -3,6 +3,7 @@ package com.vision.middleware.service;
 import com.vision.middleware.domain.ApplicationUser;
 import com.vision.middleware.exceptions.IdNotFoundException;
 import com.vision.middleware.repo.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,13 +23,14 @@ import java.util.List;
  * Provides additional methods for user profile management and queries.
  */
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     /**
      * Repository instance for user data access.
      */
     @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * Loads a user by their username, throwing an exception if not found.

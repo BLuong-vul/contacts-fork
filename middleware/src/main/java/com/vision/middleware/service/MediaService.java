@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.vision.middleware.exceptions.InvalidFileException;
 import com.vision.middleware.exceptions.MediaNotFoundException;
 import com.vision.middleware.exceptions.MediaUploadException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MediaService {
 
     /**
@@ -35,7 +37,7 @@ public class MediaService {
      * Autowired Amazon S3 client for interacting with S3 services.
      */
     @Autowired
-    private AmazonS3 s3Client;
+    private final AmazonS3 s3Client;
 
     /**
      * Maximum allowed file size in bytes (10 MB).

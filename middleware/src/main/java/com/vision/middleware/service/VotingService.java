@@ -10,6 +10,7 @@ import com.vision.middleware.exceptions.DuplicateVoteException;
 import com.vision.middleware.repo.PostRepository;
 import com.vision.middleware.repo.ReplyRepository;
 import com.vision.middleware.repo.UserVoteRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,16 +21,17 @@ import java.util.Optional;
  * Service responsible for handling voting operations on votable entities (e.g., Posts, Replies).
  */
 @Service
+@RequiredArgsConstructor
 public class VotingService {
 
     @Autowired
-    private UserVoteRepository userVoteRepository;
+    private final UserVoteRepository userVoteRepository;
 
     @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     @Autowired
-    private ReplyRepository replyRepository;
+    private final ReplyRepository replyRepository;
 
     /**
      * Casts a vote on a votable entity. If the user has already voted, updates the existing vote.

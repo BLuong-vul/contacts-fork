@@ -27,6 +27,7 @@ import java.time.LocalDate;
  * Service class responsible for handling post-related operations.
  */
 @Service
+@RequiredArgsConstructor
 @Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
 public class PostService {
 
