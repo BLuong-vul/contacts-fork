@@ -14,6 +14,11 @@ import com.vision.middleware.domain.Reply;
 
 import com.vision.middleware.dto.UserDTO;
 
+/**
+ * Data Transfer Object representing a reply in the system.
+ * It includes details such as the reply's text, author, date of posting,
+ * vote counts, vote score, user vote type, deletion status, and nested replies.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

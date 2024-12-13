@@ -33,6 +33,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuration class for setting up Spring Security.
+ */
 @AllArgsConstructor
 @Configuration
 @EnableWebSecurity
@@ -48,22 +51,41 @@ public class SecurityConfig {
     @Autowired
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
+    /**
+     * Bean definition for a password encoder.
+     *
+     * @return PasswordEncoder instance using BCrypt.
+     */
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Sets the security context holder strategy to use thread-local storage.
+     */
     @PostConstruct
     public void setSecurityContextHolderStrategy() {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_THREADLOCAL);
-        // SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
+    /**
+     * Bean definition for an authentication manager.
+     *
+     * @param authenticationConfiguration the Spring Security authentication configuration
+     * @return AuthenticationManager instance
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * Bean definition for a DAO authentication provider.
+     *
+     * @return DaoAuthenticationProvider instance
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
@@ -72,6 +94,13 @@ public class SecurityConfig {
         return daoProvider;
     }
 
+    /**
+     * Bean definition for the security filter chain.
+     *
+     * @param http the HttpSecurity object to configure
+     * @return SecurityFilterChain configured with the provided HttpSecurity object
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -116,13 +145,21 @@ public class SecurityConfig {
             .build();
     }
 
-    // unbundles data
+    /**
+     * Bean definition for a JWT decoder.
+     *
+     * @return JwtDecoder instance using the public key from RSAKeyProperties
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withPublicKey(keys.getPublicKey()).build();
     }
 
-    // bundles data and signs it with private key.
+    /**
+     * Bean definition for a JWT encoder.
+     *
+     * @return JwtEncoder instance using the public and private keys from RSAKeyProperties
+     */
     @Bean
     public JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey.Builder(keys.getPublicKey()).privateKey(keys.getPrivateKey()).build();
@@ -130,6 +167,11 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwks);
     }
 
+    /**
+     * Bean definition for a JWT authentication converter.
+     *
+     * @return JwtAuthenticationConverter instance with a custom JwtGrantedAuthoritiesConverter
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         // convert roles from form USER -> ROLE_USER for Spring Security matching users against roles from converted JWT tokens.

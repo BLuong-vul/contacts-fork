@@ -17,6 +17,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * A WebSocket channel interceptor that handles authentication for incoming WebSocket connections.
+ * It extracts a JWT token from the connection headers, validates it, and sets the user authentication context.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -25,6 +29,14 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     @Autowired
     private final JwtUtil jwtUtil;
 
+    /**
+     * Intercepts messages before they are sent to the channel.
+     * Specifically, it handles the authentication for WebSocket CONNECT commands.
+     *
+     * @param message the message to be sent
+     * @param channel the message channel
+     * @return the message to be sent, which may be a modified version of the original
+     */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 

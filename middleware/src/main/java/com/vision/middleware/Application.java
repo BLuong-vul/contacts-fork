@@ -13,44 +13,65 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Spring Boot Application entry point.
+ * <p>
+ * This application sets up a basic admin user and role structure on startup.
+ */
 @SpringBootApplication
 public class Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
+    /**
+     * Main method to run the Spring Boot application.
+     *
+     * @param args Command line arguments.
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 
-	// setup function, run each time the application is started.
-	@Bean
-	CommandLineRunner run(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-		return args -> {
-			// make a user with the Role of ADMIN if the role ADMIN does not exist
-			// ADMIN existing -> USER exists and admin user exists as well
-			if (roleRepository.findByAuthority("ADMIN").isPresent()) return;
+    /**
+     * Setup function that runs each time the application is started.
+     * It ensures that the ADMIN role and user exist in the system.
+     *
+     * @param roleRepository    Repository for Role operations.
+     * @param userRepository    Repository for ApplicationUser operations.
+     * @param passwordEncoder   Password encoder for user passwords.
+     * @return CommandLineRunner instance.
+     */
+    @Bean
+    CommandLineRunner run(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        return args -> {
+            // Check if ADMIN role already exists
+            if (roleRepository.findByAuthority("ADMIN").isPresent()) return;
 
-			Role adminRole = roleRepository.save(new Role("ADMIN"));
-			roleRepository.save(new Role("USER"));
+            // Save ADMIN and USER roles
+            Role adminRole = roleRepository.save(new Role("ADMIN"));
+            roleRepository.save(new Role("USER"));
 
-			Set<Role> roles = new HashSet<>();
-			roles.add(adminRole);
+            // Set up roles for the admin user
+            Set<Role> roles = new HashSet<>();
+            roles.add(adminRole);
 
-			// todo: factor out the password to probably an env var.
-			ApplicationUser admin = ApplicationUser.builder()
-					.id(1)
-					.username("admin")
-					.fullName("Admin")
-					.email("N/A")
-					.phoneNumber("N/A")
-					.address("N/A")
-					.city("N/A")
-					.state("N/A")
-					.zipCode("N/A")
-					.country("N/A")
-					.password(passwordEncoder.encode("password"))
-					.authorities(roles)
-					.build();
+            // Create admin user with encoded password
+            // todo: factor out admin password later, probably to env var.
+            ApplicationUser admin = ApplicationUser.builder()
+                    .id(1)
+                    .username("admin")
+                    .fullName("Admin")
+                    .email("N/A")
+                    .phoneNumber("N/A")
+                    .address("N/A")
+                    .city("N/A")
+                    .state("N/A")
+                    .zipCode("N/A")
+                    .country("N/A")
+                    .password(passwordEncoder.encode("password"))
+                    .authorities(roles)
+                    .build();
 
-			userRepository.save(admin);
-		};
-	}
+            // Save admin user to the repository
+            userRepository.save(admin);
+        };
+    }
 }

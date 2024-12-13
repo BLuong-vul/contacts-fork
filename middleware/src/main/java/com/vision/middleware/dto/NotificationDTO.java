@@ -5,6 +5,11 @@ import lombok.*;
 
 import java.time.Instant;
 
+/**
+ * Data Transfer Object for handling Notification data.
+ * This class is used to transfer notification relevant details
+ * between the application layers.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

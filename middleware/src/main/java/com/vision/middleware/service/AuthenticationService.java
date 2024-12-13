@@ -25,18 +25,48 @@ import javax.management.relation.RoleNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Service class responsible for handling user authentication-related operations,
+ * including user registration and login. Each method call is treated as a single transaction.
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional(rollbackOn = Exception.class) // <- each method call is treated as a single transaction.
+@Transactional(rollbackOn = Exception.class)
 public class AuthenticationService {
 
-    private final UserRepository userRepository; // users should be allowed to search for themselves
+    /**
+     * Repository for managing user data.
+     */
+    private final UserRepository userRepository;
+
+    /**
+     * Repository for managing user roles.
+     */
     private final RoleRepository roleRepository;
+
+    /**
+     * Service for encoding and decoding passwords.
+     */
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * Manager for handling authentication processes.
+     */
     private final AuthenticationManager authenticationManager;
+
+    /**
+     * Service for generating and managing security tokens.
+     */
     private final TokenService tokenService;
 
+    /**
+     * Registers a new user with the provided details.
+     *
+     * @param user Registration data for the new user.
+     * @return The newly created user entity.
+     * @throws ConstraintViolationException if the registration data violates any constraints.
+     */
     public ApplicationUser registerUser(RegistrationDTO user) throws ConstraintViolationException {
         final String encodedPassword = passwordEncoder.encode(user.getPassword());
 
@@ -71,6 +101,15 @@ public class AuthenticationService {
         return userRepository.save(newUser);
     }
 
+    /**
+     * Authenticates a user based on the provided credentials and returns a login response
+     * containing user details and a generated JWT token.
+     *
+     * @param username Username of the user to authenticate.
+     * @param password Password of the user to authenticate.
+     * @return Login response containing user details and a JWT token.
+     * @throws AuthenticationException if the authentication fails.
+     */
     public LoginResponseDTO loginUser(String username, String password) throws AuthenticationException {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)

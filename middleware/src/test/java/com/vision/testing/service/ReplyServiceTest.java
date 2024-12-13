@@ -17,6 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.*;
 
@@ -25,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ReplyServiceTest {
 
     @Mock
@@ -79,6 +83,8 @@ public class ReplyServiceTest {
                 .datePosted(new Date())
                 .childReplies(new HashSet<>(Collections.singletonList(testChildReply)))
                 .build();
+
+        when(userService.loadUserById(1L)).thenReturn(testUser);
     }
 
     @Test
@@ -226,5 +232,96 @@ public class ReplyServiceTest {
         ReplyDTO childReply = commentTree.get(0).getReplies().get(0);
         assertThat(childReply.getId()).isEqualTo(testChildReply.getId());
         assertThat(childReply.getText()).isEqualTo(testChildReply.getText());
+    }
+
+    @Test
+    void userVoteOnReply_ValidInput_VotingServiceCalled() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+
+        replyService.userVoteOnReply(testReply.getId(), testUser.getId(), UserVote.VoteType.LIKE);
+
+        verify(votingService).voteOnVotable(testUser, testReply, UserVote.VoteType.LIKE);
+    }
+
+    @Test
+    void userVoteOnReply_ReplyNotFound_ThrowsIdNotFoundException() {
+        when(replyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                replyService.userVoteOnReply(999L, testUser.getId(), UserVote.VoteType.LIKE)
+        ).isInstanceOf(IdNotFoundException.class)
+                .hasMessageContaining("Reply id 999 not found.");
+    }
+
+    @Test
+    void userVoteOnReply_UserNotFound_ThrowsUsernameNotFoundException() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+        when(userService.loadUserById(999L)).thenThrow(new UsernameNotFoundException("User not found."));
+
+        assertThatThrownBy(() ->
+                replyService.userVoteOnReply(testReply.getId(), 999L, UserVote.VoteType.LIKE)
+        ).isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("User not found.");
+    }
+
+    @Test
+    void removeUserVoteOnReply_ValidInput_VotingServiceCalled() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+
+        replyService.removeUserVoteOnReply(testReply.getId(), testUser.getId());
+
+        verify(votingService).deleteVote(testUser, testReply);
+    }
+
+    @Test
+    void removeUserVoteOnReply_ReplyNotFound_ThrowsIdNotFoundException() {
+        when(replyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                replyService.removeUserVoteOnReply(999L, testUser.getId())
+        ).isInstanceOf(IdNotFoundException.class)
+                .hasMessageContaining("Reply id 999 not found.");
+    }
+
+    @Test
+    void removeUserVoteOnReply_UserNotFound_ThrowsUsernameNotFoundException() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+        when(userService.loadUserById(999L)).thenThrow(new UsernameNotFoundException("User not found."));
+
+        assertThatThrownBy(() ->
+                replyService.removeUserVoteOnReply(testReply.getId(), 999L)
+        ).isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("User not found.");
+    }
+
+    @Test
+    void getUserVoteOnReply_ValidInput_ReturnsVoteType() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+        when(votingService.getUserVoteOnVotable(testUser, testReply)).thenReturn(Optional.of(UserVote.VoteType.LIKE));
+
+        Optional<UserVote.VoteType> userVoteType = replyService.getUserVoteOnReply(testReply.getId(), testUser.getId());
+
+        assertThat(userVoteType).isEqualTo(Optional.of(UserVote.VoteType.LIKE));
+    }
+
+    @Test
+    void getUserVoteOnReply_ReplyNotFound_ThrowsIdNotFoundException() {
+        when(replyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                replyService.getUserVoteOnReply(999L, testUser.getId())
+        ).isInstanceOf(IdNotFoundException.class)
+                .hasMessageContaining("Reply id 999 not found.");
+    }
+
+    @Test
+    void getUserVoteOnReply_UserNotFound_ThrowsUsernameNotFoundException() {
+        when(replyRepository.findById(testReply.getId())).thenReturn(Optional.of(testReply));
+        when(userService.loadUserById(999L)).thenThrow(new UsernameNotFoundException("User not found."));
+
+        assertThatThrownBy(() ->
+                replyService.getUserVoteOnReply(testReply.getId(), 999L)
+        ).isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("User not found.");
     }
 }

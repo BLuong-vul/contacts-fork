@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Data Transfer Object for login credentials.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

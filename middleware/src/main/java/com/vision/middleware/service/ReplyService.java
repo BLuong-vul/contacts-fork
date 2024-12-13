@@ -19,23 +19,51 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class responsible for managing replies, including creation, deletion, voting, and retrieval.
+ * Provides functionality for constructing a comment tree for a given post.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReplyService {
 
+    /**
+     * Maximum allowed length for a reply's text.
+     */
     private static final int MAX_REPLY_LENGTH = 5000;
+
+    /**
+     * Maximum allowed nesting depth for replies.
+     */
     private static final int MAX_NESTING_DEPTH = 100;
 
+    /**
+     * Repository for interacting with the reply data storage.
+     */
     @Autowired
     private final ReplyRepository replyRepository;
 
+    /**
+     * Service for user-related operations.
+     */
     @Autowired
     private final UserService userService;
 
+    /**
+     * Service for voting-related operations.
+     */
     @Autowired
     private final VotingService votingService;
 
-    // null parent reply if this is supposed to be a root reply.
+    /**
+     * Creates a new reply for a given post. The reply can be a root reply (with no parent) or a child reply.
+     *
+     * @param post        the post to which the reply belongs
+     * @param author      the author of the reply
+     * @param text        the text content of the reply
+     * @param parentReply the parent reply if this is a child reply, null otherwise
+     * @return the created reply
+     */
     @Transactional
     public Reply createReply(Post post, ApplicationUser author, String text, Reply parentReply) {
         validateReply(text, parentReply);
@@ -59,16 +87,37 @@ public class ReplyService {
         return replyRepository.save(reply);
     }
 
+    /**
+     * Retrieves a reply by its ID.
+     *
+     * @param replyId the ID of the reply to retrieve
+     * @return the reply with the given ID, or throws an exception if not found
+     * @throws IdNotFoundException if the reply with the given ID does not exist
+     */
     public Reply findReplyById(long replyId) {
         return replyRepository.findById(replyId).orElseThrow(
                 () -> new IdNotFoundException(String.format("Reply with id %d not found.", replyId))
         );
     }
 
+    /**
+     * Casts a vote on a reply.
+     *
+     * @param user     the user casting the vote
+     * @param reply    the reply being voted on
+     * @param voteType the type of vote (like/dislike)
+     */
     public void voteOnReply(ApplicationUser user, Reply reply, UserVote.VoteType voteType) {
         votingService.voteOnVotable(user, reply, voteType);
     }
 
+    /**
+     * Casts a vote on a reply, retrieving the reply and user by their IDs.
+     *
+     * @param replyId  the ID of the reply being voted on
+     * @param userId   the ID of the user casting the vote
+     * @param voteType the type of vote (like/dislike)
+     */
     public void userVoteOnReply(long replyId, long userId, UserVote.VoteType voteType) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
                 () -> new IdNotFoundException("Reply id " + replyId + " not found.")
@@ -78,6 +127,12 @@ public class ReplyService {
         votingService.voteOnVotable(user, reply, voteType);
     }
 
+    /**
+     * Removes a user's vote from a reply, retrieving the reply and user by their IDs.
+     *
+     * @param replyId the ID of the reply
+     * @param userId  the ID of the user
+     */
     public void removeUserVoteOnReply(long replyId, long userId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
                 () -> new IdNotFoundException("Reply id " + replyId + " not found.")
@@ -87,6 +142,13 @@ public class ReplyService {
         votingService.deleteVote(user, reply);
     }
 
+    /**
+     * Retrieves the type of vote (if any) a user has cast on a reply, retrieving the reply and user by their IDs.
+     *
+     * @param replyId the ID of the reply
+     * @param userId  the ID of the user
+     * @return the vote type (like/dislike) if the user has voted, or an empty optional if not
+     */
     public Optional<UserVote.VoteType> getUserVoteOnReply(long replyId, long userId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
                 () -> new IdNotFoundException("Reply id " + replyId + " not found.")
@@ -96,6 +158,11 @@ public class ReplyService {
         return votingService.getUserVoteOnVotable(user, reply);
     }
 
+    /**
+     * Deletes a reply, either by soft-deletion (if it has child replies) or hard-deletion (if it does not).
+     *
+     * @param reply the reply to delete
+     */
     @Transactional
     public void deleteReply(Reply reply) {
         if (!reply.getChildReplies().isEmpty()) {
@@ -112,6 +179,13 @@ public class ReplyService {
         }
     }
 
+    /**
+     * Constructs a comment tree for a given post, including the replies and their authors.
+     *
+     * @param postId     the ID of the post
+     * @param currentUser the currently logged-in user (for determining vote status)
+     * @return a list of ReplyDTOs representing the comment tree
+     */
     public List<ReplyDTO> getCommentTreeForPost(Long postId, ApplicationUser currentUser) {
         List<Reply> topLevelReplies = replyRepository.findTopLevelRepliesByPostId(postId);
         return topLevelReplies.stream()
@@ -119,6 +193,13 @@ public class ReplyService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Recursively converts a reply and its children into a ReplyDTO, including the author and vote information.
+     *
+     * @param reply      the reply to convert
+     * @param currentUser the currently logged-in user (for determining vote status)
+     * @return a ReplyDTO representing the reply and its children
+     */
     private ReplyDTO convertToCommentTree(Reply reply, ApplicationUser currentUser) {
         // Get the user's vote on this reply if it exists
         Optional<UserVote.VoteType> userVoteType = votingService.getUserVoteOnVotable(currentUser, reply);
@@ -154,6 +235,13 @@ public class ReplyService {
                 .build();
     }
 
+    /**
+     * Validates a reply's text and nesting depth (if applicable).
+     *
+     * @param text        the text content of the reply
+     * @param parentReply the parent reply if this is a child reply, null otherwise
+     * @throws IllegalArgumentException if the text is empty, too long, or if the nesting depth exceeds the maximum
+     */
     private void validateReply(String text, Reply parentReply) {
         validateReplyLength(text);
         if (parentReply != null) {
@@ -161,6 +249,12 @@ public class ReplyService {
         }
     }
 
+    /**
+     * Validates the length of a reply's text.
+     *
+     * @param text the text content of the reply
+     * @throws IllegalArgumentException if the text is empty or too long
+     */
     private void validateReplyLength(String text) {
         if (text == null || text.trim().isEmpty()) {
             throw new IllegalArgumentException("Reply text cannot be empty");
@@ -172,6 +266,12 @@ public class ReplyService {
         }
     }
 
+    /**
+     * Validates the nesting depth of a reply.
+     *
+     * @param parentReply the parent reply
+     * @throws IllegalArgumentException if the nesting depth exceeds the maximum
+     */
     private void validateNestingDepth(Reply parentReply) {
         int depth = calculateDepth(parentReply);
         if (depth >= MAX_NESTING_DEPTH) {
@@ -181,6 +281,12 @@ public class ReplyService {
         }
     }
 
+    /**
+     * Calculates the nesting depth of a reply.
+     *
+     * @param reply the reply
+     * @return the nesting depth
+     */
     private int calculateDepth(Reply reply) {
         int depth = 0;
         Reply current = reply;

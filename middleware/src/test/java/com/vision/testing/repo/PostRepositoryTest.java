@@ -219,7 +219,173 @@ public class PostRepositoryTest {
                 .build());
     }
 
-    // Overloaded helper method to create a post with specific date
+
+    @Test
+    void testFindAllPostsWithFilters_NoFilters() {
+        // Create multiple posts by the test user
+        for (int i = 0; i < 5; i++) {
+            Post post = Post.builder()
+                    .text("Test Post Content " + i)
+                    .postedBy(testUser)
+                    .datePosted(new Date())
+                    .build();
+            postRepository.save(post);
+        }
+
+        // Retrieve all posts with default pagination (no filters)
+        Page<Post> allPosts = postRepository.findAllPostsWithFilters(PageRequest.of(0, 10), null, null);
+
+        // Assertions
+        assertThat(allPosts.getTotalElements()).isEqualTo(5);
+        assertThat(allPosts.getContent()).allMatch(post -> post.getPostedBy().getId() == testUser.getId());
+    }
+
+    @Test
+    void testFindAllPostsWithFilters_WithBeforeDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+
+        // Retrieve posts before 'now'
+        Page<Post> filteredPosts = postRepository.findAllPostsWithFilters(PageRequest.of(0, 10), now, null);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());
+    }
+
+    @Test
+    void testFindAllPostsWithFilters_WithAfterDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+
+        // Retrieve posts after 'oneWeekAgo'
+        Page<Post> filteredPosts = postRepository.findAllPostsWithFilters(PageRequest.of(0, 10), null, oneWeekAgo);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());
+    }
+
+    @Test
+    void testFindAllPostsWithFilters_WithBeforeAndAfterDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+        Date twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+        Post post3 = createPost("Two Weeks Ago Post", testUser, twoWeeksAgo);
+
+        // Retrieve posts between 'twoWeeksAgo' and 'oneWeekAgo'
+        Page<Post> filteredPosts = postRepository.findAllPostsWithFilters(PageRequest.of(0, 10), oneWeekAgo, twoWeeksAgo);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post2.getId(), post3.getId()).doesNotContain(post1.getId());
+    }
+
+    @Test
+    void testFindAllPostsByUserWithFilters_NoFilters() {
+        // Create multiple posts by the test user
+        for (int i = 0; i < 5; i++) {
+            Post post = Post.builder()
+                    .text("Test Post Content " + i)
+                    .postedBy(testUser)
+                    .datePosted(new Date())
+                    .build();
+            postRepository.save(post);
+        }
+
+        // Retrieve all posts by user with default pagination (no filters)
+        Page<Post> userPosts = postRepository.findAllPostsByUserWithFilters(testUser, PageRequest.of(0, 10), null, null);
+
+        // Assertions
+        assertThat(userPosts.getTotalElements()).isEqualTo(5);
+        assertThat(userPosts.getContent()).allMatch(post -> post.getPostedBy().getId() == testUser.getId());
+    }
+
+    @Test
+    void testFindAllPostsByUserWithFilters_WithBeforeDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+
+        // Retrieve posts by user before 'now'
+        Page<Post> filteredPosts = postRepository.findAllPostsByUserWithFilters(testUser, PageRequest.of(0, 10), now, null);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());
+    }
+
+    @Test
+    void testFindAllPostsByUserWithFilters_WithAfterDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+
+        // Retrieve posts by user after 'oneWeekAgo'
+        Page<Post> filteredPosts = postRepository.findAllPostsByUserWithFilters(testUser, PageRequest.of(0, 10), null, oneWeekAgo);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post1.getId(), post2.getId());
+    }
+
+    @Test
+    void testFindAllPostsByUserWithFilters_WithBeforeAndAfterDate() {
+        // Create posts with different dates
+        Date now = new Date();
+        Date oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000L);
+        Date twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000L);
+
+        Post post1 = createPost("Recent Post", testUser, now);
+        Post post2 = createPost("One Week Ago Post", testUser, oneWeekAgo);
+        Post post3 = createPost("Two Weeks Ago Post", testUser, twoWeeksAgo);
+
+        // Retrieve posts by user between 'twoWeeksAgo' and 'oneWeekAgo'
+        Page<Post> filteredPosts = postRepository.findAllPostsByUserWithFilters(testUser, PageRequest.of(0, 10), oneWeekAgo, twoWeeksAgo);
+
+        // Assertions
+        assertThat(filteredPosts.getTotalElements()).isEqualTo(2);
+        assertThat(filteredPosts.getContent().stream().map(VotableEntity::getId)).contains(post2.getId(), post3.getId()).doesNotContain(post1.getId());
+    }
+
+    @Test
+    void testFindAllPostsByUserWithFilters_NoUser() {
+        // Create multiple posts by the test user
+        for (int i = 0; i < 5; i++) {
+            Post post = Post.builder()
+                    .text("Test Post Content " + i)
+                    .postedBy(testUser)
+                    .datePosted(new Date())
+                    .build();
+            postRepository.save(post);
+        }
+
+        // Retrieve posts with no specific user (effectively no user filter)
+        Page<Post> userPosts = postRepository.findAllPostsByUserWithFilters(null, PageRequest.of(0, 10), null, null);
+
+        // Assertions
+        assertThat(userPosts.getTotalElements()).isEqualTo(5);
+        assertThat(userPosts.getContent()).allMatch(post -> post.getPostedBy().getId() == testUser.getId());
+    }
+
     private Post createPost(String content, ApplicationUser user, Date createdAt) {
         return postRepository.save(Post.builder()
                 .text(content)
