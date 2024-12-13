@@ -17,6 +17,7 @@ export default function SignUp() {
     city: '',
     state: '',
     zipCode: '',
+    country: ''
   });
 
   const [errors, setErrors] = useState({
@@ -25,6 +26,11 @@ export default function SignUp() {
     confirmPassword: '',
     email: '',
     phoneNumber: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: ''
   });
 
   const handleInputChange = (e) => {
@@ -43,14 +49,17 @@ export default function SignUp() {
     if (!userData.username) {
       newErrors.username = 'Username is required.';
       isValid = false;
-    } else if (userData.username.length > 20) {
-      newErrors.username = 'Username cannot exceed 20 characters.';
+    } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(userData.username)) {
+      newErrors.username = 'Username must be 3-20 characters and contain only letters, numbers, and underscores.';
       isValid = false;
     }
 
     // Password validation
     if (!userData.password) {
       newErrors.password = 'Password is required.';
+      isValid = false;
+    } else if (userData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters.';
       isValid = false;
     }
 
@@ -68,13 +77,55 @@ export default function SignUp() {
       newErrors.email = 'Email is required.';
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(userData.email)) {
-      newErrors.email = 'Email address is invalid.';
+      newErrors.email = 'Invalid email format.';
+      isValid = false;
+    }
+
+    // Name validation
+    if (!userData.fullName) {
+      newErrors.fullName = 'Full name is required.';
       isValid = false;
     }
 
     // Phone Number validation
-    if (userData.phoneNumber && userData.phoneNumber.length > 15) {
-      newErrors.phoneNumber = 'Phone number cannot exceed 15 characters.';
+    if (!userData.phoneNumber) {
+      newErrors.phoneNumber = 'Phone number is required.';
+      isValid = false;
+    } else if (!/^\d{10}$/.test(userData.phoneNumber)) {
+      newErrors.phoneNumber = 'Phone number must be 10 digits.';
+      isValid = false;
+    }
+
+    // Address validation
+    if (!userData.address) {
+      newErrors.address = 'Address is required.';
+      isValid = false;
+    }
+
+    // City validation
+    if (!userData.city) {
+      newErrors.city = 'City is required.';
+      isValid = false;
+    }
+
+    // State validation
+    if (!userData.state) {
+      newErrors.state = 'State is required.';
+      isValid = false;
+    }
+
+    // Zip code validation
+    if (!userData.zipCode) {
+      newErrors.zipCode = 'Zip code is required.';
+      isValid = false;
+    } else if (!/^\d{5}$/.test(userData.zipCode)) {
+      newErrors.zipCode = 'Zip code must be 5 digits.';
+      isValid = false;
+    }
+
+    // Country validation
+    if (!userData.country) {
+      newErrors.country = 'Country is required.';
       isValid = false;
     }
 
@@ -146,7 +197,9 @@ export default function SignUp() {
               className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
               value={userData.fullName}
               onChange={handleInputChange}
+              onBlur={validateForm}
             />
+            {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
 
             <input
               type="text"
@@ -166,7 +219,9 @@ export default function SignUp() {
               className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
               value={userData.address}
               onChange={handleInputChange}
+              onBlur={validateForm}
             />
+            {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
 
             <input
               type="text"
@@ -175,7 +230,9 @@ export default function SignUp() {
               className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
               value={userData.city}
               onChange={handleInputChange}
+              onBlur={validateForm}
             />
+            {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
 
             <input
               type="text"
@@ -184,7 +241,9 @@ export default function SignUp() {
               className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
               value={userData.state}
               onChange={handleInputChange}
+              onBlur={validateForm}
             />
+            {errors.state && <p className="text-red-500 text-sm">{errors.state}</p>}
 
             <input
               type="text"
@@ -193,7 +252,20 @@ export default function SignUp() {
               className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
               value={userData.zipCode}
               onChange={handleInputChange}
+              onBlur={validateForm}
             />
+            {errors.zipCode && <p className="text-red-500 text-sm">{errors.zipCode}</p>}
+
+            <input
+              type="text"
+              name="country"
+              placeholder="Country"
+              className="py-2 px-3 w-full text-black text-lg font-light outlined-none mt-3"
+              value={userData.country}
+              onChange={handleInputChange}
+              onBlur={validateForm}
+            />
+            {errors.country && <p className="text-red-500 text-sm">{errors.country}</p>}
 
             <div className="flex mt-5 justify-between items-center">
               <Link href="/login" className="text-white cursor-pointer transition hover:text-black">

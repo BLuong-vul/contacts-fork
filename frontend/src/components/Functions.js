@@ -82,27 +82,29 @@ export async function updateProfileBannerFileName(filename){
 
 /* ===== ACCOUNT MANAGEMENT ===== */
 
-export async function createAccount(userData){
-	const { confirmPassword, ...userPayload } = userData;
+export async function createAccount(userData) {
+  const { confirmPassword, ...userPayload } = userData;
 
-	// Check if password and confirm password match
-	if (userData.password !== confirmPassword) {
-	  alert('Passwords do not match');
-	  return;
-	}
+  try {
+    const response = await fetchFromApi(`${baseURL}/auth/register`, 'POST', userPayload);
+    
+    // If the response is not ok (e.g., 400 Bad Request), throw an error
+    if (!response.ok) {
+      const errorResponse = await response.text();  // Get the error response body
+      throw new Error(errorResponse);  // This will be caught in the catch block
+    }
 
-	// TODO: CHECK REQUIRED FIELDS
-
-	try {							
-	  const response = await fetchFromApi(`${baseURL}/auth/register`, 'POST', userPayload);
-	  const result = await response.json();
-	  console.log('User created successfully:', result);
-	  alert('Account creation successful!')
-	  window.location.href = '/login';
-	} catch (error) {
-	  console.error('Error:', error);
-	  alert('Account creation error')
-	}
+    const result = await response.json();
+    console.log('User created successfully:', result);
+    alert('Account creation successful!');
+    window.location.href = '/login';
+  } catch (error) {
+    // Log the full error to the console for debugging
+    console.error('Error:', error);
+    
+    // Check if error is from the backend and display that message
+    alert(error.message || 'Account creation error');
+  }
 }
 
 
