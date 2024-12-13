@@ -15,7 +15,7 @@ import java.util.Set;
 
 /**
  * Spring Boot Application entry point.
- *
+ * <p>
  * This application sets up a basic admin user and role structure on startup.
  */
 @SpringBootApplication
@@ -54,6 +54,7 @@ public class Application {
             roles.add(adminRole);
 
             // Create admin user with encoded password
+            // todo: factor out admin password later, probably to env var.
             ApplicationUser admin = ApplicationUser.builder()
                     .id(1)
                     .username("admin")
