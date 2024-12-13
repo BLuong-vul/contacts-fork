@@ -3,6 +3,11 @@ package com.vision.middleware.dto;
 import lombok.*;
 import java.util.Date;
 
+/**
+ * Data Transfer Object representing a User.
+ * This class encapsulates all necessary information related to a user,
+ * including both essential details and customization options visible on the profile.
+ */
 @Getter
 @Setter
 @Builder

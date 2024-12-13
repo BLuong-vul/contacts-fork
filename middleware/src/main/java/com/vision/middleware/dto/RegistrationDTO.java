@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+/**
+ * Data Transfer Object for the registration process.
+ * This class holds all the necessary information required for a new user registration.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

@@ -4,6 +4,12 @@ import lombok.*;
 
 import java.util.Date;
 
+/**
+ * Data Transfer Object representing a post.
+ * This class is used to transfer post data between layers of the application.
+ * It includes details such as the post ID, user who posted, title, text content,
+ * like and dislike counts, date of posting, and media file name.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
