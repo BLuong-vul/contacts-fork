@@ -18,10 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.util.*;
 
@@ -212,45 +209,6 @@ public class PostServiceTest {
                 .hasMessageContaining("Post id 1 not found");
     }
 
-    /*
-    @Test
-    public void getAllPosts_Success() {
-        // Arrange
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("datePosted"));
-        List<Post> postList = Collections.singletonList(testPost);
-        Page<Post> postPage = new PageImpl<>(postList, pageRequest, postList.size());
-
-        when(postRepository.findAll(pageRequest)).thenReturn(postPage);
-
-        // Act
-        Page<Post> result = postService.getAllPosts(0, 10);
-
-        // Assert
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0)).isEqualTo(testPost);
-    }
-    */
-
-    /*
-    @Test
-    public void getAllPostsByUsername_Success() {
-        // Arrange
-        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("datePosted"));
-        List<Post> postList = Collections.singletonList(testPost);
-        Page<Post> postPage = new PageImpl<>(postList, pageRequest, postList.size());
-
-        when(userService.loadUserByUsername("testuser")).thenReturn(testUser);
-        when(postRepository.findByPostedBy(testUser, pageRequest)).thenReturn(postPage);
-
-        // Act
-        Page<Post> result = postService.getAllPostsByUsername("testuser", 0, 10);
-
-        // Assert
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0)).isEqualTo(testPost);
-    }
-    */
-
     @Test
     public void loadPostById_Success() {
         // Arrange
@@ -318,5 +276,81 @@ public class PostServiceTest {
         // Assert
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(testPost);
+    }
+
+    @Test
+    public void getAllPosts_NewSort_Success() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("datePosted")));
+        List<Post> postList = Collections.singletonList(testPost);
+        Page<Post> page = new PageImpl<>(postList, pageable, 1);
+
+        when(postRepository.findAllPostsWithFilters(pageable, null, null)).thenReturn(page);
+
+        // Act
+        Page<Post> result = postService.getAllPosts(0, 10, "new", null, null);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(testPost);
+        verify(postRepository).findAllPostsWithFilters(pageable, null, null);
+    }
+
+    @Test
+    public void getAllPosts_PopularitySort_Success() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("datePosted")));
+        List<Post> postList = Collections.singletonList(testPost);
+        Page<Post> page = new PageImpl<>(postList, pageable, 1);
+
+        when(postRepository.findAllPostsWithFilters(pageable, null, null)).thenReturn(page);
+
+        // Act
+        Page<Post> result = postService.getAllPosts(0, 10, "popularity", null, null);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(testPost);
+        verify(postRepository).findAllPostsWithFilters(pageable, null, null);
+    }
+
+    @Test
+    public void getAllPostsByUsername_NewSort_Success() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("datePosted")));
+        List<Post> postList = Collections.singletonList(testPost);
+        Page<Post> page = new PageImpl<>(postList, pageable, 1);
+
+        when(userService.loadUserByUsername("testuser")).thenReturn(testUser);
+        when(postRepository.findAllPostsByUserWithFilters(testUser, pageable, null, null)).thenReturn(page);
+
+        // Act
+        Page<Post> result = postService.getAllPostsByUsername("testuser", 0, 10, "new", null, null);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(testPost);
+        verify(userService).loadUserByUsername("testuser");
+        verify(postRepository).findAllPostsByUserWithFilters(testUser, pageable, null, null);
+    }
+
+    @Test
+    public void getAllPostsByUsername_PopularitySort_Success() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount"), Sort.Order.desc("datePosted")));
+        List<Post> postList = Collections.singletonList(testPost);
+        Page<Post> page = new PageImpl<>(postList, pageable, 1);
+
+        when(userService.loadUserByUsername("testuser")).thenReturn(testUser);
+        when(postRepository.findAllPostsByUserWithFilters(testUser, pageable, null, null)).thenReturn(page);
+
+        // Act
+        Page<Post> result = postService.getAllPostsByUsername("testuser", 0, 10, "popularity", null, null);
+
+        // Assert
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0)).isEqualTo(testPost);
+        verify(userService).loadUserByUsername("testuser");
+        verify(postRepository).findAllPostsByUserWithFilters(testUser, pageable, null, null);
     }
 }

@@ -43,7 +43,7 @@ public class PostSearchSpecification {
      */
     public static Specification<Post> filterByUser(ApplicationUser user) {
         return (root, query, criteriaBuilder) -> 
-            criteriaBuilder.equal(root.get("user"), user);
+            criteriaBuilder.equal(root.get("postedBy"), user);
     }
 
     /**

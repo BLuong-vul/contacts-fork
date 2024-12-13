@@ -9,6 +9,7 @@ import com.vision.middleware.domain.relations.UserVote;
 import com.vision.middleware.dto.ReplyDTO;
 import com.vision.middleware.dto.ReplyRequest;
 import com.vision.middleware.dto.UserDTO;
+import com.vision.middleware.dto.VoteDTO;
 import com.vision.middleware.service.PostService;
 import com.vision.middleware.service.ReplyService;
 import com.vision.middleware.service.UserService;
@@ -20,20 +21,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ReplyControllerTest {
 
     private MockMvc mockMvc;
@@ -157,7 +162,7 @@ public class ReplyControllerTest {
         long replyId = 1L;
         long userId = 1L;
         String token = "Bearer validToken";
-        UserVote.VoteType voteType = UserVote.VoteType.LIKE;
+        VoteDTO voteDTO = VoteDTO.builder().votableId(replyId).voteType(UserVote.VoteType.LIKE).build();
 
         ApplicationUser user = makeTestUser(userId, "testuser");
         Reply reply = Reply.builder().id(replyId).build();
@@ -166,12 +171,59 @@ public class ReplyControllerTest {
         when(userService.loadUserById(userId)).thenReturn(user);
         when(replyService.findReplyById(replyId)).thenReturn(reply);
 
-        mockMvc.perform(post("/replies/vote/{replyId}", replyId)
+        mockMvc.perform(post("/replies/vote")
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(voteType)))
+                        .content(objectMapper.writeValueAsString(voteDTO)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Vote created."));
+                .andExpect(content().json(objectMapper.writeValueAsString(voteDTO)));
+    }
+
+    @Test
+    public void testUnvoteOnReply() throws Exception {
+        long replyId = 1L;
+        long userId = 1L;
+        String token = "Bearer validToken";
+
+        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);
+        doNothing().when(replyService).removeUserVoteOnReply(replyId, userId);
+
+        mockMvc.perform(delete("/replies/unvote")
+                        .header("Authorization", token)
+                        .param("votableId", String.valueOf(replyId)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void testGetUserVoteOnReply() throws Exception {
+        long replyId = 1L;
+        long userId = 1L;
+        String token = "Bearer validToken";
+        UserVote.VoteType voteType = UserVote.VoteType.LIKE;
+
+        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);
+        when(replyService.getUserVoteOnReply(replyId, userId)).thenReturn(Optional.of(voteType));
+
+        mockMvc.perform(get("/replies/get-vote")
+                        .header("Authorization", token)
+                        .param("votableId", String.valueOf(replyId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("\"" + voteType.name() + "\""));
+    }
+
+    @Test
+    public void testGetUserVoteOnReplyNoVote() throws Exception {
+        long replyId = 1L;
+        long userId = 1L;
+        String token = "Bearer validToken";
+
+        when(jwtUtil.checkJwtAuthAndGetUserId(token)).thenReturn(userId);
+        when(replyService.getUserVoteOnReply(replyId, userId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/replies/get-vote")
+                        .header("Authorization", token)
+                        .param("votableId", String.valueOf(replyId)))
+                .andExpect(status().isNoContent());
     }
 
     private ApplicationUser makeTestUser(long userId, String username) {
